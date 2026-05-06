@@ -1323,12 +1323,82 @@ input, textarea, button { font-family: inherit; }
         </div>
       </div>
 
+      <!-- IMAGEN PUT/CALL CBOE -->
+      <div class="ind-card" id="ic-pcr-img">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">📸</div>
+          <div class="ind-card-name">Put/Call Ratios — desde imagen CBOE</div>
+          <div class="ind-card-src">CBOE</div>
+        </div>
+        <div style="padding: 0 12px 6px; font-size:11px; color:var(--t3); line-height:1.5;">
+          Haz una captura de la tabla del CBOE y la IA extrae los 4 ratios automáticamente.
+        </div>
+        <div style="padding: 0 12px 12px;">
+          <div id="pcr-img-area" style="
+            border: 2px dashed rgba(139,127,255,0.3);
+            border-radius: 10px; background: var(--ac2);
+            padding: 16px; text-align: center; cursor: pointer;
+            transition: all 0.2s;
+          " onclick="document.getElementById('pcr-img-input').click()"
+             ondragover="event.preventDefault(); this.style.borderColor='var(--ac)'"
+             ondragleave="this.style.borderColor='rgba(139,127,255,0.3)'"
+             ondrop="handlePCRImgDrop(event)">
+            <div style="font-size:22px; margin-bottom:6px;">📊</div>
+            <div style="font-size:12px; color:var(--t2); font-weight:600;">Subir captura del CBOE</div>
+            <div style="font-size:10px; color:var(--t3); margin-top:3px;">cboe.com/us/options/market_statistics/daily</div>
+            <input type="file" id="pcr-img-input" accept="image/*" style="display:none" onchange="handlePCRImgFile(event)">
+          </div>
+          <div id="pcr-img-preview-wrap" style="display:none; margin-top:8px; position:relative;">
+            <img id="pcr-img-preview" style="width:100%; border-radius:8px; border:1px solid var(--b2);">
+            <button onclick="limpiarPCRImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;border-radius:5px;color:#fff;padding:3px 8px;font-size:11px;cursor:pointer;">✕</button>
+          </div>
+          <button id="btn-pcr-img" style="
+            display:none; width:100%; margin-top:8px; padding:11px;
+            background:var(--ac2); border:1px solid var(--acb);
+            border-radius:9px; color:var(--ac);
+            font-size:13px; font-weight:600; cursor:pointer;
+            align-items:center; justify-content:center; gap:7px;
+          " onclick="analizarPCRImg()">
+            <span id="pcr-img-sp" style="width:13px;height:13px;border:2px solid rgba(139,127,255,0.3);border-top-color:var(--ac);border-radius:50%;display:none;animation:spin 0.7s linear infinite;"></span>
+            🔍 Extraer ratios automáticamente
+          </button>
+          <div id="pcr-img-estado" style="font-size:11px; color:var(--t3); text-align:center; margin-top:6px; display:none;"></div>
+        </div>
+        <div class="ind-links-row">
+          <a class="il blue" href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank">🔗 CBOE Stats ↗</a>
+        </div>
+      </div>
+
+      <!-- TEXTO CALENDARIO MACRO -->
       <div class="ind-card" id="ic-macro">
         <div class="ind-card-top">
           <div class="ind-card-icon">🗓️</div>
           <div class="ind-card-name">Evento macro mañana</div>
           <div class="ind-card-src">d+1</div>
         </div>
+        <div style="padding: 0 12px 6px; font-size:11px; color:var(--t3); line-height:1.5;">
+          Pega aquí el texto del calendario de Investing y la IA clasificará automáticamente el impacto para mañana.
+        </div>
+        <div style="padding: 0 12px 10px;">
+          <textarea id="macro-texto" 
+            placeholder="Pega aquí los eventos del calendario económico de mañana (copia y pega desde Investing.com)..."
+            style="width:100%; min-height:90px; background:var(--s2); border:1px solid var(--b2); border-radius:10px; padding:10px 12px; color:var(--t2); font-size:12px; line-height:1.5; resize:none; outline:none; font-family:'Space Grotesk',sans-serif; transition:border-color 0.2s;"
+            oninput="this.style.borderColor='var(--ac)'"
+            onblur="this.style.borderColor='var(--b2)'"></textarea>
+          <button id="btn-macro-analizar" onclick="analizarMacroTexto()" style="
+            width:100%; margin-top:8px; padding:10px;
+            background:var(--am2); border:1px solid var(--amb);
+            border-radius:9px; color:var(--am);
+            font-size:13px; font-weight:600; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:7px;
+          ">
+            <span id="macro-sp" style="width:13px;height:13px;border:2px solid rgba(240,165,0,0.3);border-top-color:var(--am);border-radius:50%;display:none;animation:spin 0.7s linear infinite;"></span>
+            🗓️ Clasificar eventos automáticamente
+          </button>
+          <div id="macro-resultado" style="display:none; margin-top:8px; padding:10px 12px; border-radius:9px; font-size:12px; line-height:1.5;"></div>
+        </div>
+        <!-- Selector manual como fallback -->
+        <div style="padding:0 12px 4px; font-size:10px; color:var(--t3); font-family:'JetBrains Mono',monospace; letter-spacing:0.1em; text-transform:uppercase;">O selecciona manualmente:</div>
         <div class="macro-opts">
           <div class="macro-opt" onclick="selMacro('g',this)">
             <div class="macro-radio"></div>
@@ -1347,8 +1417,8 @@ input, textarea, button { font-family: inherit; }
           </div>
         </div>
         <div class="ind-links-row">
-          <a class="il blue" href="https://es.investing.com/economic-calendar/" target="_blank">🗓️ Calendario Investing ↗</a>
-          <a class="il blue" href="https://www.tradingview.com/economic-calendar/" target="_blank">🗓️ Calendario TradingView ↗</a>
+          <a class="il blue" href="https://es.investing.com/economic-calendar/" target="_blank">🗓️ Investing ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/economic-calendar/" target="_blank">🗓️ TradingView ↗</a>
         </div>
       </div>
 
@@ -1438,6 +1508,7 @@ input, textarea, button { font-family: inherit; }
         <div class="ia-card-header">
           <div class="ia-pill">IA</div>
           <div class="ia-card-title">Análisis completo</div>
+          <div id="img-badge" style="display:none; font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 9px; border-radius:100px; background:rgba(240,165,0,0.12); color:#f0a500; border:1px solid rgba(240,165,0,0.25);">📸 + gráfico</div>
         </div>
         <div class="ia-body" id="ia-body">
           <p style="color:var(--t4);">Introduce los datos y pulsa <strong style="color:var(--t2)">"Generar informe con IA"</strong> en la pestaña Datos.</p>
@@ -1625,6 +1696,52 @@ input, textarea, button { font-family: inherit; }
       </div>
       <div class="tv-txt" id="tv-txt">Selecciona el estado de cada indicador técnico para obtener la señal combinada.</div>
       <div class="tv-bars" id="tv-bars"></div>
+    </div>
+
+    <!-- SUBIR IMAGEN PROREAL TIME -->
+    <div style="margin: 14px 20px 0;">
+      <div class="section-label" style="margin-bottom:10px;">Análisis automático desde imagen</div>
+      <div id="img-upload-area" style="
+        border: 2px dashed rgba(6,182,212,0.3);
+        border-radius: var(--r-lg);
+        background: rgba(6,182,212,0.04);
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      " onclick="document.getElementById('img-input').click()"
+         ondragover="event.preventDefault(); this.style.borderColor='rgba(6,182,212,0.7)'"
+         ondragleave="this.style.borderColor='rgba(6,182,212,0.3)'"
+         ondrop="handleImgDrop(event)">
+        <div style="font-size: 28px; margin-bottom: 8px;">📸</div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--t2); margin-bottom: 4px;">Sube tu gráfico de ProRealTime</div>
+        <div style="font-size: 11px; color: var(--t3); line-height: 1.5;">La IA leerá el gráfico y rellenará automáticamente<br>canal, volumen, velas y soporte/resistencia</div>
+        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImgFile(event)">
+      </div>
+
+      <div id="img-preview-wrap" style="display:none; margin-top:10px; position:relative;">
+        <img id="img-preview" style="width:100%; border-radius:10px; border:1px solid var(--b2);">
+        <button onclick="limpiarImagen()" style="
+          position:absolute; top:8px; right:8px;
+          background:rgba(0,0,0,0.7); border:none; border-radius:6px;
+          color:#fff; padding:4px 10px; font-size:12px; cursor:pointer;
+        ">✕ Quitar</button>
+      </div>
+
+      <button id="btn-analizar-imagen" style="
+        display:none; margin-top:10px; width:100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #06b6d4, var(--ac));
+        border: none; border-radius: var(--r-md);
+        color: #fff; font-size: 13px; font-weight: 700;
+        cursor: pointer;
+        display: none; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: 0 4px 16px rgba(6,182,212,0.3);
+      " onclick="analizarImagen()">
+        <span id="btn-img-sp" style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;display:none;animation:spin 0.7s linear infinite;"></span>
+        🔍 Analizar gráfico con IA
+      </button>
+      <div id="img-estado" style="font-size:11px; color:var(--t3); text-align:center; margin-top:6px; display:none;"></div>
     </div>
 
     <!-- BTN IA TÉCNICA -->
@@ -2313,7 +2430,7 @@ DATOS MACRO DE HOY:
 - Equity P/C Ratio: ${S.pcr_eq !== null && S.pcr_eq !== undefined ? S.pcr_eq : 'no disponible'}
 - Index P/C Ratio: ${S.pcr_idx !== null && S.pcr_idx !== undefined ? S.pcr_idx : 'no disponible'}
 - SPX P/C Ratio: ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx : 'no disponible'}
-- Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande' : 'Evento alta volatilidad (Fed/IPC/NFP)'}
+- Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande' : 'Evento alta volatilidad (Fed/IPC/NFP)'}${S.macroResumen ? ' — Resumen IA: ' + S.macroResumen : ''}
 - Modo: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
 ${S.nota ? '- Nota: ' + S.nota : ''}
 ${tecAuto}
@@ -2354,10 +2471,50 @@ LIQUIDEZ_REC: [complementario]
       btn.classList.remove('loading'); btn.disabled = false;
       return;
     }
+
+    // Construir mensaje — si hay imagen, incluirla
+    let mensajeContent;
+    if (imgBase64) {
+      const mediaType = window._imgMediaType || 'image/png';
+      const promptConImagen = prompt + '\n\n' +
+        'INSTRUCCIÓN ADICIONAL — ANÁLISIS DE IMAGEN PROREAL TIME:\n' +
+        'Se adjunta el gráfico de ProRealTime del futuro NQ Micro E-mini Nasdaq100 (MNQXXXX) en timeframe DIARIO.\n\n' +
+        'CONFIGURACIÓN EXACTA DEL GRÁFICO (de arriba a abajo):\n' +
+        'PANEL PRINCIPAL: Velas japonesas + Volume Profile (barras horizontales izquierda) + EMA20 (verde) + EMA200 (roja) + EMA50 (azul) + VWAP (línea punteada) + SuperTrend(3,10) (línea verde=alcista/roja=bajista bajo precio) + Fibonacci trazado manualmente desde mínimo corrección hasta máximo + Canal de tendencia (2 líneas diagonales negras/grises)\n' +
+        'PANEL RSI(14): Valor numérico visible en margen derecho. Niveles 30/50/70 marcados.\n' +
+        'PANEL MACD(12,26,9): Histograma verde/rojo + líneas MACD y señal. Valores numéricos en margen derecho.\n' +
+        'PANEL AccDis: Línea de acumulación/distribución.\n' +
+        'PANEL Money Flow Index(14): Oscilador con niveles 20/50/80. Valor en margen derecho.\n' +
+        'PANEL OBV: On Balance Volume. Valor en margen derecho.\n\n' +
+        'IMPORTANTE: Los datos automáticos vienen del índice NDX con 15 min retraso. Esta imagen es el futuro NQ en tiempo real con análisis manual. Cuando haya diferencias, esta imagen tiene PRIORIDAD.\n\n' +
+        'Analiza CADA panel en orden y añade al informe esta sección:\n\n' +
+        '═══════ ANÁLISIS GRÁFICO PROREAL TIME ═══════\n' +
+        'Analiza en este orden exacto:\n' +
+        '1. **Canal y tendencia**: ¿Precio dentro/fuera del canal? ¿Cerca de línea superior o inferior?\n' +
+        '2. **Fibonacci**: ¿En qué nivel está el precio? ¿Qué nivel es el soporte más cercano por debajo?\n' +
+        '3. **EMAs y SuperTrend**: ¿EMA20 > EMA50 > EMA200? ¿SuperTrend verde o rojo?\n' +
+        '4. **RSI**: Lee el valor exacto del margen derecho. ¿Hay divergencia visible respecto al precio?\n' +
+        '5. **MACD**: ¿Histograma creciendo o decreciendo? ¿Cruce reciente?\n' +
+        '6. **AccDis + MFI + OBV**: ¿Confirman o divergen del movimiento del precio?\n' +
+        '7. **Velas recientes**: ¿Qué patrón forman las últimas 3-5 velas?\n' +
+        '8. **Conclusión técnica**: Una frase con el sesgo técnico del gráfico.\n' +
+        'Usa **negrita** para valores clave. Máx 250 palabras.';
+
+      mensajeContent = [
+        { type: 'image', source: { type: 'base64', media_type: mediaType, data: imgBase64 } },
+        { type: 'text', text: promptConImagen }
+      ];
+    } else {
+      mensajeContent = prompt;
+    }
+
     const resp = await fetch(proxyBase + '/api/ia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: mensajeContent }]
+      })
     });
     const data = await resp.json();
     const texto = data.content?.[0]?.text || '';
@@ -2573,10 +2730,13 @@ function procesarRespuestaIA(texto) {
     const tecMatch   = texto.match(/═+\s*ANÁLISIS TÉCNICO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
     const concMatch  = texto.match(/═+\s*CONCLUSIÓN CONJUNTA\s*═+\s*([\s\S]+)/i);
 
-    if (macroMatch || tecMatch) {
+    const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
+
+    if (macroMatch || tecMatch || prtMatch) {
       let html = '';
       if (macroMatch) html += '<p><strong style="color:var(--ac)">📊 ANÁLISIS MACRO</strong></p>' + macroMatch[1].trim();
-      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + tecMatch[1].trim();
+      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO (automático)</strong></p>' + tecMatch[1].trim();
+      if (prtMatch)   html += '\n\n<p><strong style="color:#f0a500">📸 ANÁLISIS GRÁFICO PROREAL TIME</strong></p>' + prtMatch[1].trim();
       if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
       return html;
     }
@@ -3136,6 +3296,325 @@ async function generarInformeTecnico() {
 
   btn.classList.remove('loading');
   btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+// IMAGEN PUT/CALL CBOE
+// ═══════════════════════════════════════
+let pcrImgBase64 = null;
+
+function handlePCRImgFile(e) {
+  const file = e.target.files[0];
+  if (file) procesarPCRImg(file);
+}
+function handlePCRImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('pcr-img-area').style.borderColor = 'rgba(139,127,255,0.3)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) procesarPCRImg(file);
+}
+function procesarPCRImg(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pcrImgBase64 = e.target.result.split(',')[1];
+    window._pcrMediaType = file.type;
+    document.getElementById('pcr-img-preview').src = e.target.result;
+    document.getElementById('pcr-img-preview-wrap').style.display = 'block';
+    document.getElementById('btn-pcr-img').style.display = 'flex';
+    document.getElementById('pcr-img-area').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function limpiarPCRImg() {
+  pcrImgBase64 = null;
+  document.getElementById('pcr-img-preview-wrap').style.display = 'none';
+  document.getElementById('btn-pcr-img').style.display = 'none';
+  document.getElementById('pcr-img-area').style.display = 'block';
+  document.getElementById('pcr-img-estado').style.display = 'none';
+  document.getElementById('pcr-img-input').value = '';
+}
+
+async function analizarPCRImg() {
+  if (!pcrImgBase64) return;
+  const btn = document.getElementById('btn-pcr-img');
+  const sp = document.getElementById('pcr-img-sp');
+  const estado = document.getElementById('pcr-img-estado');
+  btn.disabled = true; sp.style.display = 'inline-block';
+  estado.style.display = 'block'; estado.textContent = 'Leyendo tabla CBOE...';
+  estado.style.color = 'var(--ac)';
+
+  const prompt = `Analiza esta imagen de la tabla de Put/Call Ratios del CBOE y extrae exactamente estos 4 valores numéricos. Responde ÚNICAMENTE con este JSON exacto sin texto adicional:
+{
+  "equity": 0.00,
+  "total": 0.00,
+  "index": 0.00,
+  "spx": 0.00
+}
+Donde:
+- equity = EQUITY PUT/CALL RATIO
+- total = TOTAL PUT/CALL RATIO  
+- index = INDEX PUT/CALL RATIO
+- spx = SPX + SPXW PUT/CALL RATIO
+Si no encuentras algún valor, pon null.`;
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) throw new Error('Proxy no configurado');
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        max_tokens: 200,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: window._pcrMediaType || 'image/png', data: pcrImgBase64 } },
+          { type: 'text', text: prompt }
+        ]}]
+      })
+    });
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    const jsonMatch = texto.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No se pudo leer la tabla');
+    const r = JSON.parse(jsonMatch[0]);
+
+    // Aplicar valores a los inputs
+    const campos = { equity: 'i-pcr-eq', total: 'i-pcr-tot', index: 'i-pcr-idx', spx: 'i-pcr-spx' };
+    const fns = { equity: () => evalPCRind('eq'), total: () => evalPCRind('tot'), index: () => evalPCRind('idx'), spx: () => evalPCRind('spx') };
+    let aplicados = 0;
+    for (const [key, inputId] of Object.entries(campos)) {
+      if (r[key] !== null && r[key] !== undefined) {
+        const inp = document.getElementById(inputId);
+        if (inp) { inp.value = r[key]; fns[key](); aplicados++; }
+      }
+    }
+    estado.textContent = '✅ ' + aplicados + ' ratios extraídos: Equity=' + (r.equity||'—') + ' Total=' + (r.total||'—') + ' Index=' + (r.index||'—') + ' SPX=' + (r.spx||'—');
+    estado.style.color = 'var(--gr)';
+    comprobarAnalizar();
+  } catch(e) {
+    estado.textContent = '❌ ' + e.message;
+    estado.style.color = 'var(--rd)';
+  }
+  btn.disabled = false; sp.style.display = 'none';
+}
+
+// ═══════════════════════════════════════
+// TEXTO CALENDARIO MACRO
+// ═══════════════════════════════════════
+async function analizarMacroTexto() {
+  const texto = document.getElementById('macro-texto').value.trim();
+  if (!texto) return;
+  const btn = document.getElementById('btn-macro-analizar');
+  const sp = document.getElementById('macro-sp');
+  const resultado = document.getElementById('macro-resultado');
+  btn.disabled = true; sp.style.display = 'inline-block';
+
+  const prompt = `Eres un analista de mercados. Analiza este calendario económico y determina el impacto para el Nasdaq 100 MAÑANA.
+
+CALENDARIO:
+${texto}
+
+Responde ÚNICAMENTE con este JSON exacto:
+{
+  "nivel": "g|a|r",
+  "resumen": "descripción breve de máximo 2 líneas de los eventos más relevantes para el Nasdaq",
+  "eventos_clave": ["evento1", "evento2"]
+}
+Donde: g=sin impacto alto, a=volatilidad posible, r=alta volatilidad (Fed/IPC/NFP/geopolítica)`;
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) throw new Error('Proxy no configurado');
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await resp.json();
+    const txt = data.content?.[0]?.text || '';
+    const jsonMatch = txt.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Sin respuesta');
+    const r = JSON.parse(jsonMatch[0]);
+
+    // Autoseleccionar en el selector manual
+    const opts = document.querySelectorAll('#ic-macro .macro-opt');
+    const idx = r.nivel === 'g' ? 0 : r.nivel === 'a' ? 1 : 2;
+    if (opts[idx]) selMacro(r.nivel, opts[idx]);
+
+    // Mostrar resultado
+    const colores = { g: 'var(--gr)', a: 'var(--am)', r: 'var(--rd)' };
+    const labels = { g: '🟢 Sin impacto alto', a: '🟡 Volatilidad posible', r: '🔴 Alta volatilidad' };
+    resultado.style.display = 'block';
+    resultado.style.background = r.nivel === 'g' ? 'var(--gr2)' : r.nivel === 'a' ? 'var(--am2)' : 'var(--rd2)';
+    resultado.style.border = '1px solid ' + (r.nivel === 'g' ? 'var(--grb)' : r.nivel === 'a' ? 'var(--amb)' : 'var(--rdb)');
+    resultado.style.color = colores[r.nivel];
+    resultado.innerHTML = '<strong>' + labels[r.nivel] + '</strong><br>' + (r.resumen || '') +
+      (r.eventos_clave?.length ? '<br><span style="opacity:0.7;font-size:10px;">' + r.eventos_clave.join(' · ') + '</span>' : '');
+
+    // Guardar texto para el informe IA
+    S.macroTexto = texto;
+    S.macroResumen = r.resumen;
+
+  } catch(e) {
+    resultado.style.display = 'block';
+    resultado.style.background = 'var(--rd2)';
+    resultado.style.color = 'var(--rd)';
+    resultado.textContent = '❌ ' + e.message;
+  }
+  btn.disabled = false; sp.style.display = 'none';
+}
+
+// ═══════════════════════════════════════
+// ANÁLISIS DE IMAGEN PROREAL TIME
+// ═══════════════════════════════════════
+let imgBase64 = null;
+
+function handleImgFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  procesarImagen(file);
+}
+
+function handleImgDrop(event) {
+  event.preventDefault();
+  document.getElementById('img-upload-area').style.borderColor = 'rgba(6,182,212,0.3)';
+  const file = event.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  procesarImagen(file);
+}
+
+function procesarImagen(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imgBase64 = e.target.result.split(',')[1];
+    const mediaType = file.type;
+    document.getElementById('img-preview').src = e.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+    document.getElementById('btn-analizar-imagen').style.display = 'flex';
+    document.getElementById('img-upload-area').style.display = 'none';
+    document.getElementById('img-estado').style.display = 'none';
+    // Mostrar badge en pestaña informe
+    const badge = document.getElementById('img-badge');
+    if (badge) badge.style.display = 'inline-block';
+    // Activar botón principal de informe si estaba desactivado por falta de datos
+    const btnA = document.getElementById('btn-analizar');
+    if (btnA) btnA.title = 'Imagen de ProRealTime cargada — se incluirá en el informe';
+    // Guardar media type
+    window._imgMediaType = mediaType;
+  };
+  reader.readAsDataURL(file);
+}
+
+function limpiarImagen() {
+  imgBase64 = null;
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('btn-analizar-imagen').style.display = 'none';
+  document.getElementById('img-upload-area').style.display = 'block';
+  document.getElementById('img-estado').style.display = 'none';
+  document.getElementById('img-input').value = '';
+}
+
+async function analizarImagen() {
+  if (!imgBase64) return;
+  const btn = document.getElementById('btn-analizar-imagen');
+  const sp = document.getElementById('btn-img-sp');
+  const estado = document.getElementById('img-estado');
+  btn.disabled = true;
+  sp.style.display = 'inline-block';
+  estado.style.display = 'block';
+  estado.textContent = 'Analizando gráfico...';
+  estado.style.color = 'var(--ac)';
+
+  const mediaType = window._imgMediaType || 'image/png';
+
+  const prompt = `Eres un analista técnico experto del Nasdaq 100. Analiza este gráfico de ProRealTime del futuro NQ Micro E-mini en timeframe diario.
+
+El gráfico contiene: Canal de tendencia (líneas diagonales), Fibonacci trazado manualmente, EMA20(verde)/EMA200(roja)/EMA50(azul), SuperTrend(3,10), Volume Profile, RSI(14), MACD(12,26,9), AccDis, Money Flow Index(14), OBV.
+
+Determina el estado de estos 4 indicadores y responde ÚNICAMENTE con este JSON exacto sin texto adicional:
+{
+  "canal": "g|a|r",
+  "volumen": "g|a|r",
+  "velas": "g|a|r",
+  "soporte": "g|a|r",
+  "canal_desc": "descripción de 1 línea",
+  "volumen_desc": "descripción de 1 línea basada en OBV y AccDis",
+  "velas_desc": "patrón de las últimas 3-5 velas",
+  "soporte_desc": "nivel Fibonacci o EMA más cercano como soporte"
+}
+g=alcista, a=neutral, r=bajista`;
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) throw new Error('Proxy no configurado');
+
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imgBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    if (!texto) throw new Error('Sin respuesta');
+
+    // Parse JSON
+    const jsonMatch = texto.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Formato de respuesta incorrecto');
+    const resultado = JSON.parse(jsonMatch[0]);
+
+    // Aplicar selecciones automáticamente
+    const mapa = {
+      canal: { num: 4, color: resultado.canal, desc: resultado.canal_desc },
+      volumen: { num: 9, color: resultado.volumen, desc: resultado.volumen_desc },
+      velas: { num: 11, color: resultado.velas, desc: resultado.velas_desc },
+      soporte: { num: 12, color: resultado.soporte, desc: resultado.soporte_desc }
+    };
+
+    let aplicados = 0;
+    for (const [key, cfg] of Object.entries(mapa)) {
+      const block = document.getElementById('tb' + cfg.num);
+      if (!block) continue;
+      const ops = block.querySelectorAll('.tec-op');
+      const idx = cfg.color === 'g' ? 0 : cfg.color === 'a' ? 1 : 2;
+      if (ops[idx]) {
+        tecPick(cfg.num, cfg.color, ops[idx]);
+        // Añadir chip de descripción
+        let tav = document.getElementById('tav' + cfg.num);
+        if (!tav) {
+          tav = document.createElement('div');
+          tav.id = 'tav' + cfg.num;
+          tav.className = 'tec-auto-val';
+          block.querySelector('.tec-opts').before(tav);
+        }
+        tav.textContent = '📸 Imagen: ' + (cfg.desc || '—');
+        tav.classList.add('vis');
+        // Quitar borde morado de pendiente
+        block.style.outline = 'none';
+        aplicados++;
+      }
+    }
+
+    estado.textContent = '✅ ' + aplicados + ' indicadores rellenados automáticamente desde la imagen';
+    estado.style.color = 'var(--gr)';
+    btn.textContent = '✓ Analizado';
+
+  } catch(e) {
+    estado.textContent = '❌ Error: ' + e.message;
+    estado.style.color = 'var(--rd)';
+    btn.disabled = false;
+    sp.style.display = 'none';
+  }
+
+  sp.style.display = 'none';
 }
 
 function guardarTecnico() {
