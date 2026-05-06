@@ -931,6 +931,26 @@ input, textarea, button { font-family: inherit; }
 .btn-tec-ia:disabled { background:var(--s3); color:var(--t3); box-shadow:none; cursor:not-allowed; }
 .btn-tec-ia .sp { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
 .btn-tec-ia.loading .sp { display:block; }
+
+/* ZONAS DE LIQUIDEZ */
+.liq-section { margin: 14px 20px 0; }
+.liq-card { background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r-lg); overflow: hidden; }
+.liq-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--b1); background: var(--s2); }
+.liq-titulo { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 3px; }
+.liq-frase { font-size: 11px; color: var(--ac); font-style: italic; line-height: 1.4; }
+.liq-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.liq-grupo { display: flex; flex-direction: column; gap: 5px; }
+.liq-grupo-title { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.liq-zona { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--b1); background: var(--s2); }
+.liq-zona.arriba { border-left: 3px solid var(--rd); }
+.liq-zona.abajo  { border-left: 3px solid var(--gr); }
+.liq-zona.actual { border-left: 3px solid var(--ac); background: var(--ac2); }
+.liq-nivel { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--t1); min-width: 75px; }
+.liq-dist { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); flex: 1; }
+.liq-fuerza { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 100px; }
+.liq-fuerza.alta  { background: var(--rd2); color: var(--rd); border: 1px solid var(--rdb); }
+.liq-fuerza.media { background: var(--am2); color: var(--am); border: 1px solid var(--amb); }
+.liq-fuerza.baja  { background: var(--s3);  color: var(--t3); border: 1px solid var(--b1); }
 </style>
 </head>
 <body>
@@ -1556,6 +1576,21 @@ input, textarea, button { font-family: inherit; }
         <div class="fib-row" style="color:var(--t3); font-size:12px;">Pulsa "Actualizar datos" en la pestaña Datos para calcular automáticamente.</div>
       </div>
       <div style="padding:6px 14px 12px; font-size:11px; color:var(--t3);">Calculado desde máximo y mínimo de los últimos 90 días del NDX.</div>
+    </div>
+
+    <!-- ZONAS DE LIQUIDEZ -->
+    <div class="liq-section">
+      <div class="liq-card">
+        <div class="liq-header">
+          <div class="liq-titulo">🎯 Zonas de liquidez — NDX</div>
+          <div class="liq-frase">"El mercado sube para encontrar vendedores y baja para encontrar compradores"</div>
+        </div>
+        <div class="liq-body" id="liq-body">
+          <div style="font-size:12px; color:var(--t3); text-align:center; padding:8px 0;">
+            Pulsa "Actualizar datos" para calcular las zonas automáticamente.
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="tec-section">
@@ -2236,6 +2271,10 @@ function aplicarDatosAuto(data) {
   if (data.max90 && data.min90 && data.tecnicos?.precio) {
     calcularFibonacci(data.tecnicos.precio, data.max90, data.min90);
   }
+  if (data.liquidez) {
+    renderLiquidez(data.liquidez);
+    S.liquidez = data.liquidez;
+  }
 
   comprobarAnalizar();
 }
@@ -2435,6 +2474,15 @@ DATOS MACRO DE HOY:
 ${S.nota ? '- Nota: ' + S.nota : ''}
 ${tecAuto}
 ${fibCtx}
+${S.liquidez ? `
+ZONAS DE LIQUIDEZ NDX (calculadas automáticamente):
+- Precio actual: ${S.liquidez.precio}
+- Liquidez ARRIBA: ${S.liquidez.arriba.zonas?.map(z => z.nivel + (z.igualdad ? '(⚡EqualHigh x'+z.count+')' : '') + (z.reciente?'[reciente]':'') + ' dist:+'+z.distPct+'%').join(', ')}
+- Liquidez ABAJO: ${S.liquidez.abajo.zonas?.map(z => z.nivel + (z.igualdad ? '(⚡EqualLow x'+z.count+')' : '') + (z.reciente?'[reciente]':'') + ' dist:'+z.distPct+'%').join(', ')}
+- Swings recientes arriba: ${S.liquidez.arriba.swingsRecientes?.join(', ')}
+- Swings recientes abajo: ${S.liquidez.abajo.swingsRecientes?.join(', ')}
+- IMPORTANTE: Las zonas con ⚡EqualHigh/EqualLow son igualdades reales (stops acumulados) — mayor probabilidad de ser barridas. Los puntos 2 y 4 (barrido vs ruptura y confirmación) se analizan con la imagen del gráfico adjunta.
+- Regla: "El mercado sube para encontrar vendedores y baja para encontrar compradores". Identifica hacia qué zona de liquidez se dirige el precio con más probabilidad.` : ''}
 ${tecSecciones}
 ${histCtx}
 ${btCtx}
@@ -3790,6 +3838,89 @@ function aplicarAutoTecnico(tecnicos, precio) {
       block.style.outlineOffset = '-2px';
     }
   });
+}
+
+// ═══════════════════════════════════════
+// ZONAS DE LIQUIDEZ
+// ═══════════════════════════════════════
+function renderLiquidez(liq) {
+  const body = document.getElementById('liq-body');
+  if (!body) return;
+  const precio = liq.precio;
+
+  const fmtNum = v => parseFloat(v).toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const fmtDist = v => (v >= 0 ? '+' : '') + v + '%';
+
+  let html = '';
+
+  // Precio actual
+  html += '<div class="liq-zona actual">';
+  html += '<div class="liq-nivel">▶ ' + fmtNum(precio) + '</div>';
+  html += '<div class="liq-dist">Precio actual</div>';
+  html += '</div>';
+
+  // Zonas arriba (liquidez de vendedores)
+  const zonasArriba = [
+    { nivel: liq.arriba.max20,  dist: ((liq.arriba.max20 - precio)/precio*100).toFixed(1), label: 'Máx 20d', fuerza: 'media' },
+    { nivel: liq.arriba.max50,  dist: ((liq.arriba.max50 - precio)/precio*100).toFixed(1), label: 'Máx 50d', fuerza: 'media' },
+    { nivel: liq.arriba.max90,  dist: ((liq.arriba.max90 - precio)/precio*100).toFixed(1), label: 'Máx 90d', fuerza: 'alta' },
+    ...( liq.arriba.zonas || []).map(z => ({ nivel: z.nivel, dist: z.distPct.toFixed(1), label: 'Zona confluencia', fuerza: z.fuerza }))
+  ].filter(z => parseFloat(z.dist) > 0.1)
+   .sort((a,b) => parseFloat(a.dist) - parseFloat(b.dist))
+   .slice(0,4);
+
+  if (zonasArriba.length) {
+    html += '<div class="liq-grupo">';
+    html += '<div class="liq-grupo-title" style="color:var(--rd)">🔴 Liquidez arriba — vendedores / stops de cortos</div>';
+    zonasArriba.forEach(z => {
+      const esIgualdad = z.igualdad;
+      const esReciente = z.reciente;
+      html += '<div class="liq-zona arriba">';
+      html += '<div class="liq-nivel">' + fmtNum(z.nivel) + '</div>';
+      html += '<div class="liq-dist">+' + z.distPct + '% · ' + (esIgualdad ? '⚡ Equal High' + (z.count > 2 ? ' x'+z.count : '') : 'Swing High') + (esReciente ? ' · reciente' : '') + '</div>';
+      html += '<div class="liq-fuerza ' + z.fuerza + '">' + z.fuerza + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Zonas abajo (liquidez de compradores)
+  const zonasAbajo = [
+    { nivel: liq.abajo.min20,  dist: ((liq.abajo.min20 - precio)/precio*100).toFixed(1), label: 'Mín 20d', fuerza: 'media' },
+    { nivel: liq.abajo.min50,  dist: ((liq.abajo.min50 - precio)/precio*100).toFixed(1), label: 'Mín 50d', fuerza: 'media' },
+    { nivel: liq.abajo.min90,  dist: ((liq.abajo.min90 - precio)/precio*100).toFixed(1), label: 'Mín 90d', fuerza: 'alta' },
+    ...( liq.abajo.zonas || []).map(z => ({ nivel: z.nivel, dist: z.distPct.toFixed(1), label: 'Zona confluencia', fuerza: z.fuerza }))
+  ].filter(z => parseFloat(z.dist) < -0.1)
+   .sort((a,b) => parseFloat(b.dist) - parseFloat(a.dist))
+   .slice(0,4);
+
+  if (zonasAbajo.length) {
+    html += '<div class="liq-grupo">';
+    html += '<div class="liq-grupo-title" style="color:var(--gr)">🟢 Liquidez abajo — compradores / stops de largos</div>';
+    zonasAbajo.forEach(z => {
+      const esIgualdad = z.igualdad;
+      const esReciente = z.reciente;
+      html += '<div class="liq-zona abajo">';
+      html += '<div class="liq-nivel">' + fmtNum(z.nivel) + '</div>';
+      html += '<div class="liq-dist">' + z.distPct + '% · ' + (esIgualdad ? '⚡ Equal Low' + (z.count > 2 ? ' x'+z.count : '') : 'Swing Low') + (esReciente ? ' · reciente' : '') + '</div>';
+      html += '<div class="liq-fuerza ' + z.fuerza + '">' + z.fuerza + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Descripción interpretativa
+  const masCercanaArriba = zonasArriba[0];
+  const masCercanaAbajo  = zonasAbajo[0];
+  let interpretacion = '';
+  if (masCercanaArriba && masCercanaAbajo) {
+    interpretacion = 'Próxima liquidez arriba: <strong style="color:var(--rd)">' + fmtNum(masCercanaArriba.nivel) + '</strong> (+' + masCercanaArriba.dist + '%) · Próxima abajo: <strong style="color:var(--gr)">' + fmtNum(masCercanaAbajo.nivel) + '</strong> (' + masCercanaAbajo.dist + '%)';
+  }
+  if (interpretacion) {
+    html += '<div style="font-size:11px; color:var(--t2); padding:6px 8px; background:var(--s2); border-radius:8px; border:1px solid var(--b1); line-height:1.5;">' + interpretacion + '</div>';
+  }
+
+  body.innerHTML = html;
 }
 
 // Calcular y mostrar Fibonacci
