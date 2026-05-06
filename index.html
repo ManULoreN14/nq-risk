@@ -1345,7 +1345,7 @@ input, textarea, button { font-family: inherit; }
              ondrop="handlePCRImgDrop(event)">
             <div style="font-size:22px; margin-bottom:6px;">📊</div>
             <div style="font-size:12px; color:var(--t2); font-weight:600;">Subir captura del CBOE</div>
-            <div style="font-size:10px; color:var(--t3); margin-top:3px;">cboe.com/us/options/market_statistics/daily</div>
+            <div style="font-size:10px; color:var(--t3); margin-top:3px;">Arrastra, selecciona o pega con Ctrl+V</div>
             <input type="file" id="pcr-img-input" accept="image/*" style="display:none" onchange="handlePCRImgFile(event)">
           </div>
           <div id="pcr-img-preview-wrap" style="display:none; margin-top:8px; position:relative;">
@@ -3296,6 +3296,55 @@ async function generarInformeTecnico() {
 
   btn.classList.remove('loading');
   btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+// PEGAR IMAGEN CON CTRL+V
+// ═══════════════════════════════════════
+document.addEventListener('paste', function(e) {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (!item.type.startsWith('image/')) continue;
+    const file = item.getAsFile();
+    if (!file) continue;
+
+    // Determinar qué área está visible/activa
+    const pcrArea = document.getElementById('pcr-img-area');
+    const imgArea = document.getElementById('img-upload-area');
+
+    // Detectar cuál está en pantalla activa
+    const sc = document.querySelector('.screen.active')?.id;
+
+    if (sc === 'sc-datos' && pcrArea && pcrArea.style.display !== 'none') {
+      procesarPCRImg(file);
+      mostrarToast('📋 Imagen pegada en Put/Call CBOE');
+    } else if (sc === 'sc-tecnico' && imgArea && imgArea.style.display !== 'none') {
+      procesarImagen(file);
+      mostrarToast('📋 Imagen pegada en análisis técnico');
+    } else if (sc === 'sc-datos') {
+      procesarPCRImg(file);
+      mostrarToast('📋 Imagen pegada en Put/Call CBOE');
+    } else {
+      procesarImagen(file);
+      mostrarToast('📋 Imagen pegada en análisis técnico');
+    }
+    break;
+  }
+});
+
+function mostrarToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(20,20,36,0.95);color:#f0eeff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.1);z-index:9999;transition:opacity 0.3s;backdrop-filter:blur(10px);';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
 }
 
 // ═══════════════════════════════════════
