@@ -1346,12 +1346,17 @@ input, textarea, button { font-family: inherit; }
       <!-- IMAGEN PUT/CALL CBOE -->
       <div class="ind-card" id="ic-pcr-img">
         <div class="ind-card-top">
-          <div class="ind-card-icon">📸</div>
-          <div class="ind-card-name">Put/Call Ratios — desde imagen CBOE</div>
-          <div class="ind-card-src">CBOE</div>
+          <div class="ind-card-icon">📊</div>
+          <div class="ind-card-name">Put/Call Ratios — CBOE</div>
+          <div class="ind-card-src">auto · CSV</div>
         </div>
         <div style="padding: 0 12px 6px; font-size:11px; color:var(--t3); line-height:1.5;">
-          Haz una captura de la tabla del CBOE y la IA extrae los 4 ratios automáticamente.
+          Se cargan automáticamente al pulsar "Actualizar datos". Si no llegan, usa la imagen o copia y pega manualmente.
+        </div>
+        <div id="pcr-auto-status" style="display:none; margin: 0 12px 8px; padding:8px 12px; background:var(--gr2); border:1px solid var(--grb); border-radius:8px; font-size:11px; color:var(--gr); line-height:1.5;"></div>
+        <div style="padding: 0 12px 8px; display:flex; gap:6px; flex-wrap:wrap;">
+          <a class="il blue" href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank">🔗 Ver tabla CBOE ↗</a>
+          <a class="il blue" href="https://cdn.cboe.com/api/global/us_indices/daily_prices/PC_STATS.csv" target="_blank">📥 CSV directo ↗</a>
         </div>
         <div style="padding: 0 12px 12px;">
           <div id="pcr-img-area" style="
@@ -2293,14 +2298,26 @@ function aplicarDatosAuto(data) {
       }
     }
     if (pcrOk > 0) {
-      // Ocultar área de subida de imagen si los datos llegaron automáticamente
-      const pcrImgArea = document.getElementById('pcr-img-area');
-      const pcrCard = document.getElementById('ic-pcr-img');
-      if (pcrImgArea && pcrOk >= 3) {
-        pcrImgArea.innerHTML = '<div style="padding:10px; text-align:center; font-size:11px; color:var(--gr);">✅ Datos cargados automáticamente del CBOE · <a href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank" style="color:var(--ac);">Ver en CBOE ↗</a></div>';
+      const status = document.getElementById('pcr-auto-status');
+      if (status) {
+        const fecha = data.pcr.fecha || 'hoy';
+        status.style.display = 'block';
+        status.innerHTML = '✅ Cargado automáticamente del CBOE · Fecha: ' + fecha +
+          '<br>Equity=' + (data.pcr.equity||'—') +
+          ' · Total=' + (data.pcr.total||'—') +
+          ' · Index=' + (data.pcr.index||'—') +
+          ' · SPX=' + (data.pcr.spx||'—');
       }
-      document.getElementById('fetch-estado').textContent = 'Actualizado ✓';
-      document.getElementById('fetch-estado').className = 'fetch-estado ok';
+    } else {
+      // CSV no disponible — mostrar aviso para usar imagen o manual
+      const status = document.getElementById('pcr-auto-status');
+      if (status) {
+        status.style.display = 'block';
+        status.style.background = 'var(--am2)';
+        status.style.borderColor = 'var(--amb)';
+        status.style.color = 'var(--am)';
+        status.innerHTML = '⚠️ No se pudo cargar automáticamente. Usa la imagen (Ctrl+V) o introduce los valores manualmente.<br><a href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank" style="color:var(--ac);">Ver tabla CBOE ↗</a>';
+      }
     }
   }
 
