@@ -1,0 +1,3328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#080810">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NQ Risk">
+<link rel="manifest" href="manifest.json">
+<title>NQ Risk · Nasdaq d+1</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:       #080810;
+  --bg2:      #0d0d18;
+  --s1:       #12121e;
+  --s2:       #181826;
+  --s3:       #20202e;
+  --s4:       #2a2a3a;
+  --b1: rgba(255,255,255,0.05);
+  --b2: rgba(255,255,255,0.09);
+  --b3: rgba(255,255,255,0.15);
+  --t1: #f0eeff;
+  --t2: #9896b8;
+  --t3: #55536e;
+  --t4: #32304a;
+
+  --gr:  #2ecc8a;
+  --gr2: rgba(46,204,138,0.12);
+  --grb: rgba(46,204,138,0.25);
+  --am:  #f0a500;
+  --am2: rgba(240,165,0,0.12);
+  --amb: rgba(240,165,0,0.25);
+  --rd:  #ff5e5e;
+  --rd2: rgba(255,94,94,0.12);
+  --rdb: rgba(255,94,94,0.25);
+  --ac:  #8b7fff;
+  --ac2: rgba(139,127,255,0.15);
+  --acb: rgba(139,127,255,0.3);
+  --bl:  #5b9cf6;
+  --bl2: rgba(91,156,246,0.12);
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --cyan: #06b6d4;
+  --cyan2: rgba(6,182,212,0.12);
+  --r-xl: 24px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --tab-h: 62px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+input, textarea, button { font-family: inherit; }
+
+/* ═══════════════════════════════════════════════════
+   SPLASH
+═══════════════════════════════════════════════════ */
+#splash {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#splash.out { opacity: 0; transform: scale(1.04); pointer-events: none; }
+
+.splash-ring {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 1.5px solid var(--b2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+.splash-ring::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-top-color: var(--ac);
+  animation: ringRotate 1s linear infinite;
+}
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+.splash-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -1px; color: var(--t1);
+}
+.splash-logo em { color: var(--ac); font-style: normal; }
+.splash-tagline {
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.2em; text-transform: uppercase;
+  margin-top: 12px;
+}
+.splash-progress {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--b1);
+}
+.splash-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--ac), var(--bl));
+  animation: loadBar 1.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes loadBar { to { width: 100%; } }
+
+/* ═══════════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════════ */
+#app { display: none; min-height: 100vh; }
+
+/* ═══════════════════════════════════════════════════
+   TAB BAR
+═══════════════════════════════════════════════════ */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(var(--tab-h) + var(--safe-b));
+  background: rgba(8,8,16,0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid var(--b2);
+  display: flex; align-items: flex-start;
+  padding-top: 0;
+  z-index: 500;
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 5px;
+  height: var(--tab-h);
+  background: none; border: none;
+  color: var(--t4); cursor: pointer;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  transition: color 0.2s;
+  position: relative;
+}
+.tab.active { color: var(--ac); }
+.tab svg { width: 22px; height: 22px; stroke-width: 1.6; }
+.tab-indicator {
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--ac);
+  border-radius: 0 0 2px 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.tab.active .tab-indicator { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════════════ */
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px);
+}
+.screen.active { display: flex; }
+
+/* ═══════════════════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════════════════ */
+.page-header {
+  padding: 56px 20px 20px;
+  position: relative;
+}
+.page-header::after {
+  content: '';
+  position: absolute; bottom: 0; left: 20px; right: 20px;
+  height: 1px; background: var(--b1);
+}
+.ph-overline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ph-overline .pulse-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gr);
+  box-shadow: 0 0 8px var(--gr);
+  animation: pulseDot 2.5s ease infinite;
+}
+@keyframes pulseDot {
+  0%,100% { opacity: 1; box-shadow: 0 0 8px var(--gr); }
+  50% { opacity: 0.5; box-shadow: 0 0 3px var(--gr); }
+}
+.ph-title {
+  font-size: 28px; font-weight: 800;
+  line-height: 1; letter-spacing: -1px;
+  color: var(--t1);
+}
+.ph-title span { color: var(--ac); }
+.ph-meta {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px; flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--t2);
+}
+.chip.mode-22 { border-color: var(--amb); color: var(--am); background: var(--am2); }
+.chip.mode-7  { border-color: var(--acb); color: var(--ac); background: var(--ac2); }
+
+/* ═══════════════════════════════════════════════════
+   MODO SELECTOR (22h / 7h)
+═══════════════════════════════════════════════════ */
+.modo-selector {
+  display: flex; gap: 8px;
+  padding: 16px 20px 0;
+}
+.modo-btn {
+  flex: 1; padding: 10px 12px;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r-md);
+  color: var(--t3);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.modo-btn .mb-hora {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 600;
+}
+.modo-btn .mb-desc { font-size: 10px; opacity: 0.7; }
+.modo-btn.active-22 {
+  background: var(--am2); border-color: var(--amb);
+  color: var(--am);
+}
+.modo-btn.active-7 {
+  background: var(--ac2); border-color: var(--acb);
+  color: var(--ac);
+}
+
+/* ═══════════════════════════════════════════════════
+   POSICIÓN ACTUAL
+═══════════════════════════════════════════════════ */
+.posicion-card {
+  margin: 16px 20px 0;
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: var(--r-lg);
+  padding: 16px;
+}
+.posicion-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.posicion-sliders {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.pos-row {
+  display: flex; align-items: center; gap: 12px;
+}
+.pos-nombre {
+  font-size: 12px; font-weight: 600;
+  color: var(--t2); min-width: 80px;
+}
+.pos-slider {
+  flex: 1;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px;
+  background: var(--s3); outline: none;
+  cursor: pointer;
+}
+.pos-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--ac);
+  box-shadow: 0 0 8px var(--ac2);
+  cursor: pointer;
+}
+.pos-valor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 500;
+  color: var(--t1); min-width: 36px; text-align: right;
+}
+.posicion-total {
+  font-size: 11px; color: var(--t3);
+  margin-top: 8px; text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ═══════════════════════════════════════════════════
+   FETCH DATOS
+═══════════════════════════════════════════════════ */
+.fetch-section {
+  margin: 14px 20px 0;
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.fetch-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--b1);
+}
+.fetch-titulo { font-size: 13px; font-weight: 600; flex: 1; }
+.fetch-estado {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 9px; border-radius: 100px;
+  background: var(--s3); color: var(--t3); border: 1px solid var(--b2);
+}
+.fetch-estado.ok   { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.fetch-estado.err  { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+.fetch-estado.loading { background: var(--ac2); color: var(--ac); border-color: var(--acb); }
+
+.fetch-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.fetch-dato {
+  padding: 12px 14px;
+  border-right: 1px solid var(--b1);
+  border-bottom: 1px solid var(--b1);
+}
+.fetch-dato:nth-child(3n) { border-right: none; }
+.fetch-dato:nth-last-child(-n+3) { border-bottom: none; }
+
+.fd-nombre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fd-valor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px; font-weight: 500;
+  color: var(--t1); line-height: 1;
+  margin-bottom: 3px;
+}
+.fd-cambio {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+.fd-cambio.up { color: var(--gr); }
+.fd-cambio.dn { color: var(--rd); }
+.fd-cambio.flat { color: var(--t3); }
+
+.btn-fetch {
+  margin: 12px 16px;
+  width: calc(100% - 32px);
+  padding: 11px;
+  background: var(--s3);
+  border: 1px solid var(--b3);
+  border-radius: var(--r-sm);
+  color: var(--t2);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-fetch:hover { background: var(--s4); color: var(--t1); }
+.btn-fetch .spin {
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--b3);
+  border-top-color: var(--ac);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+.btn-fetch.loading .spin { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.proxy-aviso {
+  margin: 8px 16px 14px;
+  padding: 10px 12px;
+  background: var(--bl2);
+  border: 1px solid rgba(91,156,246,0.2);
+  border-radius: var(--r-sm);
+  font-size: 11px; color: var(--bl); line-height: 1.5;
+}
+.proxy-aviso a { color: var(--bl); }
+
+/* ═══════════════════════════════════════════════════
+   CARDS DE INDICADORES
+═══════════════════════════════════════════════════ */
+.indicadores-section {
+  padding: 14px 20px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ind-card {
+  background: var(--s1);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.ind-card.g { border-color: var(--grb); }
+.ind-card.a { border-color: var(--amb); }
+.ind-card.r { border-color: var(--rdb); }
+
+.ind-card-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 8px;
+}
+.ind-card-icon { font-size: 16px; flex-shrink: 0; }
+.ind-card-name {
+  font-size: 13px; font-weight: 600; flex: 1;
+}
+.ind-card-src {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t4);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+.ind-input-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px 8px;
+}
+.ind-input {
+  flex: 1;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 500;
+  color: var(--t1); outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.ind-input:focus { border-color: var(--ac); }
+.ind-input::placeholder { color: var(--t4); font-size: 13px; font-weight: 400; }
+.ind-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; min-width: 68px; text-align: center;
+  padding: 5px 8px; border-radius: 100px;
+  border: 1px solid var(--b2); background: var(--s2); color: var(--t3);
+  transition: all 0.25s; flex-shrink: 0;
+}
+.ind-card.g .ind-badge { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.ind-card.a .ind-badge { background: var(--am2); color: var(--am); border-color: var(--amb); }
+.ind-card.r .ind-badge { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+
+.tend-row {
+  display: flex; gap: 5px; padding: 0 10px 8px;
+}
+.tend-b {
+  flex: 1; padding: 7px 4px;
+  background: var(--s2); border: 1px solid var(--b1);
+  border-radius: 8px; color: var(--t3);
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.tend-b:active { transform: scale(0.97); }
+.tend-b.ts { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+.tend-b.te { background: var(--am2); color: var(--am); border-color: var(--amb); }
+.tend-b.tb { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.tend-b.ts-inv { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.tend-b.tb-inv { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+
+.ind-links-row {
+  display: flex; gap: 5px; padding: 0 10px 10px; flex-wrap: wrap;
+}
+.il {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--ac); text-decoration: none;
+  padding: 4px 9px; border-radius: 6px;
+  border: 1px solid var(--acb); background: var(--ac2);
+  transition: all 0.15s;
+}
+.il:active { opacity: 0.7; }
+.il.blue { color: var(--bl); border-color: rgba(91,156,246,0.25); background: var(--bl2); }
+
+/* Opciones macro */
+.macro-opts { display: flex; flex-direction: column; gap: 0; padding: 0 10px 10px; }
+.macro-opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 8px; border-radius: 8px;
+  cursor: pointer; transition: background 0.15s; user-select: none;
+}
+.macro-opt:active { background: var(--s3); }
+.macro-radio {
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 1.5px solid var(--t4); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.macro-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: transparent; transition: 0.15s; }
+.macro-opt.sg .macro-radio { border-color: var(--gr); background: var(--gr2); }
+.macro-opt.sg .macro-radio::after { background: var(--gr); }
+.macro-opt.sa .macro-radio { border-color: var(--am); background: var(--am2); }
+.macro-opt.sa .macro-radio::after { background: var(--am); }
+.macro-opt.sr .macro-radio { border-color: var(--rd); background: var(--rd2); }
+.macro-opt.sr .macro-radio::after { background: var(--rd); }
+.macro-opt-label { font-size: 13px; color: var(--t1); flex: 1; line-height: 1.3; }
+.macro-opt-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 3px 8px; border-radius: 100px;
+  background: var(--s3); color: var(--t3); border: 1px solid var(--b1); flex-shrink: 0;
+}
+.macro-opt.sg .macro-opt-tag { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.macro-opt.sa .macro-opt-tag { background: var(--am2); color: var(--am); border-color: var(--amb); }
+.macro-opt.sr .macro-opt-tag { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+
+/* ═══════════════════════════════════════════════════
+   NOTA DEL DÍA
+═══════════════════════════════════════════════════ */
+.nota-section { padding: 14px 20px 0; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.nota-input {
+  width: 100%;
+  background: var(--s1); border: 1px solid var(--b2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  color: var(--t2); font-size: 13px; line-height: 1.6;
+  resize: none; outline: none; min-height: 72px;
+  transition: border-color 0.2s;
+}
+.nota-input:focus { border-color: var(--ac); }
+.nota-input::placeholder { color: var(--t4); }
+
+/* ═══════════════════════════════════════════════════
+   BTN ANALIZAR
+═══════════════════════════════════════════════════ */
+.btn-analizar-section { padding: 14px 20px 0; }
+.btn-analizar {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--ac) 0%, #5b7fff 50%, var(--bl) 100%);
+  background-size: 200% 200%;
+  animation: gradShift 4s ease infinite;
+  border: none; border-radius: var(--r-lg);
+  color: #fff; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 24px rgba(139,127,255,0.35);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  letter-spacing: -0.2px;
+}
+@keyframes gradShift {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.btn-analizar:disabled {
+  background: var(--s3) !important;
+  animation: none;
+  color: var(--t3);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-analizar:not(:disabled):active { transform: scale(0.98); }
+.btn-analizar .sp {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+.btn-analizar.loading .sp { display: block; }
+.btn-analizar.loading .bt { opacity: 0.7; }
+
+.alerta-dia {
+  margin: 10px 20px 0;
+  padding: 10px 14px;
+  background: var(--am2); border: 1px solid var(--amb);
+  border-radius: var(--r-sm);
+  font-size: 12px; color: var(--am); line-height: 1.5;
+  display: none;
+}
+.alerta-dia.vis { display: block; }
+
+/* ═══════════════════════════════════════════════════
+   SCREEN INFORME
+═══════════════════════════════════════════════════ */
+.informe-screen { padding: 0 20px; }
+
+/* Semáforo grande */
+.semaforo-hero {
+  margin-top: 16px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--b2);
+  background: var(--s1);
+  padding: 22px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.4s;
+}
+.semaforo-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--t4); transition: background 0.4s, box-shadow 0.4s;
+}
+.semaforo-hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, var(--glow-color, transparent) 0%, transparent 60%);
+  pointer-events: none; transition: 0.4s;
+}
+.semaforo-hero.ng { border-color: var(--grb); --glow-color: rgba(46,204,138,0.06); }
+.semaforo-hero.ng::before { background: var(--gr); box-shadow: 0 0 16px var(--gr); }
+.semaforo-hero.na { border-color: var(--amb); --glow-color: rgba(240,165,0,0.06); }
+.semaforo-hero.na::before { background: var(--am); box-shadow: 0 0 16px var(--am); }
+.semaforo-hero.nr { border-color: var(--rdb); --glow-color: rgba(255,94,94,0.06); }
+.semaforo-hero.nr::before { background: var(--rd); box-shadow: 0 0 16px var(--rd); }
+
+.sh-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sh-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;
+}
+.sh-decision {
+  font-size: 24px; font-weight: 800;
+  line-height: 1.05; letter-spacing: -0.5px;
+  color: var(--t3); transition: color 0.4s;
+}
+.semaforo-hero.ng .sh-decision { color: var(--gr); }
+.semaforo-hero.na .sh-decision { color: var(--am); }
+.semaforo-hero.nr .sh-decision { color: var(--rd); }
+
+.sh-orb {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  background: var(--s3); transition: all 0.4s;
+}
+.semaforo-hero.ng .sh-orb { background: var(--gr2); box-shadow: 0 0 24px rgba(46,204,138,0.2); }
+.semaforo-hero.na .sh-orb { background: var(--am2); box-shadow: 0 0 24px rgba(240,165,0,0.2); }
+.semaforo-hero.nr .sh-orb { background: var(--rd2); box-shadow: 0 0 24px rgba(255,94,94,0.2); }
+
+.sh-bars {
+  display: flex; gap: 3px; margin-top: 16px;
+}
+.sh-bar {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: var(--s4); transition: background 0.4s, box-shadow 0.4s;
+}
+
+/* Resumen indicadores */
+.resumen-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; margin-top: 12px;
+}
+.rg-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-md); padding: 10px 12px;
+  transition: border-color 0.3s;
+}
+.rg-card.g { border-color: var(--grb); }
+.rg-card.a { border-color: var(--amb); }
+.rg-card.r { border-color: var(--rdb); }
+.rg-nombre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.rg-valor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 500; line-height: 1; color: var(--t1);
+}
+.rg-estado { font-size: 10px; margin-top: 3px; }
+.rg-card.g .rg-estado { color: var(--gr); }
+.rg-card.a .rg-estado { color: var(--am); }
+.rg-card.r .rg-estado { color: var(--rd); }
+
+/* Informe IA */
+.ia-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); overflow: hidden; margin-top: 12px;
+}
+.ia-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-bottom: 1px solid var(--b1);
+  background: var(--s2);
+}
+.ia-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--ac2); border: 1px solid var(--acb);
+  border-radius: 100px; padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ac);
+}
+.ia-pill::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--ac); box-shadow: 0 0 6px var(--ac);
+}
+.ia-card-title { font-size: 13px; font-weight: 700; flex: 1; }
+.ia-body {
+  padding: 16px; font-size: 14px; line-height: 1.75; color: var(--t2);
+}
+.ia-body p { margin-bottom: 12px; }
+.ia-body p:last-child { margin-bottom: 0; }
+.ia-body strong { color: var(--t1); font-weight: 700; }
+
+/* Recomendación posición */
+.pos-rec-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); padding: 16px; margin-top: 12px;
+}
+.pos-rec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px;
+}
+.pos-rec-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.pos-rec-nombre { font-size: 13px; color: var(--t2); font-weight: 500; }
+.pos-rec-flecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--t3);
+  display: flex; align-items: center; gap: 6px;
+}
+.pos-rec-flecha .from { color: var(--t3); }
+.pos-rec-flecha .arrow { color: var(--ac); }
+.pos-rec-flecha .to { font-weight: 600; }
+.pos-rec-flecha.rec-gr .to { color: var(--gr); }
+.pos-rec-flecha.rec-am .to { color: var(--am); }
+.pos-rec-flecha.rec-rd .to { color: var(--rd); }
+
+/* Backtesting */
+.bt-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); overflow: hidden; margin-top: 12px;
+}
+.bt-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-bottom: 1px solid var(--b1);
+}
+.bt-title { font-size: 13px; font-weight: 700; flex: 1; }
+.bt-n { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t3); }
+.bt-rows { padding: 8px 0; }
+.bt-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 16px;
+}
+.bt-ind { font-size: 12px; font-weight: 600; color: var(--t2); min-width: 70px; }
+.bt-bar-wrap { flex: 1; height: 4px; background: var(--s3); border-radius: 2px; overflow: hidden; }
+.bt-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+.bt-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600; min-width: 36px; text-align: right;
+}
+
+/* Guardar btn */
+.btn-guardar {
+  width: 100%; padding: 13px; margin-top: 12px;
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r-md); color: var(--t2);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-guardar:not(:disabled):hover { background: var(--s3); color: var(--t1); }
+.btn-guardar:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════
+   SCREEN HISTORIAL
+═══════════════════════════════════════════════════ */
+.historial-content { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+
+.hist-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-md); padding: 13px 14px;
+  cursor: pointer; transition: all 0.15s;
+  position: relative; overflow: hidden;
+}
+.hist-item::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--t4);
+  transition: background 0.2s;
+}
+.hist-item.ng::before { background: var(--gr); }
+.hist-item.na::before { background: var(--am); }
+.hist-item.nr::before { background: var(--rd); }
+.hist-item:active { background: var(--s2); }
+.hi-fecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--t3); min-width: 74px;
+}
+.hi-decision { font-size: 13px; font-weight: 600; color: var(--t1); flex: 1; }
+.hi-datos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t4);
+  display: flex; flex-direction: column; gap: 2px; align-items: flex-end;
+}
+.hi-nivel {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 2px 7px; border-radius: 100px;
+}
+.hist-item.ng .hi-nivel { background: var(--gr2); color: var(--gr); border: 1px solid var(--grb); }
+.hist-item.na .hi-nivel { background: var(--am2); color: var(--am); border: 1px solid var(--amb); }
+.hist-item.nr .hi-nivel { background: var(--rd2); color: var(--rd); border: 1px solid var(--rdb); }
+
+.hist-empty {
+  padding: 52px 20px;
+  text-align: center; color: var(--t4);
+}
+.hist-empty .he-icon { font-size: 44px; margin-bottom: 14px; }
+.hist-empty p { font-size: 13px; line-height: 1.6; }
+
+/* ═══════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(12px);
+  z-index: 800;
+  display: none; flex-direction: column; justify-content: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--s1);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  border: 1px solid var(--b2); border-bottom: none;
+  max-height: 85vh; overflow-y: auto;
+  padding: 0 20px calc(20px + var(--safe-b));
+  animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+  width: 36px; height: 4px; background: var(--s4);
+  border-radius: 2px; margin: 14px auto 18px;
+}
+.modal-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.modal-fecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--t3); margin-bottom: 16px;
+}
+.modal-body { font-size: 14px; line-height: 1.75; color: var(--t2); }
+.modal-body p { margin-bottom: 10px; }
+.modal-body strong { color: var(--t1); }
+.modal-close {
+  width: 100%; padding: 12px; margin-top: 16px;
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r-md); color: var(--t2);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════════ */
+.divider {
+  height: 1px; background: var(--b1);
+  margin: 14px 20px 0;
+}
+.spacer { height: 14px; }
+.text-center { text-align: center; }
+
+/* ── TECHNICAL SCREEN ── */
+.tec-section { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+.tec-cat { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--t3); letter-spacing: 0.16em; text-transform: uppercase; padding: 0 2px; margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+.tec-cat::before { content:''; width:3px; height:12px; background:var(--ac); border-radius:2px; flex-shrink:0; }
+.tec-block { background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r-lg); overflow: hidden; transition: border-color 0.25s; }
+.tec-block.tg { border-color: var(--grb); }
+.tec-block.ta { border-color: var(--amb); }
+.tec-block.tr { border-color: var(--rdb); }
+.tec-block-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; }
+.tec-num { width: 22px; height: 22px; border-radius: 6px; background: var(--s2); border: 1px solid var(--b2); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t3); flex-shrink: 0; }
+.tec-name { font-size: 13px; font-weight: 600; flex: 1; }
+.tec-src { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ac); text-decoration: none; padding: 2px 8px; border-radius: 5px; border: 1px solid var(--acb); background: var(--ac2); }
+.tec-auto-val { margin: 0 12px 8px; padding: 8px 12px; background: var(--s2); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #06b6d4; display: none; }
+.tec-auto-val.vis { display: block; }
+.tec-opts { display: flex; flex-direction: column; padding: 0 12px 12px; }
+.tec-op { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; cursor: pointer; transition: background 0.15s; user-select: none; }
+.tec-op:active { background: var(--s3); }
+.tec-radio { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--t4); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.tec-radio::after { content:''; width:6px; height:6px; border-radius:50%; background:transparent; transition:0.15s; }
+.tec-op.tsg .tec-radio { border-color:var(--gr); background:var(--gr2); } .tec-op.tsg .tec-radio::after { background:var(--gr); }
+.tec-op.tsa .tec-radio { border-color:var(--am); background:var(--am2); } .tec-op.tsa .tec-radio::after { background:var(--am); }
+.tec-op.tsr .tec-radio { border-color:var(--rd); background:var(--rd2); } .tec-op.tsr .tec-radio::after { background:var(--rd); }
+.tec-op-lbl { font-size: 13px; color: var(--t1); flex: 1; line-height: 1.35; }
+.tec-op-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 100px; flex-shrink: 0; background: var(--s2); color: var(--t3); border: 1px solid var(--b1); }
+.tec-op.tsg .tec-op-tag { background:var(--gr2); color:var(--gr); border-color:var(--grb); }
+.tec-op.tsa .tec-op-tag { background:var(--am2); color:var(--am); border-color:var(--amb); }
+.tec-op.tsr .tec-op-tag { background:var(--rd2); color:var(--rd); border-color:var(--rdb); }
+.fib-levels { margin: 0 12px 12px; background: var(--s2); border: 1px solid var(--b2); border-radius: 10px; overflow: hidden; }
+.fib-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--b1); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.fib-row:last-child { border-bottom: none; }
+.fib-pct { color: var(--ac); min-width: 44px; font-weight: 600; }
+.fib-val { color: var(--t1); flex: 1; }
+.fib-dist { color: var(--t3); font-size: 10px; min-width: 60px; text-align: right; }
+.fib-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.tec-veredicto { margin: 14px 20px 0; border-radius: var(--r-lg); border: 1px solid var(--b2); background: var(--s1); padding: 18px 20px; position: relative; overflow: hidden; transition: all 0.4s; }
+.tec-veredicto::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--t4); transition: all 0.4s; }
+.tec-veredicto.tng::before { background:var(--gr); box-shadow:0 0 16px var(--gr); }
+.tec-veredicto.tna::before { background:var(--am); box-shadow:0 0 16px var(--am); }
+.tec-veredicto.tnr::before { background:var(--rd); box-shadow:0 0 16px var(--rd); }
+.tec-veredicto.tng { border-color:var(--grb); } .tec-veredicto.tna { border-color:var(--amb); } .tec-veredicto.tnr { border-color:var(--rdb); }
+.tv-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.tv-label { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t3); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:6px; }
+.tv-dec { font-size:20px; font-weight:700; color:var(--t3); transition:color 0.4s; line-height:1.1; }
+.tec-veredicto.tng .tv-dec { color:var(--gr); } .tec-veredicto.tna .tv-dec { color:var(--am); } .tec-veredicto.tnr .tv-dec { color:var(--rd); }
+.tv-score { font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:600; color:var(--t4); line-height:1; transition:color 0.4s; }
+.tec-veredicto.tng .tv-score { color:var(--gr); } .tec-veredicto.tna .tv-score { color:var(--am); } .tec-veredicto.tnr .tv-score { color:var(--rd); }
+.tv-txt { font-size:13px; color:var(--t2); line-height:1.6; margin-top:10px; padding-top:10px; border-top:1px solid var(--b1); }
+.tv-bars { display:flex; gap:3px; margin-top:12px; }
+.tv-bar { flex:1; height:3px; border-radius:2px; background:var(--s4); transition:all 0.4s; }
+.velas-ref { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.vela-item { background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r-md); padding: 12px 14px; display: flex; align-items: center; gap: 14px; }
+.vi-svg { flex-shrink: 0; width: 50px; display: flex; justify-content: center; }
+.vi-info { flex: 1; }
+.vi-nombre { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.vi-desc { font-size: 11px; color: var(--t3); line-height: 1.4; }
+.vi-tipo { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 100px; flex-shrink: 0; }
+.vit-b { background:var(--rd2); color:var(--rd); border:1px solid var(--rdb); }
+.vit-u { background:var(--gr2); color:var(--gr); border:1px solid var(--grb); }
+.vit-n { background:var(--am2); color:var(--am); border:1px solid var(--amb); }
+.btn-tec-ia { margin: 14px 20px 0; width: calc(100% - 40px); padding: 15px; background: linear-gradient(135deg, #06b6d4 0%, var(--ac) 100%); border: none; border-radius: var(--r-lg); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(6,182,212,0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-tec-ia:disabled { background:var(--s3); color:var(--t3); box-shadow:none; cursor:not-allowed; }
+.btn-tec-ia .sp { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+.btn-tec-ia.loading .sp { display:block; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-ring">
+    <div class="splash-logo">NQ<em>·</em>R</div>
+  </div>
+  <div class="splash-tagline">Nasdaq 100 · Operativa d+1</div>
+  <div class="splash-progress"><div class="splash-progress-fill"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- ══════════════ SCREEN: DATOS ══════════════ -->
+  <div class="screen active" id="sc-datos">
+
+    <div class="page-header">
+      <div class="ph-overline">
+        <div class="pulse-dot"></div>
+        <span id="fecha-top">—</span>
+      </div>
+      <div class="ph-title">Datos del <span>día</span></div>
+      <div class="ph-meta">
+        <div class="chip" id="chip-modo">⏱ Selecciona modo</div>
+        <div class="chip" id="chip-mercado">🕐 Cargando...</div>
+      </div>
+    </div>
+
+    <!-- MODO 22h / 7h -->
+    <div class="modo-selector">
+      <button class="modo-btn" id="modo-22" onclick="setModo(22)">
+        <div class="mb-hora">22:00h</div>
+        <div class="mb-desc">Cierre NY</div>
+      </button>
+      <button class="modo-btn" id="modo-7" onclick="setModo(7)">
+        <div class="mb-hora">07:00h</div>
+        <div class="mb-desc">Premarket</div>
+      </button>
+    </div>
+
+    <!-- POSICIÓN ACTUAL -->
+    <div class="posicion-card">
+      <div class="posicion-label">Mi posición actual</div>
+      <div class="posicion-sliders">
+        <div class="pos-row">
+          <div class="pos-nombre">📈 Nasdaq</div>
+          <input type="range" class="pos-slider" id="sl-nasdaq" min="0" max="100" value="50" oninput="actualizarPos()">
+          <div class="pos-valor" id="val-nasdaq">50%</div>
+        </div>
+        <div class="pos-row">
+          <div class="pos-nombre">💵 Liquidez</div>
+          <input type="range" class="pos-slider" id="sl-liquidez" min="0" max="100" value="50" oninput="actualizarPosLiq()">
+          <div class="pos-valor" id="val-liquidez">50%</div>
+        </div>
+      </div>
+      <div class="posicion-total" id="pos-total">Total: 100%</div>
+    </div>
+
+    <!-- FETCH DATOS EN TIEMPO REAL -->
+    <div class="fetch-section">
+      <div class="fetch-header">
+        <span style="font-size:14px">⚡</span>
+        <div class="fetch-titulo">Datos en tiempo real</div>
+        <div class="fetch-estado" id="fetch-estado">Listo</div>
+      </div>
+      <div class="fetch-grid">
+        <div class="fetch-dato" style="border-left:2px solid var(--ac); background:var(--ac2);">
+          <div class="fd-nombre" style="color:var(--ac)">VXN ★</div>
+          <div class="fd-valor" id="fd-vxn">—</div>
+          <div class="fd-cambio" id="fc-vxn">Nasdaq vol.</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">VIX</div>
+          <div class="fd-valor" id="fd-vix">—</div>
+          <div class="fd-cambio" id="fc-vix">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">NQ Fut %</div>
+          <div class="fd-valor" id="fd-nq">—</div>
+          <div class="fd-cambio" id="fc-nq">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">US10Y</div>
+          <div class="fd-valor" id="fd-us10">—</div>
+          <div class="fd-cambio" id="fc-us10">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">DXY</div>
+          <div class="fd-valor" id="fd-dxy">—</div>
+          <div class="fd-cambio" id="fc-dxy">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">F&amp;G</div>
+          <div class="fd-valor" id="fd-fng">—</div>
+          <div class="fd-cambio" id="fc-fng">—</div>
+        </div>
+      </div>
+      <button class="btn-fetch" id="btn-fetch" onclick="fetchDatos()">
+        <div class="spin"></div>
+        <span>⟳ Actualizar datos</span>
+      </button>
+      <div class="proxy-aviso" id="proxy-aviso">
+        ℹ️ Para datos automáticos necesitas configurar el proxy. <a href="#" onclick="mostrarInstrucciones()">Ver instrucciones →</a>
+        <br>Sin proxy: introduce los valores manualmente abajo.
+      </div>
+    </div>
+
+    <!-- INDICADORES TÉCNICOS AUTOMÁTICOS -->
+    <div class="fetch-section" id="tecnicos-section" style="display:none;">
+      <div class="fetch-header">
+        <span style="font-size:14px">📐</span>
+        <div class="fetch-titulo">Indicadores técnicos — NDX</div>
+        <div class="fetch-estado ok" id="tecnicos-estado">Auto</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;">
+        <div class="fetch-dato">
+          <div class="fd-nombre">RSI 14</div>
+          <div class="fd-valor" id="td-rsi">—</div>
+          <div class="fd-cambio" id="ts-rsi">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">EMA 20</div>
+          <div class="fd-valor" id="td-ema20">—</div>
+          <div class="fd-cambio" id="ts-ema20">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">EMA 50</div>
+          <div class="fd-valor" id="td-ema50">—</div>
+          <div class="fd-cambio" id="ts-ema50">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">SMA 200</div>
+          <div class="fd-valor" id="td-sma200">—</div>
+          <div class="fd-cambio" id="ts-sma200">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">MACD</div>
+          <div class="fd-valor" id="td-macd">—</div>
+          <div class="fd-cambio" id="ts-macd">—</div>
+        </div>
+        <div class="fetch-dato">
+          <div class="fd-nombre">ATR 14</div>
+          <div class="fd-valor" id="td-atr">—</div>
+          <div class="fd-cambio" id="ts-atr">—</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px 12px; border-top:1px solid var(--b1); display:flex; gap:8px; align-items:center;">
+        <div style="font-size:11px; color:var(--t3); flex:1;">
+          <span id="ts-cruce-emas">—</span> · <span id="ts-accdis">—</span>
+        </div>
+        <a class="il" href="https://www.tradingview.com/chart/?symbol=NDX" target="_blank" style="font-size:10px;">NDX ↗</a>
+      </div>
+    </div>
+
+    <!-- ALERTA DÍA ESPECIAL -->
+    <div class="alerta-dia" id="alerta-dia"></div>
+
+    <!-- INDICADORES MANUALES -->
+    <div class="indicadores-section">
+
+      <div class="ind-card" id="ic-vix">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">😨</div>
+          <div class="ind-card-name">VIX — Índice del miedo</div>
+          <div class="ind-card-src">S&P500</div>
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-vix" type="number" step="0.1" placeholder="ej: 17.4" oninput="evalInd('vix')" inputmode="decimal">
+          <div class="ind-badge" id="b-vix">—</div>
+        </div>
+        <div class="tend-row">
+          <button class="tend-b" id="tv-s" onclick="selTend('vix','s')">↑ Subiendo</button>
+          <button class="tend-b" id="tv-e" onclick="selTend('vix','e')">→ Estable</button>
+          <button class="tend-b" id="tv-b" onclick="selTend('vix','b')">↓ Bajando</button>
+        </div>
+        <div class="ind-links-row">
+          <a class="il" href="https://www.tradingview.com/chart/?symbol=VIX" target="_blank">📈 VIX en TradingView ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=VXN" target="_blank">📈 VXN Nasdaq ↗</a>
+          <a class="il blue" href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank">🔗 CBOE Put/Call ↗</a>
+        </div>
+      </div>
+
+      <div class="ind-card" id="ic-nq">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">📊</div>
+          <div class="ind-card-name">Futuros NQ — variación %</div>
+          <div class="ind-card-src">NQ1!</div>
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-nq" type="number" step="0.01" placeholder="ej: -0.42" oninput="evalInd('nq')" inputmode="decimal">
+          <div class="ind-badge" id="b-nq">—</div>
+        </div>
+        <div class="tend-row">
+          <button class="tend-b" id="tn-s" onclick="selTend('nq','s')">↑ Subiendo</button>
+          <button class="tend-b" id="tn-e" onclick="selTend('nq','e')">→ Estable</button>
+          <button class="tend-b" id="tn-b" onclick="selTend('nq','b')">↓ Bajando</button>
+        </div>
+        <div class="ind-links-row">
+          <a class="il" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">📈 NQ1! TradingView ↗</a>
+          <a class="il blue" href="https://es.investing.com/indices/nq-100-futures" target="_blank">🔗 Investing NQ ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=NDX" target="_blank">📈 Nasdaq 100 ↗</a>
+        </div>
+      </div>
+
+      <div class="ind-card" id="ic-us10">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">📈</div>
+          <div class="ind-card-name">Bono USA 10Y — yield %</div>
+          <div class="ind-card-src">US10Y</div>
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-us10" type="number" step="0.01" placeholder="ej: 4.32" oninput="evalInd('us10')" inputmode="decimal">
+          <div class="ind-badge" id="b-us10">—</div>
+        </div>
+        <div class="tend-row">
+          <button class="tend-b" id="tu-s" onclick="selTend('us10','s')">↑ Subiendo</button>
+          <button class="tend-b" id="tu-e" onclick="selTend('us10','e')">→ Estable</button>
+          <button class="tend-b" id="tu-b" onclick="selTend('us10','b')">↓ Bajando</button>
+        </div>
+        <div class="ind-links-row">
+          <a class="il" href="https://www.tradingview.com/chart/?symbol=US10Y" target="_blank">📈 US10Y TradingView ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=TLT" target="_blank">📈 TLT (bonos ETF) ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=HYG" target="_blank">📈 HYG (high yield) ↗</a>
+        </div>
+      </div>
+
+      <div class="ind-card" id="ic-dxy">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">💵</div>
+          <div class="ind-card-name">DXY — Índice del dólar</div>
+          <div class="ind-card-src">DXY</div>
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-dxy" type="number" step="0.01" placeholder="ej: 104.2" oninput="evalInd('dxy')" inputmode="decimal">
+          <div class="ind-badge" id="b-dxy">—</div>
+        </div>
+        <div class="tend-row">
+          <button class="tend-b" id="td-s" onclick="selTend('dxy','s')">↑ Subiendo</button>
+          <button class="tend-b" id="td-e" onclick="selTend('dxy','e')">→ Estable</button>
+          <button class="tend-b" id="td-b" onclick="selTend('dxy','b')">↓ Bajando</button>
+        </div>
+        <div class="ind-links-row">
+          <a class="il" href="https://www.tradingview.com/chart/?symbol=DXY" target="_blank">📈 DXY TradingView ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=EURUSD" target="_blank">📈 EUR/USD ↗</a>
+        </div>
+      </div>
+
+      <div class="ind-card" id="ic-fng">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">🧭</div>
+          <div class="ind-card-name">CNN Fear &amp; Greed</div>
+          <div class="ind-card-src">0–100</div>
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-fng" type="number" step="1" placeholder="ej: 42" min="0" max="100" oninput="evalInd('fng')" inputmode="numeric">
+          <div class="ind-badge" id="b-fng">—</div>
+        </div>
+        <div class="ind-links-row">
+          <a class="il blue" href="https://edition.cnn.com/markets/fear-and-greed" target="_blank">🧭 CNN Fear &amp; Greed ↗</a>
+          <a class="il blue" href="https://www.aaii.com/sentimentsurvey" target="_blank">📊 AAII Survey ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/chart/?symbol=SKEW" target="_blank">📈 SKEW Index ↗</a>
+        </div>
+      </div>
+
+      <!-- PUT/CALL RATIOS — 4 indicadores CBOE -->
+
+      <!-- 1. EQUITY P/C — el más importante -->
+      <div class="ind-card" id="ic-pcr-eq">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">⭐</div>
+          <div class="ind-card-name">Equity Put/Call Ratio</div>
+          <div class="ind-card-src">CBOE · acciones</div>
+        </div>
+        <div style="padding: 0 12px 4px; font-size:11px; color:var(--t3); line-height:1.4;">
+          El más importante para el Nasdaq. Mide solo opciones sobre acciones individuales — el sentimiento real del inversor minorista e institucional sobre empresas tech.
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-pcr-eq" type="number" step="0.01" placeholder="ej: 0.54" oninput="evalPCRind('eq')" inputmode="decimal">
+          <div class="ind-badge" id="b-pcr-eq">—</div>
+        </div>
+        <div style="padding: 0 12px 10px;">
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:5px; margin-bottom:6px;">
+            <div style="flex:1; background:#2ecc8a;"></div>
+            <div style="flex:1; background:#f0a500;"></div>
+            <div style="flex:2; background:#3ddc84;"></div>
+            <div style="flex:1; background:#f0a500;"></div>
+            <div style="flex:1; background:#ff5e5e;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4);">
+            <span>>1.0 Miedo🟢</span><span>0.8–1.0</span><span>0.5–0.8 OK</span><span>0.4–0.5</span><span><0.4 Euforia⚠️</span>
+          </div>
+          <div id="pcr-eq-txt" style="margin-top:8px; font-size:11px; color:var(--t3); line-height:1.5; padding:8px 10px; background:var(--s2); border-radius:7px; border:1px solid var(--b1);">
+            Introduce el valor para ver la interpretación.
+          </div>
+        </div>
+        <div class="ind-links-row">
+          <a class="il blue" href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank">🔗 CBOE Stats ↗</a>
+        </div>
+      </div>
+
+      <!-- 2. TOTAL P/C -->
+      <div class="ind-card" id="ic-pcr-tot">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">⚖️</div>
+          <div class="ind-card-name">Total Put/Call Ratio</div>
+          <div class="ind-card-src">CBOE · global</div>
+        </div>
+        <div style="padding: 0 12px 4px; font-size:11px; color:var(--t3); line-height:1.4;">
+          Ratio global incluyendo acciones e índices. Visión general del sentimiento del mercado. Por encima de 1.0 indica miedo generalizado.
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-pcr-tot" type="number" step="0.01" placeholder="ej: 0.87" oninput="evalPCRind('tot')" inputmode="decimal">
+          <div class="ind-badge" id="b-pcr-tot">—</div>
+        </div>
+        <div style="padding: 0 12px 10px;">
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:5px; margin-bottom:6px;">
+            <div style="flex:1; background:#2ecc8a;"></div>
+            <div style="flex:1.5; background:#f0a500;"></div>
+            <div style="flex:2; background:#3ddc84;"></div>
+            <div style="flex:1.5; background:#f0a500;"></div>
+            <div style="flex:1; background:#ff5e5e;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4);">
+            <span>>1.2 Miedo🟢</span><span>1.0–1.2</span><span>0.7–1.0 OK</span><span>0.5–0.7</span><span><0.5 Euforia⚠️</span>
+          </div>
+          <div id="pcr-tot-txt" style="margin-top:8px; font-size:11px; color:var(--t3); line-height:1.5; padding:8px 10px; background:var(--s2); border-radius:7px; border:1px solid var(--b1);">
+            Introduce el valor para ver la interpretación.
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. INDEX P/C -->
+      <div class="ind-card" id="ic-pcr-idx">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">🏦</div>
+          <div class="ind-card-name">Index Put/Call Ratio</div>
+          <div class="ind-card-src">CBOE · institucional</div>
+        </div>
+        <div style="padding: 0 12px 4px; font-size:11px; color:var(--t3); line-height:1.4;">
+          Mide opciones sobre índices. Los institucionales usan índices para cubrirse — valores altos indican que los grandes fondos están comprando protección bajista.
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-pcr-idx" type="number" step="0.01" placeholder="ej: 1.12" oninput="evalPCRind('idx')" inputmode="decimal">
+          <div class="ind-badge" id="b-pcr-idx">—</div>
+        </div>
+        <div style="padding: 0 12px 10px;">
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:5px; margin-bottom:6px;">
+            <div style="flex:2; background:#3ddc84;"></div>
+            <div style="flex:1.5; background:#f0a500;"></div>
+            <div style="flex:1; background:#ff5e5e;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4);">
+            <span><1.0 Normal</span><span>1.0–1.5 Cautela</span><span>>1.5 Alerta⚠️</span>
+          </div>
+          <div id="pcr-idx-txt" style="margin-top:8px; font-size:11px; color:var(--t3); line-height:1.5; padding:8px 10px; background:var(--s2); border-radius:7px; border:1px solid var(--b1);">
+            Introduce el valor para ver la interpretación.
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. SPX + SPXW -->
+      <div class="ind-card" id="ic-pcr-spx">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">📡</div>
+          <div class="ind-card-name">SPX + SPXW Put/Call Ratio</div>
+          <div class="ind-card-src">CBOE · S&P500</div>
+        </div>
+        <div style="padding: 0 12px 4px; font-size:11px; color:var(--t3); line-height:1.4;">
+          Opciones sobre el S&P 500 (semanales incluidas). Alta correlación con el Nasdaq — valores elevados indican cobertura institucional activa contra caídas del mercado.
+        </div>
+        <div class="ind-input-row">
+          <input class="ind-input" id="i-pcr-spx" type="number" step="0.01" placeholder="ej: 1.29" oninput="evalPCRind('spx')" inputmode="decimal">
+          <div class="ind-badge" id="b-pcr-spx">—</div>
+        </div>
+        <div style="padding: 0 12px 10px;">
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:5px; margin-bottom:6px;">
+            <div style="flex:2; background:#3ddc84;"></div>
+            <div style="flex:1.5; background:#f0a500;"></div>
+            <div style="flex:1; background:#ff5e5e;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4);">
+            <span><1.2 Normal</span><span>1.2–1.8 Cautela</span><span>>1.8 Alerta⚠️</span>
+          </div>
+          <div id="pcr-spx-txt" style="margin-top:8px; font-size:11px; color:var(--t3); line-height:1.5; padding:8px 10px; background:var(--s2); border-radius:7px; border:1px solid var(--b1);">
+            Introduce el valor para ver la interpretación.
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card" id="ic-macro">
+        <div class="ind-card-top">
+          <div class="ind-card-icon">🗓️</div>
+          <div class="ind-card-name">Evento macro mañana</div>
+          <div class="ind-card-src">d+1</div>
+        </div>
+        <div class="macro-opts">
+          <div class="macro-opt" onclick="selMacro('g',this)">
+            <div class="macro-radio"></div>
+            <div class="macro-opt-label">Sin eventos de alto impacto</div>
+            <div class="macro-opt-tag">Tranquilo</div>
+          </div>
+          <div class="macro-opt" onclick="selMacro('a',this)">
+            <div class="macro-radio"></div>
+            <div class="macro-opt-label">Resultados empresa grande (AAPL, NVDA, MSFT...)</div>
+            <div class="macro-opt-tag">Volatilidad</div>
+          </div>
+          <div class="macro-opt" onclick="selMacro('r',this)">
+            <div class="macro-radio"></div>
+            <div class="macro-opt-label">Fed, IPC, NFP o evento geopolítico</div>
+            <div class="macro-opt-tag">Alta vol.</div>
+          </div>
+        </div>
+        <div class="ind-links-row">
+          <a class="il blue" href="https://es.investing.com/economic-calendar/" target="_blank">🗓️ Calendario Investing ↗</a>
+          <a class="il blue" href="https://www.tradingview.com/economic-calendar/" target="_blank">🗓️ Calendario TradingView ↗</a>
+        </div>
+      </div>
+
+    </div><!-- /indicadores -->
+
+    <!-- NOTA -->
+    <div class="nota-section" style="margin-top:14px; padding: 0 20px;">
+      <div class="section-label">Nota del día (opcional)</div>
+      <textarea class="nota-input" id="nota-dia" placeholder="Contexto adicional, noticias relevantes, intuición..."></textarea>
+    </div>
+
+    <!-- BTN ANALIZAR -->
+    <div class="btn-analizar-section">
+      <button class="btn-analizar" id="btn-analizar" onclick="generarInformeCompleto()" disabled>
+        <div class="sp"></div>
+        <span class="bt">✦ Generar informe completo con IA</span>
+      </button>
+    </div>
+    <div style="font-size:11px; color:var(--t4); text-align:center; padding: 8px 20px 0; line-height:1.5;">
+      Analiza macro + técnico en un único informe · Requiere VIX + NQ + Evento macro
+    </div>
+
+    <div class="spacer"></div>
+  </div><!-- /sc-datos -->
+
+
+  <!-- ══════════════ SCREEN: INFORME ══════════════ -->
+  <div class="screen" id="sc-informe">
+    <div class="page-header">
+      <div class="ph-overline">
+        <div class="pulse-dot"></div>
+        <span id="fecha-informe">—</span>
+      </div>
+      <div class="ph-title">Informe <span>IA</span></div>
+    </div>
+
+    <div class="informe-screen">
+
+      <!-- SEMÁFORO HERO -->
+      <div class="semaforo-hero" id="sem-hero">
+        <div class="sh-row">
+          <div>
+            <div class="sh-label">Decisión para mañana (d+1)</div>
+            <div class="sh-decision" id="sh-decision">Genera el informe</div>
+          </div>
+          <div class="sh-orb" id="sh-orb">⏳</div>
+        </div>
+        <div class="sh-bars">
+          <div class="sh-bar" id="sb1"></div>
+          <div class="sh-bar" id="sb2"></div>
+          <div class="sh-bar" id="sb3"></div>
+          <div class="sh-bar" id="sb4"></div>
+          <div class="sh-bar" id="sb5"></div>
+          <div class="sh-bar" id="sb6"></div>
+        </div>
+      </div>
+
+      <!-- RESUMEN GRID -->
+      <div class="resumen-grid" id="resumen-grid">
+        <!-- dinámico -->
+      </div>
+
+      <!-- RECOMENDACIÓN POSICIÓN -->
+      <div class="pos-rec-card" id="pos-rec-card">
+        <div class="pos-rec-label">Recomendación de posición para mañana</div>
+        <div id="pos-rec-content">
+          <div style="font-size:13px; color:var(--t4);">Genera el informe para ver la recomendación</div>
+        </div>
+      </div>
+
+      <!-- BACKTESTING -->
+      <div class="bt-card" id="bt-card">
+        <div class="bt-header">
+          <span style="font-size:14px">🔬</span>
+          <div class="bt-title">Fiabilidad de tus indicadores</div>
+          <div class="bt-n" id="bt-n">—</div>
+        </div>
+        <div class="bt-rows" id="bt-rows">
+          <div style="padding:16px; font-size:13px; color:var(--t4); text-align:center;">
+            Necesitas al menos 5 registros guardados con resultado para ver el backtesting
+          </div>
+        </div>
+      </div>
+
+      <!-- INFORME IA -->
+      <div class="ia-card">
+        <div class="ia-card-header">
+          <div class="ia-pill">IA</div>
+          <div class="ia-card-title">Análisis completo</div>
+        </div>
+        <div class="ia-body" id="ia-body">
+          <p style="color:var(--t4);">Introduce los datos y pulsa <strong style="color:var(--t2)">"Generar informe con IA"</strong> en la pestaña Datos.</p>
+        </div>
+      </div>
+
+      <button class="btn-guardar" id="btn-guardar" onclick="guardarRegistro()" disabled>
+        💾 Guardar en historial
+      </button>
+
+    </div><!-- /informe-screen -->
+    <div class="spacer"></div>
+  </div><!-- /sc-informe -->
+
+
+  <!-- ══════════════ SCREEN: HISTORIAL ══════════════ -->
+  <div class="screen" id="sc-historial">
+    <div class="page-header">
+      <div class="ph-overline">Tus registros guardados</div>
+      <div class="ph-title">Historial <span>d+1</span></div>
+    </div>
+    <div class="historial-content" id="historial-content">
+      <!-- dinámico -->
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════ SCREEN: TÉCNICO ══════════════ -->
+  <div class="screen" id="sc-tecnico">
+    <div class="page-header">
+      <div class="ph-overline">Análisis técnico manual · NQ1!</div>
+      <div class="ph-title">Análisis <span>Técnico</span></div>
+      <div class="ph-meta">
+        <div class="chip" id="tec-precio-chip">📊 Carga datos primero</div>
+      </div>
+    </div>
+
+    <div class="fetch-section" id="fib-section">
+      <div class="fetch-header">
+        <span style="font-size:14px">🌀</span>
+        <div class="fetch-titulo">Fibonacci — Niveles automáticos NDX</div>
+        <div class="fetch-estado ok" id="fib-estado">Auto</div>
+      </div>
+      <div class="fib-levels" id="fib-levels">
+        <div class="fib-row" style="color:var(--t3); font-size:12px;">Pulsa "Actualizar datos" en la pestaña Datos para calcular automáticamente.</div>
+      </div>
+      <div style="padding:6px 14px 12px; font-size:11px; color:var(--t3);">Calculado desde máximo y mínimo de los últimos 90 días del NDX.</div>
+    </div>
+
+    <div class="tec-section">
+      <div class="tec-cat">1 · Tendencia principal</div>
+
+      <div class="tec-block" id="tb1">
+        <div class="tec-block-hdr"><div class="tec-num">01</div><div class="tec-name">EMA 20 vs EMA 50 — Tendencia corto plazo</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav1">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(1,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">EMA 20 por encima de EMA 50 y separándose (tendencia alcista confirmada)</div><div class="tec-op-tag">Alcista</div></div>
+          <div class="tec-op" onclick="tecPick(1,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">EMAs entrelazadas o convergiendo (mercado lateral / indecisión)</div><div class="tec-op-tag">Lateral</div></div>
+          <div class="tec-op" onclick="tecPick(1,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">EMA 20 por debajo de EMA 50 y separándose (tendencia bajista)</div><div class="tec-op-tag">Bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb2">
+        <div class="tec-block-hdr"><div class="tec-num">02</div><div class="tec-name">EMA 50 vs SMA 200 — Golden/Death Cross</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav2">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(2,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Golden Cross activo: EMA 50 por encima de SMA 200 (bull market estructural)</div><div class="tec-op-tag">Golden Cross</div></div>
+          <div class="tec-op" onclick="tecPick(2,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">EMAs muy próximas, cruce inminente en cualquier dirección</div><div class="tec-op-tag">Cruce inminente</div></div>
+          <div class="tec-op" onclick="tecPick(2,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Death Cross: EMA 50 por debajo de SMA 200 (bear market estructural)</div><div class="tec-op-tag">Death Cross</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb3">
+        <div class="tec-block-hdr"><div class="tec-num">03</div><div class="tec-name">Precio vs SMA 200 — Posición estructural</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav3">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(3,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio claramente por encima de SMA 200 (más del 3%)</div><div class="tec-op-tag">Zona alcista</div></div>
+          <div class="tec-op" onclick="tecPick(3,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio rozando la SMA 200 (±3%) — zona de decisión</div><div class="tec-op-tag">Zona decisión</div></div>
+          <div class="tec-op" onclick="tecPick(3,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio claramente por debajo de SMA 200 (más del 3%)</div><div class="tec-op-tag">Zona bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb4">
+        <div class="tec-block-hdr"><div class="tec-num">04</div><div class="tec-name">Canal de tendencia — Líneas de precio</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(4,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Canal alcista activo: precio rebota en soporte de tendencia o rompe resistencia con volumen</div><div class="tec-op-tag">Canal alcista</div></div>
+          <div class="tec-op" onclick="tecPick(4,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Mercado lateral: precio en rango sin dirección clara</div><div class="tec-op-tag">Lateral</div></div>
+          <div class="tec-op" onclick="tecPick(4,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Canal bajista o rotura de soporte clave de tendencia con volumen</div><div class="tec-op-tag">Canal bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb5">
+        <div class="tec-block-hdr"><div class="tec-num">05</div><div class="tec-name">Fibonacci — Posición del precio</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav5">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(5,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio por encima del 61.8% de retroceso o rebotando desde nivel Fibonacci clave</div><div class="tec-op-tag">Zona alcista</div></div>
+          <div class="tec-op" onclick="tecPick(5,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio entre el 38.2% y 61.8% — zona de indecisión Fibonacci</div><div class="tec-op-tag">Zona media</div></div>
+          <div class="tec-op" onclick="tecPick(5,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio por debajo del 61.8% de retroceso o rompiendo soporte Fibonacci</div><div class="tec-op-tag">Zona bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-cat">2 · Momentum y fuerza</div>
+
+      <div class="tec-block" id="tb6">
+        <div class="tec-block-hdr"><div class="tec-num">06</div><div class="tec-name">RSI (14) — Momentum y sobrecompra/sobreventa</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav6">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(6,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">RSI entre 45–65 con pendiente positiva, o saliendo de sobreventa (&lt;30) hacia arriba</div><div class="tec-op-tag">Momentum +</div></div>
+          <div class="tec-op" onclick="tecPick(6,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">RSI entre 40–70 sin tendencia clara, o en zona 65–70 (vigilancia)</div><div class="tec-op-tag">Neutral</div></div>
+          <div class="tec-op" onclick="tecPick(6,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">RSI &gt;70 en sobrecompra bajando, o cayendo por debajo de 40</div><div class="tec-op-tag">Señal bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb7">
+        <div class="tec-block-hdr"><div class="tec-num">07</div><div class="tec-name">Divergencia RSI — Señal de reversión</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav7">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(7,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Divergencia alcista: precio hace mínimos más bajos pero RSI hace mínimos más altos</div><div class="tec-op-tag">Div. alcista</div></div>
+          <div class="tec-op" onclick="tecPick(7,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Sin divergencia visible, precio y RSI en línea</div><div class="tec-op-tag">Sin divergencia</div></div>
+          <div class="tec-op" onclick="tecPick(7,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Divergencia bajista: precio hace máximos más altos pero RSI hace máximos más bajos</div><div class="tec-op-tag">Div. bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb8">
+        <div class="tec-block-hdr"><div class="tec-num">08</div><div class="tec-name">MACD (12,26,9) — Cruce y histograma</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-auto-val" id="tav8">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(8,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">MACD cruza al alza su señal, histograma positivo y creciendo</div><div class="tec-op-tag">Cruce alcista</div></div>
+          <div class="tec-op" onclick="tecPick(8,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">MACD y señal próximos, histograma reduciendo tamaño</div><div class="tec-op-tag">Indecisión</div></div>
+          <div class="tec-op" onclick="tecPick(8,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">MACD cruza a la baja su señal, histograma negativo y ampliándose</div><div class="tec-op-tag">Cruce bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-cat">3 · Volumen y amplitud</div>
+
+      <div class="tec-block" id="tb9">
+        <div class="tec-block-hdr"><div class="tec-num">09</div><div class="tec-name">Volumen — Confirmación del movimiento</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(9,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Subida con volumen por encima de la media 20 sesiones (movimiento confirmado)</div><div class="tec-op-tag">Volumen alcista</div></div>
+          <div class="tec-op" onclick="tecPick(9,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Volumen en la media, sin confirmación clara</div><div class="tec-op-tag">Neutro</div></div>
+          <div class="tec-op" onclick="tecPick(9,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Bajada con volumen alto, o subida con volumen muy bajo (rally sin convicción)</div><div class="tec-op-tag">Señal bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb10">
+        <div class="tec-block-hdr"><div class="tec-num">10</div><div class="tec-name">VXN — Volatilidad implícita Nasdaq</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=VXN" target="_blank">VXN ↗</a></div>
+        <div class="tec-auto-val" id="tav10">—</div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(10,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">VXN por debajo de 20, estable o bajando</div><div class="tec-op-tag">Calma</div></div>
+          <div class="tec-op" onclick="tecPick(10,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">VXN entre 20–30 o subiendo más de 3% en el día</div><div class="tec-op-tag">Vigilar</div></div>
+          <div class="tec-op" onclick="tecPick(10,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">VXN superior a 30 o subiendo varios días consecutivos</div><div class="tec-op-tag">Alerta</div></div>
+        </div>
+      </div>
+
+      <div class="tec-cat">4 · Patrón de vela y soporte/resistencia</div>
+
+      <div class="tec-block" id="tb11">
+        <div class="tec-block-hdr"><div class="tec-num">11</div><div class="tec-name">Patrón de vela japonesa — Señal de reversión</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">1D ↗</a></div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(11,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Patrón alcista en soporte: Hammer, Morning Star, Bullish Engulfing, Three Inside Up</div><div class="tec-op-tag">Reversión alcista</div></div>
+          <div class="tec-op" onclick="tecPick(11,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Sin patrón relevante, vela normal o Doji en zona media</div><div class="tec-op-tag">Sin patrón</div></div>
+          <div class="tec-op" onclick="tecPick(11,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Patrón bajista en resistencia: Shooting Star, Evening Star, Bearish Engulfing</div><div class="tec-op-tag">Reversión bajista</div></div>
+        </div>
+      </div>
+
+      <div class="tec-block" id="tb12">
+        <div class="tec-block-hdr"><div class="tec-num">12</div><div class="tec-name">Soporte / Resistencia clave</div><a class="tec-src" href="https://www.tradingview.com/chart/?symbol=CME_MINI:NQ1!" target="_blank">NQ1! ↗</a></div>
+        <div class="tec-opts">
+          <div class="tec-op" onclick="tecPick(12,'g',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio acaba de rebotar en soporte clave o superar resistencia con volumen confirmado</div><div class="tec-op-tag">Ruptura/rebote</div></div>
+          <div class="tec-op" onclick="tecPick(12,'a',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio en zona media, sin tocar nivel clave relevante</div><div class="tec-op-tag">Sin señal</div></div>
+          <div class="tec-op" onclick="tecPick(12,'r',this)"><div class="tec-radio"></div><div class="tec-op-lbl">Precio rechazado en resistencia o ha perforado soporte importante</div><div class="tec-op-tag">Rechazo/rotura</div></div>
+        </div>
+      </div>
+
+    </div><!-- /tec-section -->
+
+    <!-- VEREDICTO TÉCNICO -->
+    <div class="tec-veredicto" id="tec-veredicto">
+      <div class="tv-row">
+        <div>
+          <div class="tv-label">Señal técnica combinada d+1</div>
+          <div class="tv-dec" id="tv-dec">Completa los indicadores</div>
+        </div>
+        <div class="tv-score" id="tv-score">—</div>
+      </div>
+      <div class="tv-txt" id="tv-txt">Selecciona el estado de cada indicador técnico para obtener la señal combinada.</div>
+      <div class="tv-bars" id="tv-bars"></div>
+    </div>
+
+    <!-- BTN IA TÉCNICA -->
+    <button class="btn-tec-ia" id="btn-tec-ia" onclick="generarInformeTecnico()" disabled>
+      <div class="sp"></div>
+      <span>🔬 Generar informe técnico con IA</span>
+    </button>
+
+    <!-- INFORME IA TÉCNICO -->
+    <div class="ia-card" style="margin: 12px 20px 0;">
+      <div class="ia-card-header">
+        <div class="ia-pill" style="background:rgba(6,182,212,0.15); border-color:rgba(6,182,212,0.3); color:#06b6d4;">IA</div>
+        <div class="ia-card-title">Análisis técnico completo</div>
+      </div>
+      <div class="ia-body" id="tec-ia-body">
+        <p style="color:var(--t4);">Completa los 12 indicadores y pulsa el botón para obtener el análisis técnico.</p>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px 0;">
+      <button class="btn-guardar" id="btn-tec-guardar" onclick="guardarTecnico()" disabled>
+        💾 Guardar análisis técnico
+      </button>
+    </div>
+
+    <!-- GUÍA VELAS -->
+    <div style="padding: 14px 20px 4px;">
+      <div class="section-label">Guía de patrones de velas</div>
+    </div>
+
+    <div class="velas-ref">
+      <div class="vela-item"><div class="vi-svg"><svg width="40" height="52" viewBox="0 0 40 52"><line x1="20" y1="5" x2="20" y2="12" stroke="#2ecc8a" stroke-width="1.5"/><rect x="14" y="12" width="12" height="8" fill="#2ecc8a" rx="1"/><line x1="20" y1="20" x2="20" y2="40" stroke="#2ecc8a" stroke-width="1.5"/></svg></div><div class="vi-info"><div class="vi-nombre">Hammer</div><div class="vi-desc">Mecha inferior larga en soporte. Rechazo del precio bajo. Señal de suelo fiable.</div></div><div class="vi-tipo vit-u">ALCISTA</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="60" height="52" viewBox="0 0 60 52"><line x1="20" y1="8" x2="20" y2="14" stroke="#ff5e5e" stroke-width="1.5"/><rect x="14" y="14" width="12" height="16" fill="#ff5e5e" rx="1"/><line x1="20" y1="30" x2="20" y2="38" stroke="#ff5e5e" stroke-width="1.5"/><line x1="40" y1="5" x2="40" y2="12" stroke="#2ecc8a" stroke-width="1.5"/><rect x="32" y="12" width="16" height="26" fill="#2ecc8a" rx="1"/><line x1="40" y1="38" x2="40" y2="44" stroke="#2ecc8a" stroke-width="1.5"/></svg></div><div class="vi-info"><div class="vi-nombre">Bullish Engulfing</div><div class="vi-desc">Vela verde que engloba la roja anterior. Alta señal alcista en zona de soporte.</div></div><div class="vi-tipo vit-u">ALCISTA</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="40" height="52" viewBox="0 0 40 52"><line x1="20" y1="5" x2="20" y2="28" stroke="#ff5e5e" stroke-width="1.5"/><rect x="14" y="28" width="12" height="9" fill="#ff5e5e" rx="1"/><line x1="20" y1="37" x2="20" y2="42" stroke="#ff5e5e" stroke-width="1.5"/></svg></div><div class="vi-info"><div class="vi-nombre">Shooting Star</div><div class="vi-desc">Mecha superior larga en resistencia. Rechazo en máximos. Señal de techo.</div></div><div class="vi-tipo vit-b">BAJISTA</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="60" height="52" viewBox="0 0 60 52"><line x1="20" y1="5" x2="20" y2="12" stroke="#2ecc8a" stroke-width="1.5"/><rect x="14" y="12" width="12" height="16" fill="#2ecc8a" rx="1"/><line x1="20" y1="28" x2="20" y2="36" stroke="#2ecc8a" stroke-width="1.5"/><line x1="40" y1="2" x2="40" y2="10" stroke="#ff5e5e" stroke-width="1.5"/><rect x="32" y="10" width="16" height="26" fill="#ff5e5e" rx="1"/><line x1="40" y1="36" x2="40" y2="46" stroke="#ff5e5e" stroke-width="1.5"/></svg></div><div class="vi-info"><div class="vi-nombre">Bearish Engulfing</div><div class="vi-desc">Vela roja que engloba la verde anterior. Señal bajista en resistencia.</div></div><div class="vi-tipo vit-b">BAJISTA</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="40" height="52" viewBox="0 0 40 52"><line x1="20" y1="22" x2="20" y2="26" stroke="#94a3b8" stroke-width="1.5"/><line x1="10" y1="26" x2="30" y2="26" stroke="#94a3b8" stroke-width="2"/><line x1="20" y1="26" x2="20" y2="44" stroke="#94a3b8" stroke-width="1.5"/></svg></div><div class="vi-info"><div class="vi-nombre">Doji</div><div class="vi-desc">Apertura = cierre. Máxima indecisión. Relevante en zonas clave.</div></div><div class="vi-tipo vit-n">INDECISIÓN</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="70" height="52" viewBox="0 0 70 52"><rect x="9" y="28" width="12" height="16" fill="#2ecc8a" rx="1"/><rect x="27" y="18" width="12" height="18" fill="#2ecc8a" rx="1"/><rect x="45" y="8" width="12" height="20" fill="#2ecc8a" rx="1"/></svg></div><div class="vi-info"><div class="vi-nombre">Three White Soldiers</div><div class="vi-desc">3 velas verdes consecutivas. Tendencia alcista fuerte y sostenida.</div></div><div class="vi-tipo vit-u">ALCISTA</div></div>
+      <div class="vela-item"><div class="vi-svg"><svg width="70" height="52" viewBox="0 0 70 52"><rect x="9" y="8" width="12" height="16" fill="#ff5e5e" rx="1"/><rect x="27" y="18" width="12" height="16" fill="#ff5e5e" rx="1"/><rect x="45" y="28" width="12" height="16" fill="#ff5e5e" rx="1"/></svg></div><div class="vi-info"><div class="vi-nombre">Three Black Crows</div><div class="vi-desc">3 velas rojas consecutivas. Señal bajista fuerte y sostenida.</div></div><div class="vi-tipo vit-b">BAJISTA</div></div>
+    </div>
+
+    <div class="spacer"></div>
+  </div><!-- /sc-tecnico -->
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <button class="tab active" id="tab-datos" onclick="goTab('datos')">
+      <div class="tab-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Datos
+    </button>
+    <button class="tab" id="tab-tecnico" onclick="goTab('tecnico')">
+      <div class="tab-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Técnico
+    </button>
+    <button class="tab" id="tab-informe" onclick="goTab('informe')">
+      <div class="tab-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Informe
+    </button>
+    <button class="tab" id="tab-historial" onclick="goTab('historial')">
+      <div class="tab-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historial
+    </button>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modal-title">—</div>
+      <div class="modal-fecha" id="modal-fecha">—</div>
+      <div class="modal-body" id="modal-body">—</div>
+      <button class="modal-close" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL INSTRUCCIONES PROXY -->
+  <div class="modal-overlay" id="modal-proxy" onclick="cerrarProxy(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">⚙️ Configurar datos en tiempo real</div>
+      <div class="modal-fecha">Una sola vez · Gratis · 10 minutos</div>
+      <div class="modal-body">
+        <p>Para que la app descargue automáticamente VIX, NQ, US10Y y DXY necesitas desplegar un pequeño proxy gratuito. Estos son los pasos:</p>
+        <p><strong>1.</strong> Ve a <a href="https://vercel.com" target="_blank" style="color:var(--ac)">vercel.com</a> y crea una cuenta gratuita con tu cuenta de GitHub.</p>
+        <p><strong>2.</strong> Ve a <a href="https://github.com/new" target="_blank" style="color:var(--ac)">github.com/new</a> y crea un repositorio llamado <strong>nq-proxy</strong>.</p>
+        <p><strong>3.</strong> Dentro del repo, crea un archivo llamado <code style="background:var(--s3); padding:2px 6px; border-radius:4px;">api/datos.js</code> y pega el código del archivo <strong>proxy/api/datos.js</strong> que encontrarás junto a este index.html.</p>
+        <p><strong>4.</strong> En Vercel, importa ese repositorio y despliégalo. Te dará una URL tipo <strong>tu-proyecto.vercel.app</strong>.</p>
+        <p><strong>5.</strong> Vuelve aquí, abre la app, ve a Ajustes y pega esa URL en el campo "URL del proxy".</p>
+        <p style="color:var(--t3); font-size:12px;">¿Tienes dudas? Pregúntame en Claude y te guío paso a paso.</p>
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--b2);">
+          <div style="font-size:12px; color:var(--t2); margin-bottom:8px; font-weight:600;">Pega aquí tu URL de Vercel:</div>
+          <div style="display:flex; gap:8px;">
+            <input id="inp-proxy-url" type="url"
+              placeholder="https://nq-proxy-xxx.vercel.app"
+              value=""
+              style="flex:1; background:var(--s2); border:1px solid var(--b2); border-radius:8px; padding:10px 12px; color:var(--t1); font-family:'JetBrains Mono',monospace; font-size:12px; outline:none;"
+            >
+            <button onclick="guardarProxyUrl()"
+              style="padding:10px 16px; background:var(--ac2); border:1px solid var(--acb); border-radius:8px; color:var(--ac); font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">
+              Guardar
+            </button>
+          </div>
+          <div id="proxy-guardado" style="font-size:11px; color:var(--gr); margin-top:6px; display:none;">✓ URL guardada correctamente</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="cerrarProxy()">Cerrar</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════
+const S = {
+  modo: null,           // 22 | 7
+  posNasdaq: 50,
+  posLiquidez: 50,
+  vix: null, vixT: null,
+  nq: null,  nqT: null,
+  us10: null, us10T: null,
+  dxy: null,  dxyT: null,
+  fng: null,
+  macro: null,
+  nota: '',
+  nivel: null,
+  decision: null,
+  informeTexto: null,
+  posRecNasdaq: null,
+  posRecLiquidez: null,
+  proxyUrl: localStorage.getItem('nqr_proxy') || ''
+};
+
+// Reglas de evaluación
+const REGLAS = {
+  vix:  { g: v => v >= 13 && v < 22, a: v => (v < 13) || (v >= 22 && v <= 28), badge: v => v < 13 ? 'Complacencia ⚠️' : v < 22 ? 'Normal' : v <= 28 ? 'Vigilar' : 'Alerta' },
+  nq:   { g: v => v > -0.5,    a: v => v >= -1 && v <= -0.5, badge: v => v > -0.5 ? 'Normal' : v >= -1 ? 'Débil' : 'Bajista' },
+  us10: { g: v => v < 4.2,     a: v => v >= 4.2 && v <= 4.7, badge: v => v < 4.2 ? 'Bajo' : v <= 4.7 ? 'Moderado' : 'Alto' },
+  dxy:  { g: v => v < 102,     a: v => v >= 102 && v <= 106, badge: v => v < 102 ? 'Débil' : v <= 106 ? 'Fuerte' : 'Muy fuerte' },
+  fng:  { g: v => v >= 35 && v <= 72, a: v => (v >= 20 && v < 35) || (v > 72 && v <= 82), badge: v => v < 20 ? 'Miedo ext.' : v < 35 ? 'Miedo' : v <= 72 ? 'Neutro/OK' : v <= 82 ? 'Codicia' : 'Euforia ⚠️' },
+  pcr:  { g: v => v >= 0.5 && v <= 0.8, a: v => (v >= 0.4 && v < 0.5) || (v > 0.8 && v <= 1.0), badge: v => v < 0.4 ? 'Euforia ⚠️' : v < 0.5 ? 'Optimismo' : v <= 0.8 ? 'Normal' : v <= 1.0 ? 'Cautela' : 'Miedo 🟢' }
+};
+
+function getNivel(ind, v) {
+  if (v === null) return null;
+  const r = REGLAS[ind];
+  if (!r) return null;
+  if (r.g(v)) return 'g';
+  if (r.a(v)) return 'a';
+  return 'r';
+}
+
+// ═══════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════
+setTimeout(() => {
+  const splash = document.getElementById('splash');
+  splash.classList.add('out');
+  setTimeout(() => {
+    splash.style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    init();
+  }, 600);
+}, 1500);
+
+function init() {
+  actualizarFecha();
+  autoDetectarModo();
+  comprobarAlertaDia();
+  comprobarResultadoPendiente();
+  calcularBacktesting();
+  renderHistorial();
+  // Cargar posición guardada
+  const pos = JSON.parse(localStorage.getItem('nqr_pos') || '{"n":50,"l":50}');
+  document.getElementById('sl-nasdaq').value = pos.n;
+  document.getElementById('sl-liquidez').value = pos.l;
+  S.posNasdaq = pos.n; S.posLiquidez = pos.l;
+  actualizarPosDisplay();
+}
+
+function comprobarResultadoPendiente() {
+  const hist = getHistorial();
+  if (hist.length === 0) return;
+  const ultimo = hist[0];
+  if (ultimo.resultadoReal !== null && ultimo.resultadoReal !== undefined) return;
+
+  // Si el último registro es de ayer o antes y no tiene resultado real
+  const hoy = new Date().toISOString().slice(0,10);
+  if (ultimo.fecha >= hoy) return; // es de hoy, aún no ha pasado el d+1
+
+  const alerta = document.getElementById('alerta-dia');
+  const textoActual = alerta.textContent;
+  const aviso = '📊 Tienes el resultado de ayer pendiente de introducir en el Historial para mejorar el backtesting.';
+  alerta.textContent = textoActual ? textoActual + ' · ' + aviso : aviso;
+  alerta.classList.add('vis');
+}
+
+// ═══════════════════════════════════════
+// FECHA Y HORA
+// ═══════════════════════════════════════
+function actualizarFecha() {
+  const hoy = new Date();
+  const str = hoy.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('fecha-top').textContent = str;
+  document.getElementById('fecha-informe').textContent = str;
+
+  // Estado mercado NY
+  const hora = hoy.getUTCHours();
+  const chipM = document.getElementById('chip-mercado');
+  if (hora >= 13 && hora < 21) {
+    chipM.textContent = '🟢 Mercado NY abierto';
+    chipM.className = 'chip mode-7';
+  } else if (hora >= 21 || hora < 1) {
+    chipM.textContent = '🌙 Cierre NY reciente';
+    chipM.className = 'chip mode-22';
+  } else {
+    chipM.textContent = '⏸ Mercado cerrado';
+    chipM.className = 'chip';
+  }
+}
+
+function autoDetectarModo() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 10) setModo(7);
+  else setModo(22);
+}
+
+function setModo(m) {
+  S.modo = m;
+  document.getElementById('modo-22').className = 'modo-btn' + (m === 22 ? ' active-22' : '');
+  document.getElementById('modo-7').className  = 'modo-btn' + (m === 7  ? ' active-7'  : '');
+  const chip = document.getElementById('chip-modo');
+  chip.textContent = m === 22 ? '🌙 Revisión 22h · Cierre NY' : '🌅 Revisión 7h · Premarket';
+  chip.className = 'chip ' + (m === 22 ? 'mode-22' : 'mode-7');
+}
+
+// ═══════════════════════════════════════
+// ALERTAS DÍA ESPECIAL
+// ═══════════════════════════════════════
+function comprobarAlertaDia() {
+  const hoy = new Date();
+  const dia = hoy.getDay();
+  const d = hoy.getDate();
+  const elDiv = document.getElementById('alerta-dia');
+  let msg = '';
+
+  if (dia === 1) msg = '⚡ Lunes — apertura históricamente más volátil. Futuros NQ son clave hoy.';
+  else if (dia === 5) msg = '📌 Viernes — posible cierre de posiciones institucionales. Vigilar presión bajista de tarde.';
+  else if (dia === 6 || dia === 0) msg = '😴 Fin de semana — mercado cerrado. Revisa futuros NQ para el lunes.';
+  else if (dia === 5 && d >= 15 && d <= 21) msg = '⚠️ Tercer viernes — expiración masiva de opciones. Volatilidad intradiaria elevada.';
+
+  if (msg) { elDiv.textContent = msg; elDiv.classList.add('vis'); }
+}
+
+// ═══════════════════════════════════════
+// POSICIÓN
+// ═══════════════════════════════════════
+function actualizarPos() {
+  const v = parseInt(document.getElementById('sl-nasdaq').value);
+  S.posNasdaq = v;
+  S.posLiquidez = 100 - v;
+  document.getElementById('sl-liquidez').value = 100 - v;
+  actualizarPosDisplay();
+  guardarPos();
+}
+function actualizarPosLiq() {
+  const v = parseInt(document.getElementById('sl-liquidez').value);
+  S.posLiquidez = v;
+  S.posNasdaq = 100 - v;
+  document.getElementById('sl-nasdaq').value = 100 - v;
+  actualizarPosDisplay();
+  guardarPos();
+}
+function actualizarPosDisplay() {
+  document.getElementById('val-nasdaq').textContent = S.posNasdaq + '%';
+  document.getElementById('val-liquidez').textContent = S.posLiquidez + '%';
+  document.getElementById('pos-total').textContent = `Total: ${S.posNasdaq + S.posLiquidez}%`;
+}
+function guardarPos() {
+  localStorage.setItem('nqr_pos', JSON.stringify({ n: S.posNasdaq, l: S.posLiquidez }));
+}
+
+// ═══════════════════════════════════════
+// FETCH DATOS TIEMPO REAL
+// ═══════════════════════════════════════
+async function fetchDatos() {
+  const btn = document.getElementById('btn-fetch');
+  const estado = document.getElementById('fetch-estado');
+  btn.classList.add('loading');
+  estado.textContent = 'Cargando...';
+  estado.className = 'fetch-estado loading';
+
+  const proxyUrl = S.proxyUrl;
+  if (!proxyUrl) {
+    // Intentar Yahoo Finance CORS directo (funciona a veces en móvil)
+    await fetchYahooDirecto();
+    btn.classList.remove('loading');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${proxyUrl}/api/datos`);
+    const data = await resp.json();
+    if (data.vix !== undefined) aplicarDatosAuto(data);
+    estado.textContent = 'Actualizado ✓';
+    estado.className = 'fetch-estado ok';
+    // Rellenar backtesting automáticamente
+    rellenarResultadosAuto();
+  } catch (e) {
+    estado.textContent = 'Error proxy';
+    estado.className = 'fetch-estado err';
+    await fetchYahooDirecto();
+  }
+
+  btn.classList.remove('loading');
+}
+
+async function fetchYahooDirecto() {
+  const estado = document.getElementById('fetch-estado');
+  // Yahoo Finance v8 — puede fallar por CORS en algunos browsers
+  const symbols = { vix: '^VIX', vxn: '^VXN', nq: 'NQ=F', us10: '^TNX', dxy: 'DX-Y.NYB' };
+  let ok = false;
+  const results = {};
+
+  for (const [key, sym] of Object.entries(symbols)) {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+      const r = await fetch(url);
+      const d = await r.json();
+      const q = d?.chart?.result?.[0];
+      if (q) {
+        const closes = q.indicators?.quote?.[0]?.close;
+        const last = closes?.[closes.length-1];
+        const prev = closes?.[closes.length-2];
+        if (last) {
+          results[key] = { v: last.toFixed(2), chg: prev ? ((last-prev)/prev*100).toFixed(2) : null };
+          ok = true;
+        }
+      }
+    } catch {}
+  }
+
+  if (ok) {
+    aplicarDatosAuto(results);
+    estado.textContent = 'Parcial ✓';
+    estado.className = 'fetch-estado ok';
+  } else {
+    estado.textContent = 'Sin proxy';
+    estado.className = 'fetch-estado err';
+  }
+}
+
+function aplicarDatosAuto(data) {
+  const campos = {
+    vix:  { fd:'fd-vix',  fc:'fc-vix',  inp:'i-vix',  key:'vix'  },
+    vxn:  { fd:'fd-vxn',  fc:'fc-vxn',  inp:null,     key:null   },
+    nq:   { fd:'fd-nq',   fc:'fc-nq',   inp:'i-nq',   key:'nq', isChg: true },
+    us10: { fd:'fd-us10', fc:'fc-us10', inp:'i-us10', key:'us10' },
+    dxy:  { fd:'fd-dxy',  fc:'fc-dxy',  inp:'i-dxy',  key:'dxy'  },
+    fng:  { fd:'fd-fng',  fc:'fc-fng',  inp:'i-fng',  key:'fng'  },
+  };
+
+  for (const [k, cfg] of Object.entries(campos)) {
+    const d = data[k];
+    if (!d) continue;
+    const val = typeof d === 'object' ? d.v : d;
+    const chg = typeof d === 'object' ? d.chg : null;
+
+    document.getElementById(cfg.fd).textContent = val !== null ? val : '—';
+    if (chg !== null) {
+      const el = document.getElementById(cfg.fc);
+      const c = parseFloat(chg);
+      el.textContent = (c >= 0 ? '+' : '') + c + '%';
+      el.className = 'fd-cambio ' + (c > 0.1 ? 'up' : c < -0.1 ? 'dn' : 'flat');
+    }
+
+    if (cfg.inp && val !== null) {
+      const v = cfg.isChg ? parseFloat(chg) : parseFloat(val);
+      if (!isNaN(v)) {
+        document.getElementById(cfg.inp).value = v;
+        S[cfg.key] = v;
+        evalInd(cfg.key);
+      }
+    }
+  }
+
+  // Indicadores técnicos
+  if (data.tecnicos) {
+    const t = data.tecnicos;
+    S.tecnicos = t;
+    const sec = document.getElementById('tecnicos-section');
+    if (sec) sec.style.display = 'block';
+
+    // RSI
+    if (t.rsi) {
+      document.getElementById('td-rsi').textContent = t.rsi.valor;
+      const rsiEl = document.getElementById('ts-rsi');
+      const alertaMap = {
+        'extrema':     '🔴 RSI extremo >85',
+        'alta':        '⚠️ >80 · ' + t.rsi.diasRsiAlto + 'd seguidos',
+        'divergencia': '⚠️ Divergencia bajista',
+        'moderada':    '⚠️ Sobrecompra bajando',
+        'ninguna':     t.rsi.estado === 'sobrecompra'
+                         ? (t.rsi.tendencia === 'subiendo' ? '↑ Fuerte · sin señal' : '→ Sobrecompra')
+                         : t.rsi.estado === 'sobreventa' ? '🟢 Sobreventa' : '→ Neutro'
+      };
+      rsiEl.textContent = alertaMap[t.rsi.alertaRsi] || '—';
+      const esAlerta = ['extrema','alta','divergencia','moderada'].includes(t.rsi.alertaRsi);
+      rsiEl.className = 'fd-cambio ' + (t.rsi.alertaRsi === 'extrema' ? 'dn' : esAlerta ? 'dn' : t.rsi.estado === 'sobreventa' ? 'up' : 'flat');
+    }
+
+    // EMA 20
+    if (t.ema20) {
+      document.getElementById('td-ema20').textContent = t.ema20.valor.toLocaleString();
+      const e20El = document.getElementById('ts-ema20');
+      e20El.textContent = t.ema20.precioVsEma === 'por_encima' ? '↑ Precio encima' : '↓ Precio debajo';
+      e20El.className = 'fd-cambio ' + (t.ema20.precioVsEma === 'por_encima' ? 'up' : 'dn');
+    }
+
+    // EMA 50
+    if (t.ema50) {
+      document.getElementById('td-ema50').textContent = t.ema50.valor.toLocaleString();
+      const e50El = document.getElementById('ts-ema50');
+      e50El.textContent = t.ema50.precioVsEma === 'por_encima' ? '↑ Precio encima' : '↓ Precio debajo';
+      e50El.className = 'fd-cambio ' + (t.ema50.precioVsEma === 'por_encima' ? 'up' : 'dn');
+    }
+
+    // SMA 200
+    if (t.sma200) {
+      document.getElementById('td-sma200').textContent = t.sma200.valor.toLocaleString();
+      const s200El = document.getElementById('ts-sma200');
+      s200El.textContent = (t.sma200.distanciaPct >= 0 ? '+' : '') + t.sma200.distanciaPct + '% vs SMA200';
+      s200El.className = 'fd-cambio ' + (t.sma200.distanciaPct >= 0 ? 'up' : 'dn');
+    }
+    // SMA 20 y SMA 50 — distancia para timing corto plazo
+    if (t.sma20) {
+      const d20 = t.sma20.distanciaPct;
+      const ts20 = document.getElementById('ts-ema20');
+      if (ts20) {
+        ts20.textContent = (d20 >= 0 ? '+' : '') + d20 + '% vs SMA20';
+        ts20.className = 'fd-cambio ' + (Math.abs(d20) > 3 ? 'dn' : d20 >= 0 ? 'up' : 'dn');
+      }
+    }
+    if (t.sma50) {
+      const d50 = t.sma50.distanciaPct;
+      const ts50 = document.getElementById('ts-ema50');
+      if (ts50) {
+        ts50.textContent = (d50 >= 0 ? '+' : '') + d50 + '% vs SMA50';
+        ts50.className = 'fd-cambio ' + (Math.abs(d50) > 5 ? 'dn' : d50 >= 0 ? 'up' : 'dn');
+      }
+    }
+
+    // MACD
+    if (t.macd) {
+      document.getElementById('td-macd').textContent = t.macd.macd;
+      const macdEl = document.getElementById('ts-macd');
+      const hist = t.macd.histogram;
+      macdEl.textContent = hist !== null ? (hist >= 0 ? '↑ Alcista' : '↓ Bajista') : '—';
+      macdEl.className = 'fd-cambio ' + (hist !== null ? (hist >= 0 ? 'up' : 'dn') : 'flat');
+    }
+
+    // ATR
+    if (t.atr) {
+      document.getElementById('td-atr').textContent = t.atr.valor;
+      document.getElementById('ts-atr').textContent = 'Volatilidad real';
+      document.getElementById('ts-atr').className = 'fd-cambio flat';
+    }
+
+    // Cruce EMAs y AccDis
+    const cruceEl = document.getElementById('ts-cruce-emas');
+    if (t.ema50?.cruceEmas) {
+      cruceEl.textContent = 'EMAs: ' + (t.ema50.cruceEmas === 'alcista' ? '✅ EMA20 > EMA50 (alcista)' : '⚠️ EMA20 < EMA50 (bajista)');
+      cruceEl.style.color = t.ema50.cruceEmas === 'alcista' ? 'var(--gr)' : 'var(--rd)';
+    }
+    const accDisEl = document.getElementById('ts-accdis');
+    if (t.accdis) {
+      accDisEl.textContent = t.accdis.trend === 'acumulacion' ? '📈 Acumulación institucional' : '📉 Distribución institucional';
+      accDisEl.style.color = t.accdis.trend === 'acumulacion' ? 'var(--gr)' : 'var(--rd)';
+    }
+  }
+
+  // Actualizar pantalla técnica con datos automáticos
+  if (data.tecnicos) {
+    aplicarAutoTecnico(data.tecnicos, data.tecnicos.precio);
+  }
+  if (data.max90 && data.min90 && data.tecnicos?.precio) {
+    calcularFibonacci(data.tecnicos.precio, data.max90, data.min90);
+  }
+
+  comprobarAnalizar();
+}
+
+// ═══════════════════════════════════════
+// EVALUACIÓN INDICADORES
+// ═══════════════════════════════════════
+// Configuración de los 4 Put/Call Ratios
+const PCR_CONFIG = {
+  eq: {
+    umbrales: [
+      { max: 0.4,  nivel: 'r', badge: 'Euforia ⚠️',  txt: '<strong style="color:var(--rd)">⚠️ Euforia extrema (&lt;0.4)</strong> — Demasiadas calls. El mercado está sobreconfiado. Señal contraria bajista fuerte.' },
+      { max: 0.5,  nivel: 'a', badge: 'Optimismo',    txt: '<strong style="color:var(--am)">⚡ Optimismo elevado (0.4–0.5)</strong> — Más calls que puts. Precaución si coincide con RSI alto o VXN subiendo.' },
+      { max: 0.8,  nivel: 'g', badge: 'Normal ✅',    txt: '<strong style="color:var(--gr)">✅ Zona normal (0.5–0.8)</strong> — Equilibrio saludable. Sin extremos de sentimiento. Contexto favorable para mantener posición.' },
+      { max: 1.0,  nivel: 'a', badge: 'Cautela',      txt: '<strong style="color:var(--am)">⚠️ Cautela (0.8–1.0)</strong> — Aumentan coberturas bajistas. Los inversores empiezan a protegerse. Señal de incertidumbre.' },
+      { max: 99,   nivel: 'g', badge: 'Miedo 🟢',     txt: '<strong style="color:var(--gr)">🟢 Miedo / Oportunidad (&gt;1.0)</strong> — Más puts que calls. Miedo generalizado. Históricamente señal contraria alcista.' }
+    ]
+  },
+  tot: {
+    umbrales: [
+      { max: 0.5,  nivel: 'r', badge: 'Euforia ⚠️',  txt: '<strong style="color:var(--rd)">⚠️ Euforia extrema (&lt;0.5)</strong> — Ratio global muy bajo. Complacencia generalizada en todo el mercado.' },
+      { max: 0.7,  nivel: 'a', badge: 'Optimismo',    txt: '<strong style="color:var(--am)">⚡ Optimismo (0.5–0.7)</strong> — Más alcistas que bajistas en el mercado global. Vigilar si persiste.' },
+      { max: 1.0,  nivel: 'g', badge: 'Normal ✅',    txt: '<strong style="color:var(--gr)">✅ Zona normal (0.7–1.0)</strong> — Equilibrio entre alcistas y bajistas. Mercado sin extremos. Señal neutral.' },
+      { max: 1.2,  nivel: 'a', badge: 'Cautela',      txt: '<strong style="color:var(--am)">⚠️ Cautela (1.0–1.2)</strong> — Más puts que calls en el global. Los inversores se están cubriendo.' },
+      { max: 99,   nivel: 'g', badge: 'Miedo 🟢',     txt: '<strong style="color:var(--gr)">🟢 Miedo generalizado (&gt;1.2)</strong> — Ratio global alto. Históricamente precede rebotes técnicos.' }
+    ]
+  },
+  idx: {
+    umbrales: [
+      { max: 1.0,  nivel: 'g', badge: 'Normal ✅',    txt: '<strong style="color:var(--gr)">✅ Normal (&lt;1.0)</strong> — Los institucionales no están comprando protección excesiva. Señal positiva.' },
+      { max: 1.5,  nivel: 'a', badge: 'Cautela inst.',txt: '<strong style="color:var(--am)">⚠️ Cautela institucional (1.0–1.5)</strong> — Los grandes fondos están aumentando coberturas. Señal de precaución.' },
+      { max: 99,   nivel: 'r', badge: 'Alerta inst.⚠️',txt: '<strong style="color:var(--rd)">🔴 Alerta institucional (&gt;1.5)</strong> — Cobertura institucional masiva. Los grandes fondos anticipan caídas. Señal bajista importante.' }
+    ]
+  },
+  spx: {
+    umbrales: [
+      { max: 1.2,  nivel: 'g', badge: 'Normal ✅',    txt: '<strong style="color:var(--gr)">✅ Normal (&lt;1.2)</strong> — Cobertura sobre S&P500 en niveles habituales. Sin señales de alarma institucional.' },
+      { max: 1.8,  nivel: 'a', badge: 'Cautela',      txt: '<strong style="color:var(--am)">⚠️ Cautela (1.2–1.8)</strong> — Los institucionales están comprando más protección sobre el S&P500. Correlación directa con el Nasdaq.' },
+      { max: 99,   nivel: 'r', badge: 'Alerta ⚠️',    txt: '<strong style="color:var(--rd)">🔴 Alerta (&gt;1.8)</strong> — Cobertura institucional muy elevada sobre el S&P500. Alta probabilidad de volatilidad próxima en el Nasdaq.' }
+    ]
+  }
+};
+
+function evalPCRind(tipo) {
+  const v = parseFloat(document.getElementById('i-pcr-' + tipo).value);
+  S['pcr_' + tipo] = isNaN(v) ? null : v;
+
+  if (isNaN(v)) {
+    document.getElementById('ic-pcr-' + tipo).className = 'ind-card';
+    document.getElementById('b-pcr-' + tipo).textContent = '—';
+    return;
+  }
+
+  const cfg = PCR_CONFIG[tipo];
+  const match = cfg.umbrales.find(u => v < u.max) || cfg.umbrales[cfg.umbrales.length - 1];
+
+  document.getElementById('ic-pcr-' + tipo).className = 'ind-card ' + match.nivel;
+  document.getElementById('b-pcr-' + tipo).textContent = match.badge;
+  document.getElementById('pcr-' + tipo + '-txt').innerHTML = match.txt;
+  comprobarAnalizar();
+}
+
+function evalInd(key) {
+  const v = parseFloat(document.getElementById('i-' + key)?.value);
+  S[key] = isNaN(v) ? null : v;
+  const n = getNivel(key, S[key]);
+  const card = document.getElementById('ic-' + key);
+  const badge = document.getElementById('b-' + key);
+
+  if (card) { card.className = 'ind-card' + (n ? ' ' + n : ''); }
+  if (badge) {
+    badge.textContent = S[key] !== null ? REGLAS[key].badge(S[key]) : '—';
+  }
+  comprobarAnalizar();
+}
+
+// ═══════════════════════════════════════
+// TENDENCIAS
+// ═══════════════════════════════════════
+const mapT = { 's': 'Subiendo', 'e': 'Estable', 'b': 'Bajando' };
+
+function selTend(key, t) {
+  S[key + 'T'] = t;
+  const prefixes = { vix:'tv', nq:'tn', us10:'tu', dxy:'td' };
+  const p = prefixes[key];
+  ['s','e','b'].forEach(x => {
+    const b = document.getElementById(p + '-' + x);
+    if (!b) return;
+    b.className = 'tend-b';
+  });
+  const btn = document.getElementById(p + '-' + t);
+  if (!btn) return;
+  // NQ: subiendo es bueno; rest: subiendo es malo
+  if (key === 'nq') {
+    if (t === 's') btn.classList.add('ts-inv');
+    else if (t === 'e') btn.classList.add('te');
+    else btn.classList.add('tb-inv');
+  } else {
+    if (t === 's') btn.classList.add('ts');
+    else if (t === 'e') btn.classList.add('te');
+    else btn.classList.add('tb');
+  }
+}
+
+// ═══════════════════════════════════════
+// MACRO
+// ═══════════════════════════════════════
+function selMacro(color, el) {
+  document.querySelectorAll('#ic-macro .macro-opt').forEach(o => {
+    o.classList.remove('sg','sa','sr');
+  });
+  el.classList.add('s' + color);
+  S.macro = color;
+  const card = document.getElementById('ic-macro');
+  card.className = 'ind-card ' + color;
+  comprobarAnalizar();
+}
+
+// ═══════════════════════════════════════
+// ACTIVAR BTN
+// ═══════════════════════════════════════
+function comprobarAnalizar() {
+  const ok = S.vix !== null && S.nq !== null && S.macro !== null;
+  document.getElementById('btn-analizar').disabled = !ok;
+}
+
+// ═══════════════════════════════════════
+// INFORME UNIFICADO MACRO + TÉCNICO
+// ═══════════════════════════════════════
+async function generarInformeCompleto() {
+  const btn = document.getElementById('btn-analizar');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  S.nota = document.getElementById('nota-dia').value;
+
+  const hist = getHistorial();
+  const ultimos5 = hist.slice(0, 5);
+  const histCtx = ultimos5.length > 0
+    ? '\n\nHISTORIAL RECIENTE:\n' + ultimos5.map(r =>
+        '- ' + r.fechaLabel + ': VIX=' + (r.datos?.vix ?? '—') + ', NQ=' + (r.datos?.nq ?? '—') + '%, Decision="' + r.decision + '", Nivel=' + r.nivel +
+        (r.resultadoReal ? ', Resultado real: ' + r.resultadoReal + '%' : '')
+      ).join('\n')
+    : '';
+
+  const bt = calcularBacktestingData();
+  const btCtx = bt.length > 0
+    ? '\n\nFIABILIDAD HISTÓRICA:\n' + bt.map(b => '- ' + b.ind + ': ' + b.pct + '% de acierto en ' + b.n + ' señales').join('\n')
+    : '';
+
+  const tendStr = (v, k) => v ? ' (tendencia: ' + (k === 's' ? 'subiendo' : k === 'b' ? 'bajando' : 'estable') + ')' : '';
+
+  // Sección técnica
+  const tecLabels = {
+    1:'EMA20/50', 2:'Golden/Death Cross', 3:'Precio vs SMA200',
+    4:'Canal tendencia', 5:'Fibonacci', 6:'RSI(14)',
+    7:'Divergencia RSI', 8:'MACD', 9:'Volumen',
+    10:'VXN', 11:'Patrón velas', 12:'Soporte/Resistencia'
+  };
+  const colorLabel = { g:'ALCISTA', a:'NEUTRAL', r:'BAJISTA' };
+  const tecSecciones = Object.entries(tecEstado).length > 0
+    ? '\n\nANÁLISIS TÉCNICO MANUAL (12 indicadores):\n' +
+      Object.entries(tecEstado).map(([k,v]) => '- ' + tecLabels[k] + ': ' + colorLabel[v]).join('\n')
+    : '\n\nANÁLISIS TÉCNICO: No completado (opcional)';
+
+  const tecAuto = S.tecnicos ? '\n\nINDICADORES TÉCNICOS AUTOMÁTICOS:\n' + [
+    'RSI14=' + (S.tecnicos.rsi?.valor || '—') + ' tendencia=' + (S.tecnicos.rsi?.tendencia || '—') + ' alerta=' + (S.tecnicos.rsi?.alertaRsi || 'ninguna') + (S.tecnicos.rsi?.divergenciaBajista ? ' DIVERGENCIA_BAJISTA' : ''),
+    'EMA20=' + (S.tecnicos.ema20?.valor || '—') + ' precio_' + (S.tecnicos.ema20?.precioVsEma || '—'),
+    'EMA50=' + (S.tecnicos.ema50?.valor || '—') + ' cruce_EMAs=' + (S.tecnicos.ema50?.cruceEmas || '—'),
+    'SMA200=' + (S.tecnicos.sma200?.valor || '—') + ' dist=' + (S.tecnicos.sma200?.distanciaPct || '—') + '%',
+    'SMA20_dist=' + (S.tecnicos.sma20?.distanciaPct || '—') + '%',
+    'SMA50_dist=' + (S.tecnicos.sma50?.distanciaPct || '—') + '%',
+    'MACD=' + (S.tecnicos.macd?.macd || '—') + ' hist=' + (S.tecnicos.macd?.histogram || '—'),
+    'ATR14=' + (S.tecnicos.atr?.valor || '—'),
+    'AccDis=' + (S.tecnicos.accdis?.trend || '—'),
+    'Precio_NDX=' + (S.tecnicos.precio || '—')
+  ].join(', ') : '';
+
+  const fibCtx = S.fibonacciLevels && Object.keys(S.fibonacciLevels).length > 0
+    ? '\n\nFIBONACCI NDX (90d máx/mín): ' + Object.entries(S.fibonacciLevels)
+        .map(([k,v]) => k + '=' + v.valor + '(' + (v.distPct >= 0 ? '+' : '') + v.distPct + '%)')
+        .join(' | ')
+    : '';
+
+  const prompt = `Eres el analista personal de mercado de un inversor español con fondo Nasdaq 100, ejecución d+1. Posición actual: ${S.posNasdaq}% Nasdaq / ${S.posLiquidez}% liquidez.
+
+DATOS MACRO DE HOY:
+- VIX: ${S.vix !== null ? S.vix : 'no disponible'}${tendStr(S.vixT, S.vixT)}
+- Futuros NQ: ${S.nq !== null ? S.nq + '%' : 'no disponible'}${tendStr(S.nqT, S.nqT)} (orientativo, no señal aislada)
+- Bono USA 10Y: ${S.us10 !== null ? S.us10 + '%' : 'no disponible'}${tendStr(S.us10T, S.us10T)}
+- DXY: ${S.dxy !== null ? S.dxy : 'no disponible'}${tendStr(S.dxyT, S.dxyT)}
+- CNN Fear & Greed: ${S.fng !== null ? S.fng + '/100' : 'no disponible'}
+- Equity P/C Ratio: ${S.pcr_eq !== null && S.pcr_eq !== undefined ? S.pcr_eq : 'no disponible'}
+- Index P/C Ratio: ${S.pcr_idx !== null && S.pcr_idx !== undefined ? S.pcr_idx : 'no disponible'}
+- SPX P/C Ratio: ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx : 'no disponible'}
+- Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande' : 'Evento alta volatilidad (Fed/IPC/NFP)'}
+- Modo: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
+${S.nota ? '- Nota: ' + S.nota : ''}
+${tecAuto}
+${fibCtx}
+${tecSecciones}
+${histCtx}
+${btCtx}
+
+MARCO DE ANÁLISIS PROFESIONAL:
+1. TENDENCIA PRIMERO: Si precio > EMA50 y SMA200, sesgo alcista. No recomendar reducción sin justificación.
+2. CONDICIÓN ≠ SEÑAL: RSI alto = condición. Ruptura de estructura = señal. Nunca confundirlas.
+3. REDUCCIONES PROPORCIONALES: Sin señal confirmada máximo -20% de cambio. Solo con señal fuerte >-30%.
+4. PUT/CALL CONTEXTUALIZADO: Index PCR 1.0-1.5 es normal en bull market, no alarma.
+5. LENGUAJE PROBABILÍSTICO: Nunca "va a caer". Siempre "aumenta el riesgo", "binomio empeora".
+6. EJECUCIÓN d+1: Orden hoy = precio cierre mañana.
+
+Responde EXACTAMENTE en este formato:
+
+NIVEL: [VERDE/ÁMBAR/ROJO]
+DECISIÓN: [máximo 8 palabras, lenguaje probabilístico]
+NASDAQ_REC: [0-100, cambio máx 20 puntos sin señal confirmada vs ${S.posNasdaq}% actual]
+LIQUIDEZ_REC: [complementario]
+
+═══════ ANÁLISIS MACRO ═══════
+[2-3 párrafos: tendencia estructural, indicadores macro clave, contexto d+1. Usa **negrita** para puntos clave. Máx 180 palabras.]
+
+═══════ ANÁLISIS TÉCNICO ═══════
+[2-3 párrafos: confluencia de indicadores técnicos, niveles Fibonacci relevantes, patrón de velas si aplica, señal técnica combinada. Usa **negrita**. Máx 180 palabras.]
+
+═══════ CONCLUSIÓN CONJUNTA ═══════
+[1 párrafo: síntesis macro+técnico, decisión de posición justificada, qué vigilar mañana. Máx 80 palabras.]`;
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) {
+      document.getElementById('ia-body').innerHTML = '<p style="color:var(--rd)">Configura primero la URL del proxy.</p>';
+      goTab('informe');
+      btn.classList.remove('loading'); btn.disabled = false;
+      return;
+    }
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    if (!texto) throw new Error(data.error || 'Sin respuesta');
+    procesarRespuestaIA(texto);
+    goTab('informe');
+  } catch(e) {
+    document.getElementById('ia-body').innerHTML = '<p style="color:var(--rd)">Error: ' + e.message + '</p>';
+    goTab('informe');
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+// GENERAR INFORME IA (legacy — mantener por compatibilidad)
+// ═══════════════════════════════════════
+async function generarInforme() {
+  const btn = document.getElementById('btn-analizar');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  S.nota = document.getElementById('nota-dia').value;
+
+  const hist = getHistorial();
+  const ultimos5 = hist.slice(0, 5);
+  const histCtx = ultimos5.length > 0
+    ? '\n\nHISTORIAL RECIENTE (últimos ' + ultimos5.length + ' días registrados por el usuario):\n' +
+      ultimos5.map(r =>
+        `- ${r.fechaLabel}: VIX=${r.datos?.vix ?? '—'}, NQ=${r.datos?.nq ?? '—'}%, Decision="${r.decision}", Nivel=${r.nivel}` +
+        (r.resultadoReal ? `, Resultado real al día siguiente: ${r.resultadoReal}` : '')
+      ).join('\n')
+    : '';
+
+  // Calcular backtesting para contexto
+  const bt = calcularBacktestingData();
+  const btCtx = bt.length > 0
+    ? '\n\nFIABILIDAD HISTÓRICA DE INDICADORES (basado en registros del usuario):\n' +
+      bt.map(b => `- ${b.ind}: ${b.pct}% de acierto en ${b.n} señales`).join('\n')
+    : '';
+
+  const tendStr = (v, k) => v ? ` (tendencia: ${mapT[k] || k})` : '';
+
+  const prompt = `Eres el analista personal de mercado de un inversor español que opera un fondo de inversión Nasdaq 100 con ejecución en d+1 (las órdenes dadas hoy se ejecutan al precio de cierre de MAÑANA). Su posición actual: ${S.posNasdaq}% en fondo Nasdaq, ${S.posLiquidez}% en liquidez.
+
+MARCO DE ANÁLISIS PROFESIONAL — SIGUE ESTAS REGLAS SIEMPRE:
+
+REGLA 1 — TENDENCIA PRIMERO:
+Evalúa siempre la tendencia estructural antes que cualquier otro indicador. Si el precio está por encima de la EMA50 y SMA200, la tendencia es alcista y el sesgo por defecto es MANTENER. No recomiendes reducir sin justificación clara.
+
+REGLA 2 — DISTINGUE CONDICIÓN DE SEÑAL (CRÍTICO):
+- CONDICIÓN = el riesgo aumenta (RSI alto, extensión, sentimiento elevado) → describe como "fatiga", "riesgo creciente", "peor binomio riesgo/beneficio"
+- SEÑAL = confirmación de giro (ruptura de estructura, spike de volumen en giro, VIX disparado, distribución clara) → solo entonces recomienda reducción fuerte
+- NUNCA uses una condición como si fuera una señal de acción. RSI en 75 + divergencia = condición, NO señal confirmada de giro.
+
+REGLA 3 — ESCALA DE REDUCCIÓN PROPORCIONAL:
+- Condiciones de riesgo sin señal confirmada → reducir máximo 15-20% (ej: 70% → 50-55%)
+- Señal moderada confirmada → reducir 20-30% (ej: 70% → 40-50%)
+- Señal fuerte confirmada (VIX >30, ruptura clara, distribución masiva) → reducir 30-50%
+- NUNCA recomendar pasar de 70% a 30% solo por condiciones de riesgo sin señal confirmada
+
+REGLA 4 — PUT/CALL CONTEXTUALIZADO:
+- Index PCR 1.0-1.5 y SPX PCR 1.2-1.8 es COBERTURA NORMAL en mercado alcista, no alarma
+- Solo es señal bajista relevante si: Equity PCR < 0.4 (euforia extrema) O Index PCR > 2.0 O SPX PCR > 2.5
+- Los institucionales siempre tienen algo de cobertura — no lo interpretes como anticipación de caída
+
+REGLA 5 — VXN Y VIX:
+- El VXN pesa más que el VIX para el Nasdaq tecnológico
+- VIX < 20 con tendencia estable = mercado complacente pero no en peligro
+- Solo es alerta real si VIX sube más de 3 puntos en un día o supera 25
+
+REGLA 6 — FUTUROS:
+- Futuros positivos NO son señal alcista por sí solos — pueden ser trampa o continuación
+- Futuros negativos > -1% SÍ son señal de debilidad relevante para d+1
+- Siempre contextualiza los futuros con el resto de indicadores
+
+REGLA 7 — LENGUAJE PROBABILÍSTICO OBLIGATORIO:
+- NUNCA digas "el mercado va a caer" o "corrección inminente"
+- SIEMPRE di "aumenta el riesgo de corrección", "el binomio riesgo/beneficio empeora", "señales de fatiga"
+- Si hay señales mixtas, descríbelas como mixtas — no fuerces una conclusión
+
+REGLA 8 — EJECUCIÓN d+1:
+- La orden se ejecuta al CIERRE de mañana, no a la apertura
+- Los datos macro del día pueden cambiar el precio durante la sesión
+- En días con eventos macro importantes, la incertidumbre es bidireccional
+
+DATOS DE MERCADO DE HOY:
+- VIX: ${S.vix}${tendStr(S.vixT, S.vixT)} (normal <18, vigilar 18-25, alerta >25)
+- Futuros NQ variación: ${S.nq}%${tendStr(S.nqT, S.nqT)} (orientativo: >-0.5% normal, -0.5 a -1% débil, <-1% bajista — OJO: futuros positivos no son señal alcista por sí solos, depende del catalizador y volumen)
+- Bono USA 10Y: ${S.us10 !== null ? S.us10 + '%' : 'no disponible'}${tendStr(S.us10T, S.us10T)}
+- DXY índice dólar: ${S.dxy !== null ? S.dxy : 'no disponible'}${tendStr(S.dxyT, S.dxyT)}
+- CNN Fear & Greed: ${S.fng !== null ? S.fng + '/100' : 'no disponible'}
+- Equity Put/Call Ratio (acciones): ${S.pcr_eq !== null && S.pcr_eq !== undefined ? S.pcr_eq + ' — ' + (S.pcr_eq < 0.4 ? 'EUFORIA EXTREMA' : S.pcr_eq < 0.5 ? 'optimismo elevado' : S.pcr_eq <= 0.8 ? 'normal' : S.pcr_eq <= 1.0 ? 'cautela' : 'miedo/oportunidad') : 'no disponible'} [MÁS IMPORTANTE]
+- Total Put/Call Ratio (global): ${S.pcr_tot !== null && S.pcr_tot !== undefined ? S.pcr_tot + ' — ' + (S.pcr_tot < 0.5 ? 'euforia' : S.pcr_tot <= 1.0 ? 'normal' : 'cautela/miedo') : 'no disponible'}
+- Index Put/Call Ratio (institucional): ${S.pcr_idx !== null && S.pcr_idx !== undefined ? S.pcr_idx + ' — ' + (S.pcr_idx < 1.0 ? 'normal' : S.pcr_idx <= 1.5 ? 'cautela institucional' : 'ALERTA INSTITUCIONAL') : 'no disponible'}
+- SPX+SPXW Put/Call Ratio (S&P500): ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx + ' — ' + (S.pcr_spx < 1.2 ? 'normal' : S.pcr_spx <= 1.8 ? 'cautela' : 'ALERTA cobertura masiva') : 'no disponible'}
+- Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
+- Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
+${S.nota ? '- Nota del inversor: ' + S.nota : ''}
+${S.tecnicos ? `
+INDICADORES TÉCNICOS NDX (calculados automáticamente):
+- RSI 14: ${S.tecnicos.rsi ? S.tecnicos.rsi.valor + ' (' + S.tecnicos.rsi.estado + ')' : 'no disponible'}
+- EMA 20: ${S.tecnicos.ema20 ? S.tecnicos.ema20.valor + ' — precio ' + S.tecnicos.ema20.precioVsEma : 'no disponible'}
+- EMA 50: ${S.tecnicos.ema50 ? S.tecnicos.ema50.valor + ' — precio ' + S.tecnicos.ema50.precioVsEma + ' — cruce EMAs: ' + S.tecnicos.ema50.cruceEmas : 'no disponible'}
+- SMA 20: ${S.tecnicos.sma20 ? S.tecnicos.sma20.valor + ' — precio ' + S.tecnicos.sma20.distanciaPct + '% vs SMA20 (timing corto plazo)' : 'no disponible'}
+- SMA 50: ${S.tecnicos.sma50 ? S.tecnicos.sma50.valor + ' — precio ' + S.tecnicos.sma50.distanciaPct + '% vs SMA50 (timing medio plazo)' : 'no disponible'}
+- SMA 200: ${S.tecnicos.sma200 ? S.tecnicos.sma200.valor + ' — precio ' + S.tecnicos.sma200.distanciaPct + '% vs SMA200 (contexto macro)' : 'no disponible'}
+- MACD: ${S.tecnicos.macd ? 'linea=' + S.tecnicos.macd.macd + ' señal=' + S.tecnicos.macd.signal + ' histograma=' + S.tecnicos.macd.histogram : 'no disponible'}
+- ATR 14: ${S.tecnicos.atr ? S.tecnicos.atr.valor + ' puntos' : 'no disponible'}
+- Acumulación/Distribución: ${S.tecnicos.accdis ? S.tecnicos.accdis.trend : 'no disponible'}
+- Precio NDX: ${S.tecnicos.precio || 'no disponible'}
+- RSI tendencia: ${S.tecnicos.rsi?.tendencia || 'no disponible'}
+- RSI alerta: ${S.tecnicos.rsi?.alertaRsi || 'ninguna'} ${S.tecnicos.rsi?.divergenciaBajista ? '— DIVERGENCIA BAJISTA ACTIVA' : ''} ${S.tecnicos.rsi?.diasRsiAlto > 0 ? '— ' + S.tecnicos.rsi.diasRsiAlto + ' días con RSI>80' : ''}` : ''}
+${histCtx}
+${btCtx}
+
+Responde EXACTAMENTE en este formato (sin markdown extra):
+
+NIVEL: [VERDE/ÁMBAR/ROJO]
+DECISIÓN: [una frase de máximo 8 palabras — usa lenguaje probabilístico, ej: "Mantener con vigilancia", "Reducción moderada prudente", "Riesgo creciente, reducir parcialmente"]
+NASDAQ_REC: [número del 0 al 100 — IMPORTANTE: cambio máximo de 20 puntos respecto a posición actual (${S.posNasdaq}%) salvo señal confirmada de giro]
+LIQUIDEZ_REC: [complementario al NASDAQ_REC, suma 100]
+
+ANÁLISIS:
+[Estructura obligatoria en este orden:
+1. TENDENCIA (1 frase): ¿Cuál es la tendencia estructural? ¿Precio sobre/bajo EMA50 y SMA200?
+2. CONDICIONES ACTUALES (2-3 frases): Describe el estado del mercado sin hacer predicciones. Usa "señales de fatiga", "riesgo creciente", "binomio riesgo/beneficio".
+3. INDICADORES CLAVE (2-3 frases): Los 2-3 indicadores más relevantes de hoy con su lectura exacta.
+4. CONCLUSIÓN d+1 (2 frases): Qué implica esto para mañana. Usa lenguaje probabilístico — nunca afirmes una dirección con certeza.
+5. POSICIÓN RECOMENDADA (1 frase): Justifica el cambio o la no variación. Si no hay señal confirmada, la justificación debe ser explícita.
+Usa **negrita** para los puntos clave. Máximo 320 palabras.]`;
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) {
+      document.getElementById('ia-body').innerHTML = '<p style="color:var(--rd)">Configura primero la URL del proxy en Ver instrucciones.</p>';
+      goTab('informe');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      return;
+    }
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    if (!texto) throw new Error(data.error || 'Sin respuesta');
+    procesarRespuestaIA(texto);
+    goTab('informe');
+  } catch (e) {
+    document.getElementById('ia-body').innerHTML = '<p style="color:var(--rd)">Error: ' + e.message + '. Comprueba tu conexion e intentalo de nuevo.</p>';
+    goTab('informe');
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+// PROCESAR RESPUESTA IA
+// ═══════════════════════════════════════
+function procesarRespuestaIA(texto) {
+  // Parsear campos estructurados
+  const getNivel2 = () => {
+    const m = texto.match(/NIVEL:\s*(VERDE|ÁMBAR|ROJO|AMBAR)/i);
+    if (!m) return 'a';
+    const v = m[1].toUpperCase();
+    let nivel = v === 'VERDE' ? 'g' : v === 'ROJO' ? 'r' : 'a';
+    // Filtro RSI inteligente — no asume giro por nivel sino por contexto
+    if (S.tecnicos?.rsi) {
+      const rsi = S.tecnicos.rsi;
+      if (nivel === 'g' || nivel === 'a') {
+        if (rsi.alertaRsi === 'extrema') {
+          nivel = 'r';
+          texto += '\n\n🔴 Filtro RSI: RSI > 85 — riesgo de techo técnico extremo. Reducir exposición.';
+        } else if (rsi.alertaRsi === 'alta') {
+          nivel = nivel === 'g' ? 'a' : 'r';
+          texto += '\n\n⚠️ Filtro RSI: RSI > 80 durante ' + rsi.diasRsiAlto + ' días consecutivos — agotamiento del momentum.';
+        } else if (rsi.alertaRsi === 'divergencia') {
+          nivel = nivel === 'g' ? 'a' : nivel;
+          texto += '\n\n⚠️ Filtro RSI: Divergencia bajista detectada — precio en máximos pero RSI perdiendo fuerza.';
+        } else if (rsi.alertaRsi === 'moderada') {
+          if (nivel === 'g') {
+            nivel = 'a';
+            texto += '\n\n⚠️ Filtro RSI: RSI en sobrecompra con momentum bajando — precaución.';
+          }
+        }
+        // RSI > 70 con tendencia subiendo = mercado fuerte, sin cambio
+      }
+    }
+    return nivel;
+  };
+  const getDecision = () => {
+    const m = texto.match(/DECISIÓN:\s*(.+)/i);
+    return m ? m[1].trim() : 'Analizar con cautela';
+  };
+  const getNasdaqRec = () => {
+    const m = texto.match(/NASDAQ_REC:\s*(\d+)/i);
+    return m ? parseInt(m[1]) : S.posNasdaq;
+  };
+  const getLiqRec = () => {
+    const m = texto.match(/LIQUIDEZ_REC:\s*(\d+)/i);
+    return m ? parseInt(m[1]) : S.posLiquidez;
+  };
+  const getAnalisis = () => {
+    // Try new unified format with sections
+    const macroMatch = texto.match(/═+\s*ANÁLISIS MACRO\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS TÉCNICO|$)/i);
+    const tecMatch   = texto.match(/═+\s*ANÁLISIS TÉCNICO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
+    const concMatch  = texto.match(/═+\s*CONCLUSIÓN CONJUNTA\s*═+\s*([\s\S]+)/i);
+
+    if (macroMatch || tecMatch) {
+      let html = '';
+      if (macroMatch) html += '<p><strong style="color:var(--ac)">📊 ANÁLISIS MACRO</strong></p>' + macroMatch[1].trim();
+      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + tecMatch[1].trim();
+      if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
+      return html;
+    }
+    // Fallback: old format
+    const m = texto.match(/ANÁLISIS:\s*([\s\S]+)/i);
+    return m ? m[1].trim() : texto;
+  };
+
+  const nivel = getNivel2();
+  const decision = getDecision();
+  const nasdaqRec = getNasdaqRec();
+  const liqRec = getLiqRec();
+  const analisis = getAnalisis();
+
+  S.nivel = nivel;
+  S.decision = decision;
+  S.informeTexto = texto;
+  S.posRecNasdaq = nasdaqRec;
+  S.posRecLiquidez = liqRec;
+
+  // Semáforo hero
+  const mapNivel = { g: ['ng','Mantener posición','✅'], a: ['na','Vigilar situación','⚠️'], r: ['nr','Reducir exposición','🔴'] };
+  const [cls, dec, orb] = mapNivel[nivel];
+  const hero = document.getElementById('sem-hero');
+  hero.className = 'semaforo-hero ' + cls;
+  document.getElementById('sh-decision').textContent = decision;
+  document.getElementById('sh-orb').textContent = orb;
+
+  // Barras
+  const barColor = { g:'#2ecc8a', a:'#f0a500', r:'#ff5e5e' };
+  const barFill  = { g:2, a:4, r:6 };
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById('sb' + i);
+    b.style.background = i <= barFill[nivel] ? barColor[nivel] : 'var(--s4)';
+    b.style.boxShadow = i <= barFill[nivel] ? `0 0 4px ${barColor[nivel]}60` : 'none';
+  }
+
+  // Resumen grid
+  renderResumenGrid();
+
+  // Recomendación posición
+  renderPosRec(nasdaqRec, liqRec, nivel);
+
+  // Backtesting
+  calcularBacktesting();
+
+  // Texto IA
+  const htmlAnalisis = analisis
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .split('\n').filter(l => l.trim())
+    .map(l => `<p>${l}</p>`).join('');
+  document.getElementById('ia-body').innerHTML = htmlAnalisis;
+
+  document.getElementById('btn-guardar').disabled = false;
+}
+
+function renderResumenGrid() {
+  const items = [
+    { n:'VIX', v: S.vix, k:'vix' },
+    { n:'NQ %', v: S.nq, k:'nq' },
+    { n:'US10Y', v: S.us10, k:'us10' },
+    { n:'DXY', v: S.dxy, k:'dxy' },
+    { n:'F&G', v: S.fng, k:'fng' },
+    { n:'Macro', v: S.macro === 'g' ? '🟢' : S.macro === 'a' ? '🟡' : '🔴', k: null, preNivel: S.macro }
+  ];
+  document.getElementById('resumen-grid').innerHTML = items.map(it => {
+    const n = it.k ? getNivel(it.k, it.v) : it.preNivel;
+    const v = it.v !== null ? (it.k === 'nq' ? it.v + '%' : it.v) : (it.preNivel ? it.v : '—');
+    const estado = it.k && it.v !== null ? REGLAS[it.k].badge(it.v) : (it.preNivel === 'g' ? 'Tranquilo' : it.preNivel === 'a' ? 'Vigilar' : it.preNivel === 'r' ? 'Alerta' : '—');
+    return `<div class="rg-card${n ? ' '+n : ''}">
+      <div class="rg-nombre">${it.n}</div>
+      <div class="rg-valor">${v}</div>
+      <div class="rg-estado">${estado}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPosRec(nasdaqRec, liqRec, nivel) {
+  const colorCls = nivel === 'g' ? 'rec-gr' : nivel === 'a' ? 'rec-am' : 'rec-rd';
+  const nDir = nasdaqRec > S.posNasdaq ? '↑' : nasdaqRec < S.posNasdaq ? '↓' : '→';
+  const lDir = liqRec > S.posLiquidez ? '↑' : liqRec < S.posLiquidez ? '↓' : '→';
+
+  document.getElementById('pos-rec-content').innerHTML = `
+    <div class="pos-rec-row">
+      <div class="pos-rec-nombre">📈 Fondo Nasdaq</div>
+      <div class="pos-rec-flecha ${colorCls}">
+        <span class="from">${S.posNasdaq}%</span>
+        <span class="arrow">${nDir}</span>
+        <span class="to">${nasdaqRec}%</span>
+      </div>
+    </div>
+    <div class="pos-rec-row">
+      <div class="pos-rec-nombre">💵 Liquidez</div>
+      <div class="pos-rec-flecha ${colorCls}">
+        <span class="from">${S.posLiquidez}%</span>
+        <span class="arrow">${lDir}</span>
+        <span class="to">${liqRec}%</span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// BACKTESTING
+// ═══════════════════════════════════════
+function calcularBacktestingData() {
+  const hist = getHistorial().filter(r => r.resultadoReal && r.datos);
+  if (hist.length < 3) return [];
+
+  const indicadores = ['vix','nq','us10','dxy','fng'];
+  const resultados = [];
+
+  for (const ind of indicadores) {
+    const conDato = hist.filter(r => r.datos[ind] !== null && r.datos[ind] !== undefined);
+    if (conDato.length < 2) continue;
+
+    let aciertos = 0;
+    for (const r of conDato) {
+      const nivel = getNivel(ind, r.datos[ind]);
+      const realBajo = parseFloat(r.resultadoReal) < 0;
+      const realSubio = parseFloat(r.resultadoReal) >= 0;
+      // Acierto = si nivel era malo (a,r) y el mercado bajó, O nivel era bueno y subió
+      if ((nivel === 'r' || nivel === 'a') && realBajo) aciertos++;
+      else if (nivel === 'g' && realSubio) aciertos++;
+    }
+
+    resultados.push({
+      ind: ind.toUpperCase(),
+      pct: Math.round(aciertos / conDato.length * 100),
+      n: conDato.length
+    });
+  }
+
+  return resultados.sort((a,b) => b.pct - a.pct);
+}
+
+function calcularBacktesting() {
+  const bt = calcularBacktestingData();
+  const btRows = document.getElementById('bt-rows');
+  const btN = document.getElementById('bt-n');
+
+  if (bt.length === 0) {
+    btN.textContent = '—';
+    btRows.innerHTML = `<div style="padding:14px 16px; font-size:12px; color:var(--t4); text-align:center;">
+      Necesitas ≥3 registros con resultado real. Al guardar un registro, puedes añadir el % que movió el Nasdaq al día siguiente.
+    </div>`;
+    return;
+  }
+
+  btN.textContent = bt[0].n + ' sesiones';
+  const colores = pct => pct >= 70 ? '#2ecc8a' : pct >= 50 ? '#f0a500' : '#ff5e5e';
+  btRows.innerHTML = bt.map(b => `
+    <div class="bt-row">
+      <div class="bt-ind">${b.ind}</div>
+      <div class="bt-bar-wrap">
+        <div class="bt-bar-fill" style="width:${b.pct}%; background:${colores(b.pct)}"></div>
+      </div>
+      <div class="bt-pct" style="color:${colores(b.pct)}">${b.pct}%</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// GUARDAR HISTORIAL
+// ═══════════════════════════════════════
+function guardarRegistro() {
+  if (!S.nivel) return;
+  const hoy = new Date();
+  const clave = hoy.toISOString().slice(0,10);
+  const registro = {
+    fecha: clave,
+    fechaLabel: hoy.toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short' }),
+    decision: S.decision,
+    nivel: S.nivel,
+    informe: S.informeTexto,
+    posAntes: { n: S.posNasdaq, l: S.posLiquidez },
+    posRec: { n: S.posRecNasdaq, l: S.posRecLiquidez },
+    nota: S.nota,
+    modo: S.modo,
+    resultadoReal: null, // se puede editar después
+    datos: {
+      vix: S.vix, nq: S.nq, us10: S.us10,
+      dxy: S.dxy, fng: S.fng, macro: S.macro,
+      pcr_eq: S.pcr_eq, pcr_tot: S.pcr_tot, pcr_idx: S.pcr_idx, pcr_spx: S.pcr_spx
+    }
+  };
+
+  let hist = getHistorial();
+  hist = hist.filter(r => r.fecha !== clave);
+  hist.unshift(registro);
+  if (hist.length > 90) hist = hist.slice(0, 90);
+  localStorage.setItem('nqr_hist', JSON.stringify(hist));
+  renderHistorial();
+  calcularBacktesting();
+
+  const btn = document.getElementById('btn-guardar');
+  btn.textContent = '✓ Guardado';
+  setTimeout(() => btn.textContent = '💾 Guardar en historial', 2000);
+}
+
+function getHistorial() {
+  return JSON.parse(localStorage.getItem('nqr_hist') || '[]');
+}
+
+// ═══════════════════════════════════════
+// BACKTESTING AUTOMÁTICO
+// ═══════════════════════════════════════
+async function rellenarResultadosAuto() {
+  const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+  if (!proxyBase) return;
+
+  const hist = getHistorial();
+  // Buscar registros sin resultado real que sean de días pasados
+  const hoy = new Date().toISOString().slice(0,10);
+  const pendientes = hist.filter(r =>
+    (r.resultadoReal === null || r.resultadoReal === undefined) && r.fecha < hoy
+  );
+  if (pendientes.length === 0) return;
+
+  // Necesitamos el cierre del día SIGUIENTE al registro (d+1)
+  // y el cierre del propio día para calcular la variación
+  const fechasNecesarias = [];
+  pendientes.forEach(r => {
+    // Añadir fecha del registro y el día siguiente
+    fechasNecesarias.push(r.fecha);
+    const siguiente = new Date(r.fecha);
+    siguiente.setDate(siguiente.getDate() + 1);
+    fechasNecesarias.push(siguiente.toISOString().slice(0,10));
+    // También +2 por si el siguiente es festivo
+    const siguiente2 = new Date(r.fecha);
+    siguiente2.setDate(siguiente2.getDate() + 2);
+    fechasNecesarias.push(siguiente2.toISOString().slice(0,10));
+  });
+
+  const fechasUnicas = [...new Set(fechasNecesarias)].join(',');
+
+  try {
+    const resp = await fetch(`${proxyBase}/api/datos?fechas=${fechasUnicas}`);
+    const data = await resp.json();
+    const cierres = data.cierresHistoricos;
+    if (!cierres) return;
+
+    let actualizados = 0;
+    pendientes.forEach(r => {
+      const cierreDia = cierres[r.fecha];
+      // Buscar el primer día hábil siguiente con datos
+      let cierreSiguiente = null;
+      for (let d = 1; d <= 4; d++) {
+        const sig = new Date(r.fecha);
+        sig.setDate(sig.getDate() + d);
+        const sigStr = sig.toISOString().slice(0,10);
+        if (cierres[sigStr] !== null && cierres[sigStr] !== undefined) {
+          cierreSiguiente = cierres[sigStr];
+          break;
+        }
+      }
+
+      if (cierreDia && cierreSiguiente) {
+        const variacion = parseFloat(((cierreSiguiente - cierreDia) / cierreDia * 100).toFixed(2));
+        const idx = hist.findIndex(h => h.fecha === r.fecha);
+        if (idx >= 0) {
+          hist[idx].resultadoReal = variacion;
+          hist[idx].resultadoAutomatic = true;
+          actualizados++;
+        }
+      }
+    });
+
+    if (actualizados > 0) {
+      localStorage.setItem('nqr_hist', JSON.stringify(hist));
+      renderHistorial();
+      calcularBacktesting();
+      // Mostrar aviso
+      const alerta = document.getElementById('alerta-dia');
+      const msg = '✅ ' + actualizados + ' resultado' + (actualizados > 1 ? 's' : '') + ' de backtesting rellenado' + (actualizados > 1 ? 's' : '') + ' automáticamente.';
+      alerta.textContent = alerta.textContent ? alerta.textContent + ' · ' + msg : msg;
+      alerta.classList.add('vis');
+    }
+  } catch (e) {
+    console.log('Error backtesting auto:', e);
+  }
+}
+
+// ═══════════════════════════════════════
+// RENDER HISTORIAL
+// ═══════════════════════════════════════
+function renderHistorial() {
+  const hist = getHistorial();
+  const contenedor = document.getElementById('historial-content');
+
+  if (hist.length === 0) {
+    contenedor.innerHTML = `<div class="hist-empty">
+      <div class="he-icon">📂</div>
+      <p>Sin registros todavía.<br>Genera un informe y pulsa "Guardar".</p>
+    </div>`;
+    return;
+  }
+
+  contenedor.innerHTML = hist.map((r,i) => `
+    <div class="hist-item ${r.nivel || ''}" onclick="abrirDetalle(${i})">
+      <div class="hi-fecha">${r.fechaLabel}</div>
+      <div class="hi-decision">${r.decision || '—'}</div>
+      <div class="hi-datos">
+        <div class="hi-nivel">${r.nivel === 'g' ? '● Verde' : r.nivel === 'a' ? '● Ámbar' : '● Rojo'}</div>
+        ${r.datos ? `<div>VIX ${r.datos.vix ?? '—'} · NQ ${r.datos.nq !== null ? r.datos.nq+'%' : '—'}</div>` : ''}
+        ${r.resultadoReal !== null && r.resultadoReal !== undefined ? `<div style="color:${parseFloat(r.resultadoReal)>=0?'var(--gr)':'var(--rd)'}">Real: ${r.resultadoReal}%</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirDetalle(idx) {
+  const hist = getHistorial();
+  const r = hist[idx];
+  if (!r) return;
+
+  document.getElementById('modal-title').textContent = r.decision || '—';
+  document.getElementById('modal-fecha').textContent =
+    `${r.fechaLabel} · Modo ${r.modo === 22 ? '22h' : '7h'} · ${r.nivel === 'g' ? '🟢 Verde' : r.nivel === 'a' ? '🟡 Ámbar' : '🔴 Rojo'}`;
+
+  let html = '';
+  if (r.datos) {
+    html += `<p><strong>Datos:</strong> VIX ${r.datos.vix ?? '—'} · NQ ${r.datos.nq !== null ? r.datos.nq+'%' : '—'} · US10Y ${r.datos.us10 ?? '—'}% · DXY ${r.datos.dxy ?? '—'} · F&G ${r.datos.fng ?? '—'}</p>`;
+  }
+  if (r.posAntes) {
+    html += `<p><strong>Posición:</strong> ${r.posAntes.n}% Nasdaq / ${r.posAntes.l}% Liquidez`;
+    if (r.posRec) html += ` → Recomendado: ${r.posRec.n}% / ${r.posRec.l}%`;
+    html += '</p>';
+  }
+  if (r.informe) {
+    const analisis = r.informe.match(/ANÁLISIS:\s*([\s\S]+)/i);
+    const txt = analisis ? analisis[1].trim() : r.informe;
+    html += txt.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('');
+  }
+  if (r.nota) html += `<p style="margin-top:10px; padding-top:10px; border-top:1px solid var(--b1); color:var(--t3); font-style:italic;">Nota: ${r.nota}</p>`;
+
+  // Campo resultado real
+  html += `<div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--b1);">
+    <div style="font-size:12px; color:var(--t3); margin-bottom:8px;">Resultado real del Nasdaq al día siguiente (para backtesting):</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="inp-resultado-${idx}" type="number" step="0.01" placeholder="ej: -1.23"
+        value="${r.resultadoReal ?? ''}"
+        style="flex:1; background:var(--s2); border:1px solid var(--b2); border-radius:8px; padding:9px 12px; color:var(--t1); font-family:'JetBrains Mono',monospace; font-size:14px; outline:none;"
+        inputmode="decimal">
+      <button onclick="guardarResultado(${idx})"
+        style="padding:9px 14px; background:var(--ac2); border:1px solid var(--acb); border-radius:8px; color:var(--ac); font-size:13px; font-weight:600; cursor:pointer;">
+        Guardar
+      </button>
+    </div>
+  </div>`;
+
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+
+function guardarResultado(idx) {
+  const val = parseFloat(document.getElementById('inp-resultado-' + idx)?.value);
+  if (isNaN(val)) return;
+  let hist = getHistorial();
+  hist[idx].resultadoReal = val;
+  localStorage.setItem('nqr_hist', JSON.stringify(hist));
+  renderHistorial();
+  calcularBacktesting();
+  cerrarModal();
+}
+
+// ═══════════════════════════════════════
+// MODALES
+// ═══════════════════════════════════════
+function cerrarModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+function mostrarInstrucciones() {
+  document.getElementById('modal-proxy').classList.add('open');
+}
+function cerrarProxy(e) {
+  if (!e || e.target === document.getElementById('modal-proxy')) {
+    document.getElementById('modal-proxy').classList.remove('open');
+  }
+}
+function guardarProxyUrl() {
+  const url = document.getElementById("inp-proxy-url").value.trim().replace(/\/$/,"");
+  if (!url) return;
+  S.proxyUrl = url;
+  localStorage.setItem("nqr_proxy", url);
+  document.getElementById("proxy-guardado").style.display = "block";
+  document.getElementById("proxy-aviso").innerHTML = "✅ Proxy configurado correctamente. Pulsa Actualizar datos.";
+  setTimeout(() => cerrarProxy(), 1500);
+}
+
+// ═══════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════
+function goTab(tab) {
+  ['datos','tecnico','informe','historial'].forEach(t => {
+    const sc = document.getElementById('sc-' + t);
+    const tb = document.getElementById('tab-' + t);
+    if (sc) sc.classList.remove('active');
+    if (tb) tb.classList.remove('active');
+  });
+  document.getElementById('sc-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'historial') renderHistorial();
+}
+
+// ═══════════════════════════════════════
+// ANÁLISIS TÉCNICO
+// ═══════════════════════════════════════
+const tecEstado = {};
+let tecNivel = null;
+
+function tecPick(n, c, el) {
+  document.querySelectorAll('#tb' + n + ' .tec-op').forEach(o => {
+    o.classList.remove('tsg','tsa','tsr');
+  });
+  el.classList.add(c === 'g' ? 'tsg' : c === 'a' ? 'tsa' : 'tsr');
+  tecEstado[n] = c;
+  const block = document.getElementById('tb' + n);
+  block.classList.remove('tg','ta','tr');
+  block.classList.add(c === 'g' ? 'tg' : c === 'a' ? 'ta' : 'tr');
+  calcularTecnico();
+}
+
+function calcularTecnico() {
+  const vals = Object.values(tecEstado);
+  if (vals.length < 4) return;
+
+  const rojos  = vals.filter(v => v === 'r').length;
+  const ambers = vals.filter(v => v === 'a').length;
+  const verdes = vals.filter(v => v === 'g').length;
+  const n = vals.length;
+
+  // Ponderación extra de tendencia (indicadores 1-4)
+  const tEnd = [1,2,3,4].filter(k => tecEstado[k]).map(k => tecEstado[k]);
+  const tRojos  = tEnd.filter(v => v === 'r').length;
+  const tVerdes = tEnd.filter(v => v === 'g').length;
+
+  let dec, txt, cls, fill;
+  const score = verdes + 'V·' + ambers + 'N·' + rojos + 'R';
+
+  if (tRojos >= 3 || rojos >= Math.ceil(n * 0.6)) {
+    dec = 'Señal bajista fuerte';
+    txt = rojos + ' de ' + n + ' indicadores en rojo incluyendo ' + tRojos + ' de tendencia. Alta probabilidad de continuación bajista. Considera reducir exposición.';
+    cls = 'tnr'; fill = 7;
+  } else if (tRojos >= 2 || rojos >= Math.ceil(n * 0.4)) {
+    dec = 'Señal bajista moderada';
+    txt = 'Debilidad en indicadores de tendencia. Riesgo creciente. Vigilar futuros NQ y posible reducción parcial.';
+    cls = 'tnr'; fill = 5;
+  } else if (tVerdes >= 3 && rojos === 0) {
+    dec = 'Señal alcista fuerte';
+    txt = verdes + ' indicadores en verde con tendencia confirmada. El análisis técnico apoya la continuación alcista. Mantén posición.';
+    cls = 'tng'; fill = 7;
+  } else if (verdes > rojos + ambers && tRojos === 0) {
+    dec = 'Señal alcista moderada';
+    txt = 'Mayoría de indicadores favorables. Sin señales de alarma en tendencia. Mantén posición con revisión a las 7h.';
+    cls = 'tng'; fill = 5;
+  } else if (rojos >= 1 && ambers >= 2) {
+    dec = 'Señal mixta — Vigilar';
+    txt = 'Mezcla de señales con ' + rojos + ' rojo(s) y ' + ambers + ' neutro(s). Entorno de incertidumbre. No actuar hasta confirmación.';
+    cls = 'tna'; fill = 3;
+  } else {
+    dec = 'Señal neutral';
+    txt = 'Sin sesgo técnico claro (' + verdes + 'V, ' + ambers + 'N, ' + rojos + 'R). Mantén posición y revisa tras el cierre americano.';
+    cls = 'tna'; fill = 2;
+  }
+
+  tecNivel = { cls, dec, score, verdes, ambers, rojos, n };
+
+  const ver = document.getElementById('tec-veredicto');
+  ver.className = 'tec-veredicto ' + cls;
+  document.getElementById('tv-dec').textContent = dec;
+  document.getElementById('tv-score').textContent = score;
+  document.getElementById('tv-txt').textContent = txt;
+
+  const bars = document.getElementById('tv-bars');
+  bars.innerHTML = '';
+  const colMap = { tng:'#2ecc8a', tna:'#f0a500', tnr:'#ff5e5e' };
+  const col = colMap[cls];
+  for (let i = 1; i <= 7; i++) {
+    const b = document.createElement('div');
+    b.className = 'tv-bar';
+    if (i <= fill) { b.style.background = col; b.style.boxShadow = '0 0 4px ' + col + '60'; }
+    bars.appendChild(b);
+  }
+
+  document.getElementById('btn-tec-ia').disabled = vals.length < 6;
+}
+
+async function generarInformeTecnico() {
+  const btn = document.getElementById('btn-tec-ia');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const t = S.tecnicos;
+  const labels = {
+    1: 'EMA20 vs EMA50', 2: 'Golden/Death Cross (EMA50/SMA200)',
+    3: 'Precio vs SMA200', 4: 'Canal de tendencia',
+    5: 'Fibonacci', 6: 'RSI(14)',
+    7: 'Divergencia RSI', 8: 'MACD',
+    9: 'Volumen', 10: 'VXN',
+    11: 'Patrón velas', 12: 'Soporte/Resistencia'
+  };
+  const colorLabel = { g: 'ALCISTA', a: 'NEUTRAL', r: 'BAJISTA' };
+  const selecciones = Object.entries(tecEstado)
+    .map(([k,v]) => '- ' + labels[k] + ': ' + colorLabel[v])
+    .join('\n');
+
+  const fibInfo = S.fibonacciLevels
+    ? 'Niveles Fibonacci NDX (90d): ' + Object.entries(S.fibonacciLevels)
+        .map(([k,v]) => k + '=' + v.valor + ' (' + (v.distPct >= 0 ? '+' : '') + v.distPct + '% del precio actual)')
+        .join(', ')
+    : 'Fibonacci no disponible';
+
+  const autoInfo = t ? [
+    'RSI14=' + (t.rsi?.valor || '—') + ' (' + (t.rsi?.tendencia || '—') + ', alerta=' + (t.rsi?.alertaRsi || 'ninguna') + ')',
+    'EMA20=' + (t.ema20?.valor || '—') + ' precio ' + (t.ema20?.precioVsEma || '—'),
+    'EMA50=' + (t.ema50?.valor || '—') + ' cruce=' + (t.ema50?.cruceEmas || '—'),
+    'SMA200=' + (t.sma200?.valor || '—') + ' dist=' + (t.sma200?.distanciaPct || '—') + '%',
+    'SMA20 dist=' + (t.sma20?.distanciaPct || '—') + '%',
+    'SMA50 dist=' + (t.sma50?.distanciaPct || '—') + '%',
+    'MACD=' + (t.macd?.macd || '—') + ' hist=' + (t.macd?.histogram || '—'),
+    'ATR14=' + (t.atr?.valor || '—'),
+    'AccDis=' + (t.accdis?.trend || '—'),
+    'Precio NDX=' + (t.precio || '—')
+  ].join(', ') : 'Datos automáticos no disponibles';
+
+  const prompt = 'Eres un analista técnico experto del Nasdaq 100. El inversor opera fondos con ejecución d+1 (orden hoy = ejecución mañana). Su posición actual: ' + S.posNasdaq + '% Nasdaq / ' + S.posLiquidez + '% liquidez.\n\nSELECCIONES MANUALES (12 indicadores):\n' + selecciones + '\n\nDATA AUTOMÁTICA CALCULADA:\n' + autoInfo + '\n\n' + fibInfo + '\n\nINSTRUCCIONES:\n1. Analiza la CONFLUENCIA de señales — busca cuando múltiples indicadores apuntan en la misma dirección\n2. Prioriza los indicadores de TENDENCIA (01-05) sobre los de momentum\n3. Diferencia entre CONDICIÓN (riesgo elevado) y SEÑAL CONFIRMADA (giro confirmado)\n4. Usa lenguaje probabilístico — nunca afirmes una dirección con certeza\n5. La recomendación de posición debe ser proporcional a la evidencia: cambios máximos de 20% sin señal confirmada\n\nResponde en español con esta estructura:\nSEÑAL: [ALCISTA/NEUTRAL/BAJISTA]\nCONFLUENCIA: [breve descripción de qué indicadores coinciden]\nANÁLISIS: [300 palabras máximo con análisis técnico puro, sin macro. Usa **negrita** para puntos clave]';
+
+  try {
+    const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
+    if (!proxyBase) throw new Error('Proxy no configurado');
+    const resp = await fetch(proxyBase + '/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    if (!texto) throw new Error('Sin respuesta');
+
+    const htmlTexto = texto
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .split('\n').filter(l => l.trim())
+      .map(l => '<p>' + l + '</p>').join('');
+    document.getElementById('tec-ia-body').innerHTML = htmlTexto;
+    // También mostrar en pestaña informe si no hay informe unificado
+    const iaBody = document.getElementById('ia-body');
+    if (iaBody && iaBody.querySelector('p[style*="t4"]')) {
+      iaBody.innerHTML = '<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + htmlTexto;
+    }
+    S.tecInforme = texto;
+    document.getElementById('btn-tec-guardar').disabled = false;
+  } catch(e) {
+    document.getElementById('tec-ia-body').innerHTML = '<p style="color:var(--rd)">Error: ' + e.message + '</p>';
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+}
+
+function guardarTecnico() {
+  if (!tecNivel) return;
+  const hoy = new Date();
+  const clave = hoy.toISOString().slice(0,10);
+  const reg = {
+    fecha: clave,
+    fechaLabel: hoy.toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short' }),
+    tipo: 'tecnico',
+    dec: tecNivel.dec,
+    nivel: tecNivel.cls,
+    score: tecNivel.score,
+    informe: S.tecInforme || '',
+    selecciones: { ...tecEstado }
+  };
+  let hist = getHistorial();
+  // Guardar en historial separado para técnico
+  let histTec = JSON.parse(localStorage.getItem('nqr_hist_tec') || '[]');
+  histTec = histTec.filter(r => r.fecha !== clave);
+  histTec.unshift(reg);
+  if (histTec.length > 60) histTec = histTec.slice(0, 60);
+  localStorage.setItem('nqr_hist_tec', JSON.stringify(histTec));
+
+  const btn = document.getElementById('btn-tec-guardar');
+  btn.textContent = '✓ Guardado';
+  setTimeout(() => btn.textContent = '💾 Guardar análisis técnico', 2000);
+}
+
+// Rellenar Y AUTOSELECCIONAR datos automáticos en pantalla técnica
+function aplicarAutoTecnico(tecnicos, precio) {
+  if (!tecnicos) return;
+  const t = tecnicos;
+
+  // Chip de precio
+  const chip = document.getElementById('tec-precio-chip');
+  if (chip && precio) chip.textContent = '📊 NDX ' + precio.toLocaleString();
+
+  // Helper: autoseleccionar un indicador y mostrar valor
+  function autoSel(num, color, txtAuto) {
+    const el = document.getElementById('tav' + num);
+    if (el) { el.textContent = '⚡ Auto: ' + txtAuto; el.classList.add('vis'); }
+    // Simular click en la opción correcta
+    const block = document.getElementById('tb' + num);
+    if (!block) return;
+    const ops = block.querySelectorAll('.tec-op');
+    const idx = color === 'g' ? 0 : color === 'a' ? 1 : 2;
+    if (ops[idx]) tecPick(num, color, ops[idx]);
+  }
+
+  // 01 EMA20 vs EMA50
+  if (t.ema20 && t.ema50) {
+    const alcista = t.ema50.cruceEmas === 'alcista';
+    const cerca = Math.abs(t.ema20.valor - t.ema50.valor) / t.ema50.valor < 0.005;
+    const c = cerca ? 'a' : alcista ? 'g' : 'r';
+    autoSel(1, c, 'EMA20=' + t.ema20.valor.toLocaleString() + ' vs EMA50=' + t.ema50.valor.toLocaleString() + ' → ' + (cerca ? '↔ Convergiendo' : alcista ? '✅ Alcista' : '⚠️ Bajista'));
+  }
+
+  // 02 EMA50 vs SMA200
+  if (t.ema50 && t.sma200) {
+    const golden = t.ema50.valor > t.sma200.valor;
+    const diffPct = Math.abs(t.ema50.valor - t.sma200.valor) / t.sma200.valor * 100;
+    const cerca = diffPct < 1;
+    const c = cerca ? 'a' : golden ? 'g' : 'r';
+    autoSel(2, c, 'EMA50=' + t.ema50.valor.toLocaleString() + ' vs SMA200=' + t.sma200.valor.toLocaleString() + ' → ' + (cerca ? '⚡ Cruce inminente' : golden ? '✅ Golden Cross' : '⚠️ Death Cross'));
+  }
+
+  // 03 Precio vs SMA200
+  if (t.sma200 && precio) {
+    const dist = t.sma200.distanciaPct;
+    const c = dist > 3 ? 'g' : dist < -3 ? 'r' : 'a';
+    autoSel(3, c, 'Precio ' + (dist >= 0 ? '+' : '') + dist + '% vs SMA200 (' + t.sma200.valor.toLocaleString() + ')');
+  }
+
+  // 06 RSI
+  if (t.rsi) {
+    const r = t.rsi.valor;
+    const tend = t.rsi.tendencia;
+    let c;
+    if (r >= 45 && r <= 65 && tend === 'subiendo') c = 'g';
+    else if ((r > 70 && tend === 'bajando') || t.rsi.alertaRsi !== 'ninguna' || r < 40) c = 'r';
+    else c = 'a';
+    autoSel(6, c, 'RSI14=' + r + ' tendencia=' + tend + ' alerta=' + t.rsi.alertaRsi);
+  }
+
+  // 07 Divergencia RSI
+  if (t.rsi) {
+    const divBaj = t.rsi.divergenciaBajista;
+    const c = divBaj ? 'r' : 'a'; // alcista divergence sería 'g' pero no la calculamos aún
+    autoSel(7, c, divBaj ? '⚠️ DIVERGENCIA BAJISTA detectada' : 'Sin divergencia detectada');
+  }
+
+  // 08 MACD
+  if (t.macd && t.macd.histogram !== null) {
+    const hist = t.macd.histogram;
+    const c = hist > 5 ? 'g' : hist < -5 ? 'r' : 'a';
+    autoSel(8, c, 'MACD=' + t.macd.macd + ' Señal=' + t.macd.signal + ' Hist=' + hist + ' → ' + (hist > 0 ? '↑ Alcista' : '↓ Bajista'));
+  }
+
+  // 05 Fibonacci (si está calculado)
+  if (S.fibonacciLevels && precio) {
+    const fib618 = parseFloat(S.fibonacciLevels['61.8%']?.valor || 0);
+    const fib382 = parseFloat(S.fibonacciLevels['38.2%']?.valor || 0);
+    if (fib618 && fib382) {
+      const c = precio > fib618 ? 'g' : precio < fib618 && precio > fib382 ? 'a' : 'r';
+      const txt = 'Precio=' + precio.toLocaleString() + ' Fib61.8%=' + fib618.toLocaleString() + ' Fib38.2%=' + fib382.toLocaleString();
+      autoSel(5, c, txt);
+    }
+  }
+
+  // 10 VXN
+  const vxnRaw = document.getElementById('fd-vxn')?.textContent;
+  if (vxnRaw && vxnRaw !== '—') {
+    const vxn = parseFloat(vxnRaw);
+    const c = vxn < 20 ? 'g' : vxn <= 30 ? 'a' : 'r';
+    autoSel(10, c, 'VXN=' + vxnRaw + (vxn < 20 ? ' (calma)' : vxn <= 30 ? ' (vigilar)' : ' (alerta)'));
+  }
+
+  // Marcar los 4 manuales como pendientes
+  [4, 9, 11, 12].forEach(n => {
+    const block = document.getElementById('tb' + n);
+    if (block && !tecEstado[n]) {
+      block.style.outline = '2px dashed rgba(139,127,255,0.4)';
+      block.style.outlineOffset = '-2px';
+    }
+  });
+}
+
+// Calcular y mostrar Fibonacci
+function calcularFibonacci(precio, max90, min90) {
+  if (!precio || !max90 || !min90) return;
+  S.fibonacciLevels = {};
+
+  const rango = max90 - min90;
+  const fibs = [
+    { pct: '0%',     val: max90,                    color: '#2ecc8a' },
+    { pct: '23.6%',  val: max90 - rango * 0.236,    color: '#5b9cf6' },
+    { pct: '38.2%',  val: max90 - rango * 0.382,    color: '#f0a500' },
+    { pct: '50.0%',  val: max90 - rango * 0.5,      color: '#f0a500' },
+    { pct: '61.8%',  val: max90 - rango * 0.618,    color: '#ff5e5e' },
+    { pct: '78.6%',  val: max90 - rango * 0.786,    color: '#ff5e5e' },
+    { pct: '100%',   val: min90,                    color: '#ff5e5e' },
+  ];
+
+  // Extensiones
+  const exts = [
+    { pct: '127.2%', val: min90 - rango * 0.272, color: '#8b7fff' },
+    { pct: '161.8%', val: min90 - rango * 0.618, color: '#8b7fff' },
+  ];
+
+  const container = document.getElementById('fib-levels');
+  const estado = document.getElementById('fib-estado');
+  if (!container) return;
+
+  const allLevels = [...fibs, ...exts];
+  container.innerHTML = allLevels.map(f => {
+    const dist = ((precio - f.val) / f.val * 100);
+    const esCercano = Math.abs(dist) < 1.5;
+    S.fibonacciLevels[f.pct] = { valor: f.val.toFixed(0), distPct: dist.toFixed(2) };
+    return '<div class="fib-row" style="' + (esCercano ? 'background:rgba(139,127,255,0.08);' : '') + '">' +
+      '<div class="fib-dot" style="background:' + f.color + '"></div>' +
+      '<div class="fib-pct">' + f.pct + '</div>' +
+      '<div class="fib-val">' + parseFloat(f.val.toFixed(0)).toLocaleString() + (esCercano ? ' ◀ PRECIO AQUÍ' : '') + '</div>' +
+      '<div class="fib-dist">' + (dist >= 0 ? '+' : '') + dist.toFixed(1) + '%</div>' +
+    '</div>';
+  }).join('');
+
+  if (estado) { estado.textContent = 'Calculado ✓'; estado.className = 'fetch-estado ok'; }
+
+  // Auto-seleccionar indicador 05 (Fibonacci) si hay datos técnicos
+  if (S.tecnicos?.precio && S.fibonacciLevels) {
+    const precio = S.tecnicos.precio;
+    const fib618 = parseFloat(S.fibonacciLevels['61.8%']?.valor || 0);
+    const fib382 = parseFloat(S.fibonacciLevels['38.2%']?.valor || 0);
+    if (fib618 && fib382) {
+      const c = precio > fib618 ? 'g' : precio < fib618 && precio > fib382 ? 'a' : 'r';
+      const block = document.getElementById('tb5');
+      if (block) {
+        const ops = block.querySelectorAll('.tec-op');
+        const idx = c === 'g' ? 0 : c === 'a' ? 1 : 2;
+        if (ops[idx]) tecPick(5, c, ops[idx]);
+        const tav = document.getElementById('tav5');
+        if (tav) { tav.textContent = '⚡ Auto: Precio=' + precio.toLocaleString() + ' Fib61.8%=' + fib618.toLocaleString(); tav.classList.add('vis'); }
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>

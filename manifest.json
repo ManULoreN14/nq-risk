@@ -1,0 +1,20 @@
+{
+  "name": "NQ Risk · Nasdaq d+1",
+  "short_name": "NQ Risk",
+  "description": "Monitor de riesgo Nasdaq 100 con análisis IA para operativa d+1",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080810",
+  "theme_color": "#080810",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "productivity"],
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
