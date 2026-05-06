@@ -2276,6 +2276,34 @@ function aplicarDatosAuto(data) {
     S.liquidez = data.liquidez;
   }
 
+  // Put/Call Ratios automáticos del CBOE
+  if (data.pcr) {
+    const mapPCR = {
+      equity: { inp: 'i-pcr-eq', fn: () => evalPCRind('eq'), key: 'pcr_eq' },
+      total:  { inp: 'i-pcr-tot', fn: () => evalPCRind('tot'), key: 'pcr_tot' },
+      index:  { inp: 'i-pcr-idx', fn: () => evalPCRind('idx'), key: 'pcr_idx' },
+      spx:    { inp: 'i-pcr-spx', fn: () => evalPCRind('spx'), key: 'pcr_spx' }
+    };
+    let pcrOk = 0;
+    for (const [k, cfg] of Object.entries(mapPCR)) {
+      const val = data.pcr[k];
+      if (val !== null && val !== undefined) {
+        const inp = document.getElementById(cfg.inp);
+        if (inp) { inp.value = val; cfg.fn(); S[cfg.key] = val; pcrOk++; }
+      }
+    }
+    if (pcrOk > 0) {
+      // Ocultar área de subida de imagen si los datos llegaron automáticamente
+      const pcrImgArea = document.getElementById('pcr-img-area');
+      const pcrCard = document.getElementById('ic-pcr-img');
+      if (pcrImgArea && pcrOk >= 3) {
+        pcrImgArea.innerHTML = '<div style="padding:10px; text-align:center; font-size:11px; color:var(--gr);">✅ Datos cargados automáticamente del CBOE · <a href="https://www.cboe.com/us/options/market_statistics/daily/" target="_blank" style="color:var(--ac);">Ver en CBOE ↗</a></div>';
+      }
+      document.getElementById('fetch-estado').textContent = 'Actualizado ✓';
+      document.getElementById('fetch-estado').className = 'fetch-estado ok';
+    }
+  }
+
   comprobarAnalizar();
 }
 
