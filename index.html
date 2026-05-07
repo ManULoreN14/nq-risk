@@ -2811,12 +2811,15 @@ ${histCtx}
 ${btCtx}
 
 MARCO DE ANÁLISIS PROFESIONAL:
-1. TENDENCIA PRIMERO: Si precio > EMA50 y SMA200, sesgo alcista. No recomendar reducción sin justificación.
-2. CONDICIÓN ≠ SEÑAL: RSI alto = condición. Ruptura de estructura = señal. Nunca confundirlas.
-3. REDUCCIONES PROPORCIONALES: Sin señal confirmada máximo -20% de cambio. Solo con señal fuerte >-30%.
-4. PUT/CALL CONTEXTUALIZADO: Index PCR 1.0-1.5 es normal en bull market, no alarma.
-5. LENGUAJE PROBABILÍSTICO: Nunca "va a caer". Siempre "aumenta el riesgo", "binomio empeora".
-6. EJECUCIÓN d+1: Orden hoy = precio cierre mañana.
+1. TENDENCIA PRIMERO: Si precio > EMA50 y SMA200, sesgo alcista. No recomendar reducción sin justificación técnica sólida.
+2. CONDICIÓN ≠ SEÑAL: RSI alto = CONDICIÓN de alerta, NO señal. Una mecha en resistencia = CONDICIÓN, no "ventas institucionales". Solo llamar SEÑAL cuando hay confirmación múltiple.
+3. DIVERGENCIA RSI: Solo es señal real (fiabilidad ~80%) si tiene al menos 2 confirmadores: volumen decreciente + VIX subiendo con precio + AccDis divergiendo. Sin confirmadores es solo "condición de alerta". NUNCA decir "divergencia bajista = señal de techo" sin especificar la fiabilidad.
+4. MERCADO ESTIRADO: Si distancia a EMA20 semanal > 10%, usar frase exacta "mercado estirado respecto a EMA20 semanal — probabilidad de consolidación elevada aunque tendencia siga alcista". No implica caída, implica necesidad de consolidación.
+5. BREADTH: Si semis rezagan y %EMA50 < 40%, el rally es sospechoso aunque el índice suba. Si semis lideran y %EMA50 > 60%, rally sano.
+6. LENGUAJE RIGUROSO: Nunca "ventas institucionales" sin evidencia. Usar "rechazo en zona", "presión vendedora", "absorción posible". Nunca "va a caer", siempre "aumenta la probabilidad de corrección".
+7. REDUCCIONES PROPORCIONALES: Sin señal confirmada máximo -20%. Solo con señal fuerte (divergencia alta fiabilidad + breadth débil + mercado estirado) considerar >-30%.
+8. PUT/CALL CONTEXTUALIZADO: Equity PCR tiene ruido de 0DTE. Index PCR 1.0-1.5 es normal en bull market.
+9. EJECUCIÓN d+1: Orden hoy = precio cierre mañana.
 
 Responde EXACTAMENTE en este formato:
 
@@ -2852,13 +2855,14 @@ Usa **negrita**. Máx 180 palabras.]
 
 ═══════ DETECCIÓN DE GIRO ═══════
 [Analiza específicamente si hay señales de giro bajista (techo) o alcista (suelo):
-1. **Divergencias RSI**: ¿Hay divergencia alcista o bajista? ¿Qué implica?
+1. **Divergencias RSI**: ¿Hay divergencia? ¿Cuál es su fiabilidad (confirmadores)? RECORDAR: sin confirmadores es solo condición, no señal.
 2. **Bandas de Bollinger**: ¿El precio está en banda superior o inferior? ¿Hay squeeze?
 3. **Ratio VXN/VIX**: ¿Hay estrés específico en tech?
-4. **Días consecutivos**: ¿Hay agotamiento de tendencia?
-5. **Confluencia**: Si 2 o más señales apuntan al mismo giro, es una alerta seria. Si ninguna coincide, no hay señal de giro confirmada.
-6. **Veredicto de giro**: ¿Techo probable / Suelo probable / Sin señal clara?
-Usa **negrita**. Máx 150 palabras.]
+4. **Días consecutivos + mercado estirado**: ¿Agotamiento? ¿Distancia excesiva a EMA20 semanal?
+5. **Breadth**: ¿Los semiconductores lideran o rezagan? ¿Qué dice el %EMA50?
+6. **Confluencia**: Una señal sola NO es suficiente. Necesitas 2+ confirmadores para hablar de giro probable. Sé explícito sobre qué confirma y qué no.
+7. **Veredicto de giro**: Techo probable (alta confluencia) / Condición de alerta (1 señal) / Sin señal clara
+Usa **negrita**. Máx 180 palabras.]
 
 ═══════ CONCLUSIÓN CONJUNTA ═══════
 [Síntesis de los 4 análisis anteriores. Responde estas 3 preguntas: ¿Cuál es el sesgo direccional para d+1? ¿Hay riesgo de giro inminente? ¿Qué posición recomiendas y por qué? Máx 100 palabras.]`;
@@ -3043,7 +3047,8 @@ ${S.semanal ? `  · Tendencia semanal: ${S.semanal.tendencia}
   · SMA200W=${S.semanal.sma200} (dist ${S.semanal.distSma200}%)
   · MACD semanal=${S.semanal.macd} (${S.semanal.macd > 0 ? 'alcista' : 'bajista'})
   · Vela semana actual: ${S.semanal.vela.alcista ? 'alcista' : 'bajista'} · Máx/Mín semana ant: ${S.semanal.niveles.maxSemAnt}/${S.semanal.niveles.minSemAnt}` : 'no disponible'}
-- Detectores de giro NDX: ${S.giro ? 'Señal global=' + S.giro.señalGlobal + ' · Divergencia RSI=' + S.giro.divergencias.señal + ' · Bollinger=' + S.giro.bollinger.señal + ' (pos=' + S.giro.bollinger.posicion + '%) · VXN/VIX ratio=' + S.giro.vixVxn.ratio + ' (' + S.giro.vixVxn.señal + ') · Días consecutivos=' + S.giro.diasConsecutivos.dias + ' ' + S.giro.diasConsecutivos.direccion + ' (' + S.giro.diasConsecutivos.señal + ')' : 'no disponible'}
+- Detectores de giro NDX: ${S.giro ? 'Señal global=' + S.giro.señalGlobal + ' · Divergencia RSI=' + S.giro.divergencias.señal + ' FIABILIDAD=' + (S.giro.divergencias.fiabilidad||'baja') + ' confirmadores=' + (S.giro.divergencias.confirmadores||0) + '/3 (volDecreciente=' + S.giro.divergencias.volDecreciente + ' trampaVix=' + S.giro.divergencias.trampaVix + ' accdisDiv=' + S.giro.divergencias.accdisDiv + ') · Bollinger=' + S.giro.bollinger.señal + ' pos=' + S.giro.bollinger.posicion + '% · VXN/VIX=' + S.giro.vixVxn.ratio + ' · Días=' + S.giro.diasConsecutivos.dias + ' ' + S.giro.diasConsecutivos.direccion : 'no disponible'}
+- Distancia EMA20 semanal: ${S.semanal?.distEma20 !== null ? (S.semanal.distEma20 >= 0 ? '+' : '') + S.semanal.distEma20 + '% — ' + (Math.abs(S.semanal.distEma20) > 10 ? '⚠️ MERCADO MUY ESTIRADO vs EMA20 semanal — alta probabilidad de mean reversion aunque tendencia siga alcista' : 'dentro de rango normal') : 'no disponible'}
 ${S.nota ? '- Nota del inversor: ' + S.nota : ''}
 ${S.tecnicos ? `
 INDICADORES TÉCNICOS NDX (calculados automáticamente):
@@ -4365,11 +4370,25 @@ function renderGiro(g) {
     {
       icon: '📊',
       nombre: 'Divergencia RSI',
-      desc: g.divergencias.alcista ? '✅ Divergencia ALCISTA — precio baja pero RSI sube (señal de suelo)' :
-            g.divergencias.bajista ? '⚠️ Divergencia BAJISTA — precio sube pero RSI baja (señal de techo)' :
-            'Sin divergencia visible — precio y RSI en sincronía',
+      desc: (() => {
+        if (!g.divergencias.alcista && !g.divergencias.bajista) return 'Sin divergencia visible — precio y RSI en sincronía';
+        const tipo = g.divergencias.bajista ? 'BAJISTA' : 'ALCISTA';
+        const fib = g.divergencias.fiabilidad || 'baja';
+        const conf = g.divergencias.confirmadores || 0;
+        const confirmDesc = [];
+        if (g.divergencias.volDecreciente) confirmDesc.push('volumen decreciente');
+        if (g.divergencias.trampaVix) confirmDesc.push('VIX subiendo con precio');
+        if (g.divergencias.accdisDiv) confirmDesc.push('AccDis divergiendo');
+        const confTxt = confirmDesc.length > 0 ? ' · Confirmada por: ' + confirmDesc.join(', ') : ' · Sin confirmación de volumen ni VIX — fiabilidad baja';
+        return 'Divergencia ' + tipo + ' detectada · Fiabilidad: ' + fib.toUpperCase() + ' (' + conf + '/3 confirmadores)' + confTxt;
+      })(),
       señal: g.divergencias.alcista ? 'suelo' : g.divergencias.bajista ? 'techo' : 'neutro',
-      badge: g.divergencias.alcista ? '🟢 Suelo posible' : g.divergencias.bajista ? '🔴 Techo posible' : '→ Neutro'
+      badge: (() => {
+        if (!g.divergencias.alcista && !g.divergencias.bajista) return '→ Sin div.';
+        const fib = g.divergencias.fiabilidad || 'baja';
+        const emoji = g.divergencias.bajista ? '🔴' : '🟢';
+        return emoji + ' ' + (fib === 'alta' ? 'Señal fuerte' : fib === 'media' ? 'Señal media' : 'Condición');
+      })()
     },
     {
       icon: '📏',
