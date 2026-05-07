@@ -932,6 +932,70 @@ input, textarea, button { font-family: inherit; }
 .btn-tec-ia .sp { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
 .btn-tec-ia.loading .sp { display:block; }
 
+/* CONTEXTO SEMANAL */
+.semanal-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.sem-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.sem-titulo { font-size:13px; font-weight:700; flex:1; }
+.sem-body { padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+.sem-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.sem-dato { background:var(--s2); border:1px solid var(--b1); border-radius:9px; padding:9px 11px; }
+.sem-dato-val { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:600; color:var(--t1); line-height:1; }
+.sem-dato-lbl { font-size:9px; color:var(--t3); margin-top:3px; text-transform:uppercase; letter-spacing:0.08em; font-family:'JetBrains Mono',monospace; }
+.sem-dato-dist { font-size:10px; margin-top:2px; font-family:'JetBrains Mono',monospace; }
+.sem-tendencia { padding:9px 12px; border-radius:9px; font-size:12px; font-weight:600; line-height:1.4; }
+.sem-img-area { border:2px dashed rgba(139,127,255,0.25); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--ac2); }
+.sem-img-area:hover { border-color:var(--ac); }
+
+/* DETECTORES DE GIRO */
+.giro-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.giro-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.giro-titulo { font-size:13px; font-weight:700; flex:1; }
+.giro-global { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 9px; border-radius:100px; }
+.giro-techo { background:var(--rd2); color:var(--rd); border:1px solid var(--rdb); }
+.giro-suelo { background:var(--gr2); color:var(--gr); border:1px solid var(--grb); }
+.giro-neutro { background:var(--s3); color:var(--t3); border:1px solid var(--b1); }
+.giro-body { padding:10px 14px; display:flex; flex-direction:column; gap:6px; }
+.giro-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; background:var(--s2); border:1px solid var(--b1); }
+.giro-item.señal-techo { border-left:3px solid var(--rd); }
+.giro-item.señal-suelo { border-left:3px solid var(--gr); }
+.giro-item.señal-neutro { border-left:3px solid var(--t4); }
+.giro-item-icon { font-size:14px; flex-shrink:0; }
+.giro-item-info { flex:1; }
+.giro-item-nombre { font-size:12px; font-weight:600; color:var(--t1); margin-bottom:2px; }
+.giro-item-desc { font-size:11px; color:var(--t3); line-height:1.4; }
+.giro-item-badge { font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 7px; border-radius:100px; flex-shrink:0; }
+
+/* MAX PAIN */
+.maxpain-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.mp-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.mp-titulo { font-size:13px; font-weight:700; flex:1; }
+.mp-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.mp-valores { display:flex; gap:8px; }
+.mp-val { flex:1; background:var(--s2); border:1px solid var(--b1); border-radius:10px; padding:10px 12px; text-align:center; }
+.mp-val-num { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; color:var(--t1); }
+.mp-val-label { font-size:10px; color:var(--t3); margin-top:3px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; }
+.mp-señal { font-size:12px; line-height:1.5; padding:8px 10px; border-radius:8px; font-weight:500; }
+.mp-señal.acumulacion { background:var(--gr2); color:var(--gr); border:1px solid var(--grb); }
+.mp-señal.distribucion { background:var(--rd2); color:var(--rd); border:1px solid var(--rdb); }
+.mp-señal.neutro { background:var(--am2); color:var(--am); border:1px solid var(--amb); }
+
+/* GEX */
+.gex-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:14px 20px 0; }
+.gex-header { padding:13px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.gex-titulo { font-size:13px; font-weight:700; flex:1; }
+.gex-badge { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 9px; border-radius:100px; }
+.gex-pos-alta  { background:var(--gr2); color:var(--gr); border:1px solid var(--grb); }
+.gex-pos       { background:rgba(46,204,138,0.07); color:var(--gr); border:1px solid var(--grb); }
+.gex-neutra    { background:var(--am2); color:var(--am); border:1px solid var(--amb); }
+.gex-neg       { background:var(--rd2); color:var(--rd); border:1px solid var(--rdb); }
+.gex-neg-ext   { background:var(--rd2); color:var(--rd); border:1px solid var(--rdb); }
+.gex-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.gex-escala { display:flex; gap:3px; height:6px; border-radius:3px; overflow:hidden; margin-bottom:4px; }
+.gex-seg { flex:1; border-radius:2px; }
+.gex-desc { font-size:12px; color:var(--t2); line-height:1.5; }
+.gex-alerta { font-size:11px; color:var(--rd); background:var(--rd2); border:1px solid var(--rdb); border-radius:8px; padding:8px 10px; line-height:1.4; font-weight:600; }
+.gex-links { display:flex; gap:6px; flex-wrap:wrap; }
+
 /* ZONAS DE LIQUIDEZ */
 .liq-section { margin: 14px 20px 0; }
 .liq-card { background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r-lg); overflow: hidden; }
@@ -1105,6 +1169,68 @@ input, textarea, button { font-family: inherit; }
           <span id="ts-cruce-emas">—</span> · <span id="ts-accdis">—</span>
         </div>
         <a class="il" href="https://www.tradingview.com/chart/?symbol=NDX" target="_blank" style="font-size:10px;">NDX ↗</a>
+      </div>
+    </div>
+
+    <!-- GEX APROXIMADO -->
+    <div class="gex-card" id="gex-card" style="display:none;">
+      <div class="gex-header">
+        <span style="font-size:15px;">⚡</span>
+        <div class="gex-titulo">Gamma Exposure (GEX) — aproximación</div>
+        <div class="gex-badge" id="gex-badge">—</div>
+      </div>
+      <div class="gex-body">
+        <div class="gex-escala" id="gex-escala"></div>
+        <div class="gex-desc" id="gex-desc">—</div>
+        <div class="gex-alerta" id="gex-alerta" style="display:none;"></div>
+        <div class="gex-links">
+          <a class="il" href="https://spotgamma.com/free-tools/" target="_blank">⚡ SpotGamma oficial ↗</a>
+          <a class="il blue" href="https://www.cboe.com/derivatives/insights/articles/" target="_blank">🔗 CBOE Gamma ↗</a>
+        </div>
+        <div style="font-size:10px; color:var(--t4); font-style:italic;">Estimación basada en VIX/VXN. Para el dato oficial consulta SpotGamma.</div>
+      </div>
+    </div>
+
+    <!-- MAX PAIN -->
+    <div class="maxpain-card" id="maxpain-card" style="display:none;">
+      <div class="mp-header">
+        <span style="font-size:15px;">🎯</span>
+        <div class="mp-titulo">Max Pain — QQQ opciones</div>
+        <div class="ind-badge" id="mp-badge" style="font-size:10px;">—</div>
+      </div>
+      <div class="mp-body">
+        <div class="mp-valores">
+          <div class="mp-val">
+            <div class="mp-val-num" id="mp-valor">—</div>
+            <div class="mp-val-label">Max Pain</div>
+          </div>
+          <div class="mp-val">
+            <div class="mp-val-num" id="mp-precio">—</div>
+            <div class="mp-val-label">Precio QQQ</div>
+          </div>
+          <div class="mp-val">
+            <div class="mp-val-num" id="mp-dist">—</div>
+            <div class="mp-val-label">Distancia</div>
+          </div>
+        </div>
+        <div class="mp-señal" id="mp-señal">—</div>
+        <div style="font-size:10px; color:var(--t3);" id="mp-exp">Vencimiento: —</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+          <a class="il" href="https://www.barchart.com/stocks/quotes/QQQ/options" target="_blank">🎯 Max Pain oficial ↗</a>
+          <a class="il blue" href="https://marketchameleon.com/Overview/QQQ/OptionChain/" target="_blank">🔗 Market Chameleon ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETECTORES DE GIRO -->
+    <div class="giro-card" id="giro-card" style="display:none;">
+      <div class="giro-header">
+        <span style="font-size:15px;">🔄</span>
+        <div class="giro-titulo">Detectores de giro — NDX</div>
+        <div class="giro-global giro-neutro" id="giro-global-badge">—</div>
+      </div>
+      <div class="giro-body" id="giro-body">
+        <div style="font-size:12px; color:var(--t3); text-align:center;">Cargando...</div>
       </div>
     </div>
 
@@ -1568,6 +1694,70 @@ input, textarea, button { font-family: inherit; }
       <div class="ph-title">Análisis <span>Técnico</span></div>
       <div class="ph-meta">
         <div class="chip" id="tec-precio-chip">📊 Carga datos primero</div>
+      </div>
+    </div>
+
+    <!-- CONTEXTO SEMANAL AUTOMÁTICO -->
+    <div class="semanal-card" id="semanal-card" style="display:none;">
+      <div class="sem-header">
+        <span style="font-size:15px;">📅</span>
+        <div class="sem-titulo">Contexto Semanal — NDX</div>
+        <div class="ind-badge" id="sem-tendencia-badge">—</div>
+      </div>
+      <div class="sem-body">
+        <!-- Grid datos automáticos -->
+        <div class="sem-grid" id="sem-grid">
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-rsi">—</div>
+            <div class="sem-dato-lbl">RSI Semanal</div>
+            <div class="sem-dato-dist" id="sw-rsi-est">—</div>
+          </div>
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-ema20">—</div>
+            <div class="sem-dato-lbl">EMA 20W</div>
+            <div class="sem-dato-dist" id="sw-ema20-dist">—</div>
+          </div>
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-ema50">—</div>
+            <div class="sem-dato-lbl">EMA 50W</div>
+            <div class="sem-dato-dist" id="sw-ema50-dist">—</div>
+          </div>
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-sma200">—</div>
+            <div class="sem-dato-lbl">SMA 200W</div>
+            <div class="sem-dato-dist" id="sw-sma200-dist">—</div>
+          </div>
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-macd">—</div>
+            <div class="sem-dato-lbl">MACD Semanal</div>
+            <div class="sem-dato-dist" id="sw-macd-dir">—</div>
+          </div>
+          <div class="sem-dato">
+            <div class="sem-dato-val" id="sw-vela">—</div>
+            <div class="sem-dato-lbl">Vela semana</div>
+            <div class="sem-dato-dist" id="sw-niveles">—</div>
+          </div>
+        </div>
+        <div class="sem-tendencia" id="sw-tendencia-desc">—</div>
+
+        <!-- Imagen semanal ProRealTime -->
+        <div style="font-size:10px; color:var(--t3); font-family:'JetBrains Mono',monospace; letter-spacing:0.1em; text-transform:uppercase; margin-top:4px;">Gráfico semanal ProRealTime (opcional · 1 vez/semana)</div>
+        <div id="sem-img-area" class="sem-img-area" onclick="document.getElementById('sem-img-input').click()"
+          ondragover="event.preventDefault(); this.style.borderColor='var(--ac)'"
+          ondragleave="this.style.borderColor='rgba(139,127,255,0.25)'"
+          ondrop="handleSemImgDrop(event)">
+          <div style="font-size:20px; margin-bottom:5px;">📈</div>
+          <div style="font-size:12px; color:var(--t2); font-weight:600;">Sube tu gráfico semanal</div>
+          <div style="font-size:10px; color:var(--t3); margin-top:3px;">Arrastra · Selecciona · o pega con <strong style="color:var(--ac)">Ctrl+V</strong></div>
+          <input type="file" id="sem-img-input" accept="image/*" style="display:none" onchange="handleSemImgFile(event)">
+        </div>
+        <div id="sem-img-preview-wrap" style="display:none; position:relative;">
+          <img id="sem-img-preview" style="width:100%; border-radius:9px; border:1px solid var(--b2);">
+          <button onclick="limpiarSemImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;border-radius:5px;color:#fff;padding:3px 8px;font-size:11px;cursor:pointer;">✕ Quitar</button>
+        </div>
+        <div style="font-size:10px; color:var(--t3); line-height:1.5; padding:2px 0;">
+          Configuración recomendada: EMA 20/50/200 · Canal tendencia · Fibonacci estructural · RSI · MACD · OBV · Volume Profile semanal
+        </div>
       </div>
     </div>
 
@@ -2281,6 +2471,94 @@ function aplicarDatosAuto(data) {
     S.liquidez = data.liquidez;
   }
 
+  // CONTEXTO SEMANAL
+  if (data.semanal) {
+    S.semanal = data.semanal;
+    const card = document.getElementById('semanal-card');
+    if (card) card.style.display = 'block';
+    renderSemanal(data.semanal);
+  }
+
+  // DETECTORES DE GIRO
+  if (data.giro) {
+    S.giro = data.giro;
+    const card = document.getElementById('giro-card');
+    if (card) card.style.display = 'block';
+    renderGiro(data.giro);
+  }
+
+  // MAX PAIN
+  if (data.maxpain) {
+    S.maxpain = data.maxpain;
+    const card = document.getElementById('maxpain-card');
+    if (card) card.style.display = 'block';
+
+    const mp = data.maxpain;
+    const el = (id) => document.getElementById(id);
+
+    if (el('mp-valor'))  el('mp-valor').textContent  = mp.valor?.toLocaleString('es-ES') || '—';
+    if (el('mp-precio')) el('mp-precio').textContent = mp.precio?.toLocaleString('es-ES') || '—';
+    if (el('mp-dist'))   el('mp-dist').textContent   = (mp.distPct >= 0 ? '+' : '') + mp.distPct + '%';
+    if (el('mp-exp'))    el('mp-exp').textContent    = 'Vencimiento: ' + (mp.expiracion || '—');
+
+    const señalEl = el('mp-señal');
+    if (señalEl) {
+      señalEl.textContent = mp.descripcion;
+      señalEl.className = 'mp-señal ' + (mp.señal || 'neutro');
+    }
+
+    const badge = el('mp-badge');
+    if (badge) {
+      const badgeMap = {
+        acumulacion: { txt: '📈 Acumulación', cls: 'g' },
+        distribucion: { txt: '📉 Distribución', cls: 'r' },
+        neutro: { txt: '→ Neutro', cls: 'a' }
+      };
+      const b = badgeMap[mp.señal] || badgeMap.neutro;
+      badge.textContent = b.txt;
+      badge.className = 'ind-badge ' + b.cls;
+    }
+  }
+
+  // GEX aproximado
+  if (data.gex) {
+    S.gex = data.gex;
+    const card = document.getElementById('gex-card');
+    if (card) card.style.display = 'block';
+
+    const mapEstado = {
+      'positiva_alta': { label:'Gamma + Alta', cls:'gex-pos-alta', segs:[1,1,1,1,1,0,0], col:'#2ecc8a' },
+      'positiva':      { label:'Gamma +',      cls:'gex-pos',      segs:[0,1,1,1,0,0,0], col:'#2ecc8a' },
+      'neutra':        { label:'Gamma Neutra',  cls:'gex-neutra',   segs:[0,0,1,1,0,0,0], col:'#f0a500' },
+      'negativa':      { label:'Gamma -',       cls:'gex-neg',      segs:[0,0,0,1,1,1,0], col:'#ff5e5e' },
+      'negativa_extrema':{ label:'Gamma - Extrema', cls:'gex-neg-ext', segs:[0,0,0,1,1,1,1], col:'#ff5e5e' }
+    };
+    const cfg = mapEstado[data.gex.estado] || mapEstado['neutra'];
+
+    const badge = document.getElementById('gex-badge');
+    if (badge) { badge.textContent = cfg.label; badge.className = 'gex-badge ' + cfg.cls; }
+
+    const escala = document.getElementById('gex-escala');
+    if (escala) {
+      escala.innerHTML = cfg.segs.map(on =>
+        '<div class="gex-seg" style="background:' + (on ? cfg.col : 'var(--s4)') + ';"></div>'
+      ).join('');
+    }
+
+    const desc = document.getElementById('gex-desc');
+    if (desc) desc.textContent = data.gex.descripcion;
+
+    const alerta = document.getElementById('gex-alerta');
+    if (alerta) {
+      if (data.gex.alerta) {
+        alerta.textContent = '⚠️ ' + data.gex.alerta;
+        alerta.style.display = 'block';
+      } else {
+        alerta.style.display = 'none';
+      }
+    }
+  }
+
   // Put/Call Ratios automáticos del CBOE
   if (data.pcr) {
     const mapPCR = {
@@ -2548,13 +2826,42 @@ NASDAQ_REC: [0-100, cambio máx 20 puntos sin señal confirmada vs ${S.posNasdaq
 LIQUIDEZ_REC: [complementario]
 
 ═══════ ANÁLISIS MACRO ═══════
-[2-3 párrafos: tendencia estructural, indicadores macro clave, contexto d+1. Usa **negrita** para puntos clave. Máx 180 palabras.]
+[2-3 párrafos: tendencia estructural, indicadores macro clave (VIX, futuros, bonos, DXY, Fear&Greed), contexto d+1. Usa **negrita** para puntos clave. Máx 180 palabras.]
+
+═══════ CONTEXTO SEMANAL ═══════
+[Analiza el timeframe semanal como marco de referencia para la decisión d+1:
+1. **Tendencia semanal**: ¿Cuál es el sesgo estructural en semanal? ¿Opera a favor o en contra del diario?
+2. **RSI semanal**: ¿Está en sobrecompra/sobreventa semanal? Esto tiene más peso que el diario.
+3. **EMAs semanales**: ¿Precio sobre o bajo EMA20/50/200 semanal?
+4. **Confluencia semanal/diario**: ¿Los dos timeframes apuntan en la misma dirección o hay divergencia?
+5. **Conclusión**: ¿El contexto semanal apoya o contradice la operación de mañana?
+${semImgBase64 ? 'Se adjunta gráfico semanal de ProRealTime — léelo e incorpora su análisis.' : ''}
+Usa **negrita**. Máx 150 palabras.]
 
 ═══════ ANÁLISIS TÉCNICO ═══════
 [2-3 párrafos: confluencia de indicadores técnicos, niveles Fibonacci relevantes, patrón de velas si aplica, señal técnica combinada. Usa **negrita**. Máx 180 palabras.]
 
+═══════ LECTURA INSTITUCIONAL ═══════
+[Analiza siguiendo este framework exacto:
+1. **PCR**: ¿Está el retail demasiado alcista (Equity PCR bajo)? ¿Están los institucionales protegidos (Index PCR medio/alto)?
+2. **VIX + GEX**: ¿Los dealers estabilizan o amplifican? ¿Hay trampa institucional (precio sube + VIX sube)?
+3. **Max Pain**: ¿Está el precio por encima o debajo? ¿Qué incentivo tienen los dealers?
+4. **Liquidez**: ¿Dónde está la liquidez más cercana arriba y abajo? ¿Hacia qué zona va el precio?
+5. **Fase del mercado**: subida controlada / barrido de máximos / distribución / reversión inminente
+Usa **negrita**. Máx 180 palabras.]
+
+═══════ DETECCIÓN DE GIRO ═══════
+[Analiza específicamente si hay señales de giro bajista (techo) o alcista (suelo):
+1. **Divergencias RSI**: ¿Hay divergencia alcista o bajista? ¿Qué implica?
+2. **Bandas de Bollinger**: ¿El precio está en banda superior o inferior? ¿Hay squeeze?
+3. **Ratio VXN/VIX**: ¿Hay estrés específico en tech?
+4. **Días consecutivos**: ¿Hay agotamiento de tendencia?
+5. **Confluencia**: Si 2 o más señales apuntan al mismo giro, es una alerta seria. Si ninguna coincide, no hay señal de giro confirmada.
+6. **Veredicto de giro**: ¿Techo probable / Suelo probable / Sin señal clara?
+Usa **negrita**. Máx 150 palabras.]
+
 ═══════ CONCLUSIÓN CONJUNTA ═══════
-[1 párrafo: síntesis macro+técnico, decisión de posición justificada, qué vigilar mañana. Máx 80 palabras.]`;
+[Síntesis de los 4 análisis anteriores. Responde estas 3 preguntas: ¿Cuál es el sesgo direccional para d+1? ¿Hay riesgo de giro inminente? ¿Qué posición recomiendas y por qué? Máx 100 palabras.]`;
 
   try {
     const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
@@ -2565,11 +2872,34 @@ LIQUIDEZ_REC: [complementario]
       return;
     }
 
-    // Construir mensaje — si hay imagen, incluirla
+    // Construir mensaje — si hay imagen diaria y/o semanal
     let mensajeContent;
-    if (imgBase64) {
+    const tieneImgDiaria = !!imgBase64;
+    const tieneImgSemanal = !!semImgBase64;
+
+    if (tieneImgDiaria || tieneImgSemanal) {
       const mediaType = window._imgMediaType || 'image/png';
+      // Construir array de contenido con imágenes disponibles
+      const contentParts = [];
+
+      // Imagen semanal primero si existe
+      if (tieneImgSemanal) {
+        contentParts.push({
+          type: 'image',
+          source: { type: 'base64', media_type: window._semMediaType || 'image/png', data: semImgBase64 }
+        });
+      }
+      // Imagen diaria
+      if (tieneImgDiaria) {
+        contentParts.push({
+          type: 'image',
+          source: { type: 'base64', media_type: window._imgMediaType || 'image/png', data: imgBase64 }
+        });
+      }
+
       const promptConImagen = prompt + '\n\n' +
+        (tieneImgSemanal ? 'PRIMERA IMAGEN: Gráfico SEMANAL de ProRealTime del NQ. Úsalo para la sección CONTEXTO SEMANAL.\n' : '') +
+        (tieneImgDiaria ? (tieneImgSemanal ? 'SEGUNDA IMAGEN: ' : 'IMAGEN: ') + 'Gráfico DIARIO de ProRealTime del NQ. Úsalo para la sección ANÁLISIS GRÁFICO PROREAL TIME.\n' : '') + '\n' +
         'INSTRUCCIÓN ADICIONAL — ANÁLISIS DE IMAGEN PROREAL TIME:\n' +
         'Se adjunta el gráfico de ProRealTime del futuro NQ Micro E-mini Nasdaq100 (MNQXXXX) en timeframe DIARIO.\n\n' +
         'CONFIGURACIÓN EXACTA DEL GRÁFICO (de arriba a abajo):\n' +
@@ -2593,10 +2923,8 @@ LIQUIDEZ_REC: [complementario]
         '8. **Conclusión técnica**: Una frase con el sesgo técnico del gráfico.\n' +
         'Usa **negrita** para valores clave. Máx 250 palabras.';
 
-      mensajeContent = [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: imgBase64 } },
-        { type: 'text', text: promptConImagen }
-      ];
+      contentParts.push({ type: 'text', text: promptConImagen });
+      mensajeContent = contentParts;
     } else {
       mensajeContent = prompt;
     }
@@ -2706,6 +3034,16 @@ DATOS DE MERCADO DE HOY:
 - SPX+SPXW Put/Call Ratio (S&P500): ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx + ' — ' + (S.pcr_spx < 1.2 ? 'normal' : S.pcr_spx <= 1.8 ? 'cautela' : 'ALERTA cobertura masiva') : 'no disponible'}
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
+- Gamma Exposure aproximado: ${S.gex ? S.gex.estado + ' — ' + S.gex.descripcion + (S.gex.alerta ? ' ⚠️ ALERTA: ' + S.gex.alerta : '') : 'no disponible'}
+- Max Pain QQQ: ${S.maxpain ? 'Valor=' + S.maxpain.valor + ' Precio=' + S.maxpain.precio + ' Distancia=' + S.maxpain.distPct + '% Señal=' + S.maxpain.señal + ' (' + S.maxpain.descripcion + ') Venc=' + S.maxpain.expiracion : 'no disponible'}
+- CONTEXTO SEMANAL NDX (timeframe semanal):
+${S.semanal ? `  · Tendencia semanal: ${S.semanal.tendencia}
+  · RSI semanal: ${S.semanal.rsi} (${S.semanal.rsi > 70 ? 'sobrecompra semanal — señal seria' : S.semanal.rsi < 30 ? 'sobreventa semanal — oportunidad' : 'neutro'})
+  · EMA20W=${S.semanal.ema20} (dist ${S.semanal.distEma20}%) · EMA50W=${S.semanal.ema50} (dist ${S.semanal.distEma50}%)
+  · SMA200W=${S.semanal.sma200} (dist ${S.semanal.distSma200}%)
+  · MACD semanal=${S.semanal.macd} (${S.semanal.macd > 0 ? 'alcista' : 'bajista'})
+  · Vela semana actual: ${S.semanal.vela.alcista ? 'alcista' : 'bajista'} · Máx/Mín semana ant: ${S.semanal.niveles.maxSemAnt}/${S.semanal.niveles.minSemAnt}` : 'no disponible'}
+- Detectores de giro NDX: ${S.giro ? 'Señal global=' + S.giro.señalGlobal + ' · Divergencia RSI=' + S.giro.divergencias.señal + ' · Bollinger=' + S.giro.bollinger.señal + ' (pos=' + S.giro.bollinger.posicion + '%) · VXN/VIX ratio=' + S.giro.vixVxn.ratio + ' (' + S.giro.vixVxn.señal + ') · Días consecutivos=' + S.giro.diasConsecutivos.dias + ' ' + S.giro.diasConsecutivos.direccion + ' (' + S.giro.diasConsecutivos.señal + ')' : 'no disponible'}
 ${S.nota ? '- Nota del inversor: ' + S.nota : ''}
 ${S.tecnicos ? `
 INDICADORES TÉCNICOS NDX (calculados automáticamente):
@@ -2819,17 +3157,23 @@ function procesarRespuestaIA(texto) {
   };
   const getAnalisis = () => {
     // Try new unified format with sections
-    const macroMatch = texto.match(/═+\s*ANÁLISIS MACRO\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS TÉCNICO|$)/i);
-    const tecMatch   = texto.match(/═+\s*ANÁLISIS TÉCNICO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
+    const macroMatch = texto.match(/═+\s*ANÁLISIS MACRO\s*═+\s*([\s\S]+?)(?:═+\s*CONTEXTO SEMANAL|═+\s*ANÁLISIS TÉCNICO|$)/i);
+    const semMatch   = texto.match(/═+\s*CONTEXTO SEMANAL\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS TÉCNICO|$)/i);
+    const tecMatch   = texto.match(/═+\s*ANÁLISIS TÉCNICO\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS GRÁFICO|═+\s*LECTURA|═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
     const concMatch  = texto.match(/═+\s*CONCLUSIÓN CONJUNTA\s*═+\s*([\s\S]+)/i);
 
-    const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
+    const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*CONCLUSIÓN|$)/i);
+    const instMatch = texto.match(/═+\s*LECTURA INSTITUCIONAL\s*═+\s*([\s\S]+?)(?:═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
+    const giroMatch = texto.match(/═+\s*DETECCIÓN DE GIRO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
 
-    if (macroMatch || tecMatch || prtMatch) {
+    if (macroMatch || semMatch || tecMatch || prtMatch || instMatch || giroMatch) {
       let html = '';
       if (macroMatch) html += '<p><strong style="color:var(--ac)">📊 ANÁLISIS MACRO</strong></p>' + macroMatch[1].trim();
-      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO (automático)</strong></p>' + tecMatch[1].trim();
+      if (semMatch)   html += '\n\n<p><strong style="color:#8b5cf6">📅 CONTEXTO SEMANAL</strong></p>' + semMatch[1].trim();
+      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + tecMatch[1].trim();
       if (prtMatch)   html += '\n\n<p><strong style="color:#f0a500">📸 ANÁLISIS GRÁFICO PROREAL TIME</strong></p>' + prtMatch[1].trim();
+      if (instMatch)  html += '\n\n<p><strong style="color:#8b5cf6">🏦 LECTURA INSTITUCIONAL</strong></p>' + instMatch[1].trim();
+      if (giroMatch)  html += '\n\n<p><strong style="color:#ff6b6b">🔄 DETECCIÓN DE GIRO</strong></p>' + giroMatch[1].trim();
       if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
       return html;
     }
@@ -3401,20 +3745,27 @@ document.addEventListener('paste', function(e) {
     if (!item.type.startsWith('image/')) continue;
     const file = item.getAsFile();
     if (!file) continue;
-
-    // Determinar qué área está visible/activa
+    const sc = document.querySelector('.screen.active')?.id;
     const pcrArea = document.getElementById('pcr-img-area');
     const imgArea = document.getElementById('img-upload-area');
-
-    // Detectar cuál está en pantalla activa
-    const sc = document.querySelector('.screen.active')?.id;
+    const semArea = document.getElementById('sem-img-area');
 
     if (sc === 'sc-datos' && pcrArea && pcrArea.style.display !== 'none') {
       procesarPCRImg(file);
       mostrarToast('📋 Imagen pegada en Put/Call CBOE');
-    } else if (sc === 'sc-tecnico' && imgArea && imgArea.style.display !== 'none') {
-      procesarImagen(file);
-      mostrarToast('📋 Imagen pegada en análisis técnico');
+    } else if (sc === 'sc-tecnico') {
+      // En técnico: si el área semanal está visible, preguntar cuál
+      if (semArea && semArea.style.display !== 'none' && imgArea && imgArea.style.display !== 'none') {
+        // Pegar en el más cercano al scroll — por defecto semanal primero
+        procesarSemImg(file);
+        mostrarToast('📋 Pegado en gráfico semanal · Para diario usa el área inferior');
+      } else if (semArea && semArea.style.display !== 'none') {
+        procesarSemImg(file);
+        mostrarToast('📋 Imagen pegada en gráfico semanal');
+      } else {
+        procesarImagen(file);
+        mostrarToast('📋 Imagen pegada en análisis técnico diario');
+      }
     } else if (sc === 'sc-datos') {
       procesarPCRImg(file);
       mostrarToast('📋 Imagen pegada en Put/Call CBOE');
@@ -3883,6 +4234,184 @@ function aplicarAutoTecnico(tecnicos, precio) {
       block.style.outlineOffset = '-2px';
     }
   });
+}
+
+// ═══════════════════════════════════════
+// CONTEXTO SEMANAL
+// ═══════════════════════════════════════
+let semImgBase64 = null;
+
+function handleSemImgFile(e) {
+  const file = e.target.files[0];
+  if (file) procesarSemImg(file);
+}
+function handleSemImgDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) procesarSemImg(file);
+}
+function procesarSemImg(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    semImgBase64 = e.target.result.split(',')[1];
+    window._semMediaType = file.type;
+    document.getElementById('sem-img-preview').src = e.target.result;
+    document.getElementById('sem-img-preview-wrap').style.display = 'block';
+    document.getElementById('sem-img-area').style.display = 'none';
+    mostrarToast('📋 Gráfico semanal cargado');
+  };
+  reader.readAsDataURL(file);
+}
+function limpiarSemImg() {
+  semImgBase64 = null;
+  document.getElementById('sem-img-preview-wrap').style.display = 'none';
+  document.getElementById('sem-img-area').style.display = 'block';
+  document.getElementById('sem-img-input').value = '';
+}
+
+function renderSemanal(s) {
+  const fmtN = v => v ? parseFloat(v).toLocaleString('es-ES', {maximumFractionDigits:0}) : '—';
+  const fmtD = v => v !== null && v !== undefined ? (v>=0?'+':'') + v + '%' : '—';
+  const colD = v => v >= 0 ? 'var(--gr)' : 'var(--rd)';
+
+  // RSI semanal
+  const rsiEl = document.getElementById('sw-rsi');
+  const rsiEst = document.getElementById('sw-rsi-est');
+  if (rsiEl) rsiEl.textContent = s.rsi || '—';
+  if (rsiEst && s.rsi) {
+    rsiEst.textContent = s.rsi > 70 ? '⚠ Sobrecompra' : s.rsi < 30 ? '🟢 Sobreventa' : '→ Neutro';
+    rsiEst.style.color = s.rsi > 70 ? 'var(--rd)' : s.rsi < 30 ? 'var(--gr)' : 'var(--t3)';
+  }
+
+  // EMAs
+  const setEma = (valId, distId, val, dist) => {
+    const ve = document.getElementById(valId), de = document.getElementById(distId);
+    if (ve) ve.textContent = fmtN(val);
+    if (de) { de.textContent = fmtD(dist); de.style.color = dist >= 0 ? 'var(--gr)' : 'var(--rd)'; }
+  };
+  setEma('sw-ema20', 'sw-ema20-dist', s.ema20, s.distEma20);
+  setEma('sw-ema50', 'sw-ema50-dist', s.ema50, s.distEma50);
+  setEma('sw-sma200', 'sw-sma200-dist', s.sma200, s.distSma200);
+
+  // MACD
+  const macdEl = document.getElementById('sw-macd');
+  const macdDir = document.getElementById('sw-macd-dir');
+  if (macdEl) macdEl.textContent = s.macd || '—';
+  if (macdDir && s.macd !== null) {
+    macdDir.textContent = s.macd > 0 ? '↑ Alcista' : '↓ Bajista';
+    macdDir.style.color = s.macd > 0 ? 'var(--gr)' : 'var(--rd)';
+  }
+
+  // Vela semanal
+  const velaEl = document.getElementById('sw-vela');
+  const nivEl = document.getElementById('sw-niveles');
+  if (velaEl) {
+    velaEl.textContent = s.vela.alcista ? '🟢 Alcista' : '🔴 Bajista';
+    velaEl.style.color = s.vela.alcista ? 'var(--gr)' : 'var(--rd)';
+  }
+  if (nivEl) nivEl.textContent = 'Ant: ' + fmtN(s.niveles.maxSemAnt) + '/' + fmtN(s.niveles.minSemAnt);
+
+  // Tendencia badge
+  const badge = document.getElementById('sem-tendencia-badge');
+  const tendMap = {
+    'alcista_fuerte': { txt:'↑↑ Alcista fuerte', cls:'g' },
+    'alcista':        { txt:'↑ Alcista',          cls:'g' },
+    'lateral':        { txt:'→ Lateral',          cls:'a' },
+    'bajista':        { txt:'↓ Bajista',          cls:'r' },
+    'bajista_fuerte': { txt:'↓↓ Bajista fuerte',  cls:'r' }
+  };
+  const tb = tendMap[s.tendencia] || tendMap.lateral;
+  if (badge) { badge.textContent = tb.txt; badge.className = 'ind-badge ' + tb.cls; }
+
+  // Descripción tendencia
+  const descEl = document.getElementById('sw-tendencia-desc');
+  const descMap = {
+    'alcista_fuerte': { txt:'Tendencia semanal alcista fuerte — precio sobre EMA20 > EMA50. Sesgo alcista estructural. Opera a favor de la tendencia.', bg:'var(--gr2)', bc:'var(--grb)', col:'var(--gr)' },
+    'alcista':        { txt:'Tendencia semanal alcista — EMA20 > EMA50 pero precio puede estar en corrección. Mantener exposición.', bg:'rgba(46,204,138,0.07)', bc:'var(--grb)', col:'var(--gr)' },
+    'lateral':        { txt:'Mercado semanal sin tendencia clara. Operar con más cautela y reducir tamaño de posición.', bg:'var(--am2)', bc:'var(--amb)', col:'var(--am)' },
+    'bajista':        { txt:'Tendencia semanal bajista — EMA20 < EMA50. Sesgo bajista. Reducir exposición en rebotes.', bg:'var(--rd2)', bc:'var(--rdb)', col:'var(--rd)' },
+    'bajista_fuerte': { txt:'Tendencia semanal bajista fuerte — precio bajo EMA20 < EMA50. Alto riesgo. Mínima exposición.', bg:'var(--rd2)', bc:'var(--rdb)', col:'var(--rd)' }
+  };
+  const dm = descMap[s.tendencia] || descMap.lateral;
+  if (descEl) {
+    descEl.textContent = dm.txt;
+    descEl.style.cssText = `background:${dm.bg}; border:1px solid ${dm.bc}; color:${dm.col};`;
+  }
+}
+
+// Actualizar paste handler para incluir imagen semanal
+document.addEventListener('paste', function(e) {
+  // Override del paste existente para incluir sem
+}, true);
+
+// ═══════════════════════════════════════
+// DETECTORES DE GIRO
+// ═══════════════════════════════════════
+function renderGiro(g) {
+  const body = document.getElementById('giro-body');
+  const badge = document.getElementById('giro-global-badge');
+  if (!body) return;
+
+  // Badge global
+  const globalMap = {
+    techo: { txt:'⚠️ Señales de techo', cls:'giro-techo' },
+    suelo: { txt:'🟢 Señales de suelo', cls:'giro-suelo' },
+    neutro: { txt:'→ Sin señal extrema', cls:'giro-neutro' }
+  };
+  const gb = globalMap[g.señalGlobal] || globalMap.neutro;
+  if (badge) { badge.textContent = gb.txt; badge.className = 'giro-global ' + gb.cls; }
+
+  const items = [
+    {
+      icon: '📊',
+      nombre: 'Divergencia RSI',
+      desc: g.divergencias.alcista ? '✅ Divergencia ALCISTA — precio baja pero RSI sube (señal de suelo)' :
+            g.divergencias.bajista ? '⚠️ Divergencia BAJISTA — precio sube pero RSI baja (señal de techo)' :
+            'Sin divergencia visible — precio y RSI en sincronía',
+      señal: g.divergencias.alcista ? 'suelo' : g.divergencias.bajista ? 'techo' : 'neutro',
+      badge: g.divergencias.alcista ? '🟢 Suelo posible' : g.divergencias.bajista ? '🔴 Techo posible' : '→ Neutro'
+    },
+    {
+      icon: '📏',
+      nombre: 'Bandas de Bollinger',
+      desc: g.bollinger.señal === 'techo_posible' ? '⚠️ Precio tocando banda superior (BB=' + g.bollinger.upper + ') — zona de techo' :
+            g.bollinger.señal === 'suelo_posible' ? '✅ Precio tocando banda inferior (BB=' + g.bollinger.lower + ') — zona de suelo' :
+            'Precio en zona media de Bollinger (' + g.bollinger.posicion + '% del rango) — sin señal extrema',
+      señal: g.bollinger.señal === 'techo_posible' ? 'techo' : g.bollinger.señal === 'suelo_posible' ? 'suelo' : 'neutro',
+      badge: g.bollinger.señal === 'techo_posible' ? '🔴 Banda superior' : g.bollinger.señal === 'suelo_posible' ? '🟢 Banda inferior' : '→ Zona media'
+    },
+    {
+      icon: '⚡',
+      nombre: 'Ratio VXN/VIX — Estrés tech',
+      desc: 'Ratio ' + (g.vixVxn.ratio || '—') + ' · ' + (g.vixVxn.descripcion || '—'),
+      señal: g.vixVxn.señal.includes('extremo') ? 'techo' : g.vixVxn.señal.includes('alto') ? 'techo' : 'neutro',
+      badge: g.vixVxn.señal === 'estres_tech_extremo' ? '🔴 Estrés extremo' :
+             g.vixVxn.señal === 'estres_tech_alto' ? '⚠️ Estrés alto' :
+             g.vixVxn.señal === 'tech_calma_relativa' ? '🟢 Tech tranquilo' : '→ Normal'
+    },
+    {
+      icon: '📅',
+      nombre: 'Días consecutivos',
+      desc: g.diasConsecutivos.descripcion,
+      señal: g.diasConsecutivos.señal === 'agotamiento_alcista' ? 'techo' :
+             g.diasConsecutivos.señal === 'rebote_probable' ? 'suelo' :
+             g.diasConsecutivos.señal === 'vigilar_techo' ? 'techo' : 'neutro',
+      badge: g.diasConsecutivos.señal === 'agotamiento_alcista' ? '🔴 Agotamiento' :
+             g.diasConsecutivos.señal === 'rebote_probable' ? '🟢 Rebote probable' :
+             g.diasConsecutivos.señal === 'vigilar_techo' ? '⚠️ Vigilar techo' : '→ Normal'
+    }
+  ];
+
+  body.innerHTML = items.map(item => `
+    <div class="giro-item señal-${item.señal}">
+      <div class="giro-item-icon">${item.icon}</div>
+      <div class="giro-item-info">
+        <div class="giro-item-nombre">${item.nombre}</div>
+        <div class="giro-item-desc">${item.desc}</div>
+      </div>
+      <div class="giro-item-badge ${item.señal === 'techo' ? 'r' : item.señal === 'suelo' ? 'g' : 'a'} ind-badge">${item.badge}</div>
+    </div>
+  `).join('');
 }
 
 // ═══════════════════════════════════════
