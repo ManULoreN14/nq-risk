@@ -3082,8 +3082,14 @@ DATOS DE MERCADO DE HOY:
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
 - MACRO FRED (Federal Reserve Data):
-${S.fred ? `Score macro FRED: ${S.fred.score} (${S.fred.estado}) · ${S.fred.señales?.map(s => s.ind + '=' + s.val + '(' + s.tend + ')').join(' · ')}
-  Interpretación: ${S.fred.señales?.map(s => s.desc).join(' | ')}` : 'no disponible'}
+${S.fred ? `Score macro FRED: ${S.fred.score}/8 (${S.fred.estado})
+  Balance Fed: ${S.fred.walcl?.actual ? (S.fred.walcl.actual/1000000).toFixed(2)+'T' : '—'} (${S.fred.walcl?.tendencia||'—'})
+  Fed Funds: ${S.fred.fedfunds?.actual||'—'}% · SOFR spread repo: ${S.fred.sofrSpread !== null ? S.fred.sofrSpread+'%' : '—'}
+  HY Spread: ${S.fred.hySpread?.actual||'—'}% (${S.fred.hySpread?.tendencia||'—'}) — CRÍTICO si >4%
+  NFCI: ${S.fred.nfci?.actual||'—'} (${S.fred.nfci?.actual < 0 ? 'acomodaticio' : 'restrictivo'})
+  Curva 10Y-3M: ${S.fred.t10y3m?.actual||'—'}% · Curva 10Y-2Y: ${S.fred.t10y2y?.actual||'—'}%
+  ${S.fred.estadoCurva ? 'Estado curva: ' + S.fred.estadoCurva.descripcion : ''}
+  Expectativas largo plazo (5Y5Y): ${S.fred.t5y5y?.actual||'—'}%` : 'no disponible'}
 - Gamma Exposure aproximado: ${S.gex ? S.gex.estado + ' — ' + S.gex.descripcion + (S.gex.alerta ? ' ⚠️ ALERTA: ' + S.gex.alerta : '') : 'no disponible'}
 - Max Pain QQQ: ${S.maxpain ? 'Valor=' + S.maxpain.valor + ' Precio=' + S.maxpain.precio + ' Distancia=' + S.maxpain.distPct + '% Señal=' + S.maxpain.señal + ' (' + S.maxpain.descripcion + ') Venc=' + S.maxpain.expiracion : 'no disponible'}
 - CONTEXTO SEMANAL NDX (timeframe semanal):
@@ -4428,6 +4434,31 @@ function renderFred(fred) {
       <div class="fred-item-tend" style="background:${tendCol}20;color:${tendCol};border:1px solid ${tendCol}40;">${tendEmoji} ${s.tend||'—'}</div>
     </div>`;
   }).join('');
+
+  // Curva de tipos visual
+  if (fred.estadoCurva) {
+    const c = fred.estadoCurva;
+    const col = c.señalRecesion === 'alta' ? 'var(--rd)' : c.señalRecesion === 'moderada' ? 'var(--am)' : 'var(--gr)';
+    const bg = c.señalRecesion === 'alta' ? 'var(--rd2)' : c.señalRecesion === 'moderada' ? 'var(--am2)' : 'var(--gr2)';
+    const bc = c.señalRecesion === 'alta' ? 'var(--rdb)' : c.señalRecesion === 'moderada' ? 'var(--amb)' : 'var(--grb)';
+    body.innerHTML += `
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;margin-top:2px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Curva de tipos — Estado</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;text-align:center;background:var(--s3);border-radius:7px;padding:7px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:${c.t10y3m < 0 ? 'var(--rd)' : 'var(--gr)'};">${c.t10y3m >= 0 ? '+' : ''}${c.t10y3m}%</div>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px;">10Y - 3M</div>
+            <div style="font-size:9px;color:var(--t3);">Fed Cleveland</div>
+          </div>
+          <div style="flex:1;text-align:center;background:var(--s3);border-radius:7px;padding:7px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:${c.t10y2y < 0 ? 'var(--rd)' : 'var(--gr)'};">${c.t10y2y >= 0 ? '+' : ''}${c.t10y2y}%</div>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px;">10Y - 2Y</div>
+            <div style="font-size:9px;color:var(--t3);">Más seguida</div>
+          </div>
+        </div>
+        <div style="padding:7px 10px;border-radius:7px;background:${bg};border:1px solid ${bc};color:${col};font-size:11px;font-weight:600;">${c.descripcion}</div>
+      </div>`;
+  }
 
   // Estado general
   const estadoMap = {
