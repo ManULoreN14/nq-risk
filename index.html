@@ -2712,22 +2712,31 @@ function aplicarDatosAuto(data) {
   // FINNHUB SENTIMIENTO
   if (data.finnhub) {
     S.finnhub = data.finnhub;
-    // Si hay noticias de Finnhub y no hay de NewsAPI, mostrarlas en el área geo
+    // Mostrar sentiment score de Alpha Vantage
+    if (data.finnhub.sentimentScore !== null) {
+      S.sentimentAV = data.finnhub.sentimentScore;
+      S.sentimentDescAV = data.finnhub.sentimentDesc;
+    }
+  // Si hay noticias de Alpha Vantage/Finnhub, mostrarlas en el área geo
     if (data.finnhub.noticias?.length > 0 && !data.noticias) {
       const autoDiv = document.getElementById('geo-noticias-auto');
       const lista = document.getElementById('geo-noticias-lista');
       const badge = document.getElementById('geo-badge');
       if (autoDiv) autoDiv.style.display = 'block';
-      if (badge) { badge.textContent = 'Finnhub Auto'; badge.className = 'ind-badge g'; }
+      if (badge) { badge.textContent = (data.finnhub.fuente === 'alphavantage' ? 'Alpha Vantage' : 'Auto') + ' · ' + data.finnhub.noticias.length + ' noticias'; badge.className = 'ind-badge g'; }
       if (lista) {
-        lista.innerHTML = data.finnhub.noticias.map(n => `
-          <div class="noticia-item">
+        lista.innerHTML = data.finnhub.noticias.map(n => {
+          const sentCol = n.sentimentScore > 0.1 ? 'var(--gr)' : n.sentimentScore < -0.1 ? 'var(--rd)' : 'var(--t3)';
+          const sentEmoji = n.sentimentScore > 0.1 ? '▲' : n.sentimentScore < -0.1 ? '▼' : '→';
+          return `<div class="noticia-item">
             <div class="noticia-titulo">${n.titulo}</div>
             <div class="noticia-meta">
               <span class="noticia-fuente">${n.fuente||'—'}</span>
               <span class="noticia-fecha">${n.fecha||'—'}</span>
+              ${n.sentimentScore !== undefined ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${sentCol};">${sentEmoji} ${n.sentiment||''}</span>` : ''}
             </div>
-          </div>`).join('');
+          </div>`;
+        }).join('');
       }
     }
   }
@@ -3330,7 +3339,8 @@ DATOS DE MERCADO DE HOY:
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
 - SCORE UNIFICADO NQ COMPASS: ${S.scoreUnificado ? S.scoreUnificado.score + '/10 (' + S.scoreUnificado.estado + ') — ' + S.scoreUnificado.descripcion + ' | Técnico=' + S.scoreUnificado.componentes.tecnico + ' Macro=' + S.scoreUnificado.componentes.macro + ' Sentimiento=' + S.scoreUnificado.componentes.sentimiento : 'no disponible'}
-- SENTIMIENTO FINNHUB QQQ: ${S.finnhub?.sentimentScore ? S.finnhub.sentimentScore + '% alcistas — ' + S.finnhub.sentimentDesc : 'no disponible'}
+- SENTIMIENTO NOTICIAS (Alpha Vantage): ${S.finnhub?.sentimentScore ? 'Score=' + S.finnhub.sentimentScore + '/100 — ' + S.finnhub.sentimentDesc : 'no disponible'}
+- NOTICIAS FINANCIERAS AV: ${S.finnhub?.noticias?.length > 0 ? S.finnhub.noticias.slice(0,5).map(n => n.titulo + ' [' + (n.sentiment||'neutral') + ']').join(' | ') : 'no disponible'}
 - DATOS EMPRESARIALES TOP 10 QQQ:
 ${S.empresarial ? `PER QQQ: ${S.empresarial.qqqPER||'—'}x (${S.empresarial.valoracionQQQ}) — ${S.empresarial.valoracionDesc}
   Earnings próximos 14 días: ${S.empresarial.earningsProximos?.length > 0 ? S.empresarial.earningsProximos.map(e => e.simbolo + '=' + e.fecha + (e.enProximos7dias ? '⚡ESTA_SEMANA' : '') + (e.crecimientoIngresos !== null ? ' rev_growth=' + e.crecimientoIngresos + '%' : '')).join(' | ') : 'ninguno'}
