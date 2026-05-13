@@ -932,6 +932,57 @@ input, textarea, button { font-family: inherit; }
 .btn-tec-ia .sp { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
 .btn-tec-ia.loading .sp { display:block; }
 
+/* CONTEXTO GEOPOLÍTICO */
+.geo-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.geo-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.geo-titulo { font-size:13px; font-weight:700; flex:1; }
+.geo-body { padding:10px 14px; display:flex; flex-direction:column; gap:8px; }
+.noticia-item { padding:9px 11px; background:var(--s2); border:1px solid var(--b1); border-radius:9px; }
+.noticia-titulo { font-size:12px; font-weight:600; color:var(--t1); line-height:1.4; margin-bottom:4px; }
+.noticia-meta { display:flex; gap:8px; align-items:center; }
+.noticia-fuente { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--ac); }
+.noticia-fecha { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); }
+.geo-textarea { width:100%; min-height:80px; background:var(--s2); border:1px solid var(--b2); border-radius:9px; padding:10px 12px; color:var(--t2); font-size:12px; line-height:1.5; resize:none; outline:none; font-family:'Space Grotesk',sans-serif; transition:border-color 0.2s; }
+.geo-textarea:focus { border-color:var(--ac); }
+.geo-newsapi-cfg { font-size:10px; color:var(--t4); padding:4px 2px; line-height:1.5; }
+
+/* DATOS EMPRESARIALES */
+.emp-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.emp-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.emp-titulo { font-size:13px; font-weight:700; flex:1; }
+.emp-body { padding:10px 14px; display:flex; flex-direction:column; gap:8px; }
+.emp-per { display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--s2); border:1px solid var(--b1); border-radius:10px; }
+.emp-per-val { font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700; line-height:1; }
+.emp-per-info { flex:1; }
+.emp-per-lbl { font-size:9px; color:var(--t3); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:3px; }
+.emp-per-desc { font-size:11px; color:var(--t2); line-height:1.4; }
+.earn-item { display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--s2); border:1px solid var(--b1); border-radius:8px; }
+.earn-item.urgente { border-left:3px solid var(--am); background:var(--am2); }
+.earn-sym { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--ac); min-width:52px; }
+.earn-fecha { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t3); min-width:80px; }
+.earn-info { flex:1; font-size:11px; color:var(--t2); }
+.earn-badge { font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 7px; border-radius:100px; }
+
+/* SCORE UNIFICADO */
+.score-unif-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; position:relative; }
+.score-unif-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--t4); transition:all 0.4s; }
+.score-unif-card.alcista::before { background:var(--gr); box-shadow:0 0 16px var(--gr); }
+.score-unif-card.neutro::before { background:var(--am); box-shadow:0 0 16px var(--am); }
+.score-unif-card.bajista::before { background:var(--rd); box-shadow:0 0 16px var(--rd); }
+.su-header { padding:14px 16px 12px; display:flex; align-items:center; gap:14px; }
+.su-score { font-family:'JetBrains Mono',monospace; font-size:42px; font-weight:700; line-height:1; min-width:80px; transition:color 0.4s; }
+.score-unif-card.alcista .su-score { color:var(--gr); }
+.score-unif-card.neutro .su-score { color:var(--am); }
+.score-unif-card.bajista .su-score { color:var(--rd); }
+.su-info { flex:1; }
+.su-label { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:5px; }
+.su-desc { font-size:14px; font-weight:600; color:var(--t1); line-height:1.3; }
+.su-componentes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; padding:0 16px 14px; }
+.su-comp { background:var(--s2); border:1px solid var(--b1); border-radius:9px; padding:9px 11px; text-align:center; }
+.su-comp-val { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:600; }
+.su-comp-lbl { font-size:9px; color:var(--t3); margin-top:3px; text-transform:uppercase; letter-spacing:0.08em; font-family:'JetBrains Mono',monospace; }
+.su-comp-peso { font-size:9px; color:var(--t4); margin-top:2px; }
+
 /* FRED MACRO */
 .fred-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
 .fred-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
@@ -1094,6 +1145,34 @@ input, textarea, button { font-family: inherit; }
     </div>
 
     <!-- FETCH DATOS EN TIEMPO REAL -->
+    <!-- SCORE UNIFICADO — aparece arriba cuando hay datos -->
+    <div class="score-unif-card neutro" id="score-unif-card" style="display:none;">
+      <div class="su-header">
+        <div class="su-score" id="su-score">—</div>
+        <div class="su-info">
+          <div class="su-label">Score NQ Compass · d+1</div>
+          <div class="su-desc" id="su-desc">Actualizando datos...</div>
+        </div>
+      </div>
+      <div class="su-componentes">
+        <div class="su-comp">
+          <div class="su-comp-val" id="su-tec">—</div>
+          <div class="su-comp-lbl">Técnico</div>
+          <div class="su-comp-peso">Peso 40%</div>
+        </div>
+        <div class="su-comp">
+          <div class="su-comp-val" id="su-mac">—</div>
+          <div class="su-comp-lbl">Macro FRED</div>
+          <div class="su-comp-peso">Peso 30%</div>
+        </div>
+        <div class="su-comp">
+          <div class="su-comp-val" id="su-sent">—</div>
+          <div class="su-comp-lbl">Sentimiento</div>
+          <div class="su-comp-peso">Peso 30%</div>
+        </div>
+      </div>
+    </div>
+
     <div class="fetch-section">
       <div class="fetch-header">
         <span style="font-size:14px">⚡</span>
@@ -1263,6 +1342,78 @@ input, textarea, button { font-family: inherit; }
       </div>
       <div class="giro-body" id="giro-body">
         <div style="font-size:12px; color:var(--t3); text-align:center;">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- CONTEXTO GEOPOLÍTICO Y NOTICIAS -->
+    <div class="geo-card">
+      <div class="geo-header">
+        <span style="font-size:15px;">🌍</span>
+        <div class="geo-titulo">Contexto geopolítico y noticias</div>
+        <div class="ind-badge a" id="geo-badge">Manual</div>
+      </div>
+      <div class="geo-body">
+        <!-- Noticias automáticas si hay NewsAPI key -->
+        <div id="geo-noticias-auto" style="display:none;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Noticias automáticas</div>
+          <div id="geo-noticias-lista"></div>
+        </div>
+
+        <!-- Texto manual -->
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Contexto manual — pega titulares o notas</div>
+        <textarea id="geo-texto" class="geo-textarea" 
+          placeholder="Pega aquí titulares geopolíticos, noticias de la Fed, earnings relevantes, tensiones comerciales... La IA los analizará en el informe."
+          oninput="S.geoTexto = this.value; localStorage.setItem('nqr_geo_texto', this.value)"></textarea>
+
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+          <div class="geo-newsapi-cfg">
+            🔑 NewsAPI key (opcional — noticias automáticas):
+          </div>
+          <input id="geo-newsapi-key" type="text" placeholder="tu-key-newsapi.org"
+            style="flex:1;min-width:180px;background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:5px 10px;color:var(--t2);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none;"
+            oninput="localStorage.setItem('nqr_newsapi', this.value)"
+            value="">
+          <a href="https://newsapi.org/register" target="_blank" style="font-size:10px;color:var(--ac);text-decoration:none;">Registro gratis ↗</a>
+        </div>
+
+        <div style="font-size:10px;color:var(--t3);line-height:1.5;padding:4px 2px;">
+          Sin NewsAPI: pega los titulares manualmente. La IA los analiza igual. Con NewsAPI: noticias automáticas al pulsar "Actualizar datos".
+        </div>
+      </div>
+    </div>
+
+    <!-- DATOS EMPRESARIALES -->
+    <div class="emp-card" id="emp-card" style="display:none;">
+      <div class="emp-header">
+        <span style="font-size:15px;">📈</span>
+        <div class="emp-titulo">Datos empresariales — Top 10 QQQ</div>
+        <div class="ind-badge" id="emp-badge">—</div>
+      </div>
+      <div class="emp-body">
+
+        <!-- PER QQQ -->
+        <div class="emp-per">
+          <div>
+            <div class="emp-per-lbl">PER QQQ</div>
+            <div class="emp-per-val" id="emp-per-val">—</div>
+          </div>
+          <div class="emp-per-info">
+            <div class="emp-per-desc" id="emp-per-desc">—</div>
+          </div>
+          <div class="ind-badge" id="emp-per-badge">—</div>
+        </div>
+
+        <!-- Earnings próximos -->
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">Earnings próximos — Top 10 QQQ</div>
+        <div id="emp-earnings-lista">
+          <div style="font-size:12px;color:var(--t3);text-align:center;padding:8px;">Cargando...</div>
+        </div>
+
+        <!-- Links -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <a class="il blue" href="https://finance.yahoo.com/calendar/earnings" target="_blank">📅 Calendario earnings ↗</a>
+          <a class="il blue" href="https://www.earningswhispers.com" target="_blank">📊 Earnings Whispers ↗</a>
+        </div>
       </div>
     </div>
 
@@ -2188,6 +2339,18 @@ function init() {
   document.getElementById('sl-liquidez').value = pos.l;
   S.posNasdaq = pos.n; S.posLiquidez = pos.l;
   actualizarPosDisplay();
+  // Cargar NewsAPI key si existe
+  const newsKey = localStorage.getItem('nqr_newsapi');
+  if (newsKey) {
+    const inp = document.getElementById('geo-newsapi-key');
+    if (inp) inp.value = newsKey;
+  }
+  // Restaurar texto geopolítico
+  const geoTxt = localStorage.getItem('nqr_geo_texto');
+  if (geoTxt) {
+    const ta = document.getElementById('geo-texto');
+    if (ta) { ta.value = geoTxt; S.geoTexto = geoTxt; }
+  }
 }
 
 function comprobarResultadoPendiente() {
@@ -2517,6 +2680,84 @@ function aplicarDatosAuto(data) {
     const card = document.getElementById('giro-card');
     if (card) card.style.display = 'block';
     renderGiro(data.giro);
+  }
+
+  // SCORE UNIFICADO
+  if (data.scoreUnificado) {
+    S.scoreUnificado = data.scoreUnificado;
+    const su = data.scoreUnificado;
+    const card = document.getElementById('score-unif-card');
+    if (card) {
+      card.style.display = 'block';
+      card.className = 'score-unif-card ' + su.estado;
+    }
+    const scoreEl = document.getElementById('su-score');
+    if (scoreEl) {
+      scoreEl.textContent = (su.score >= 0 ? '+' : '') + su.score;
+    }
+    const descEl = document.getElementById('su-desc');
+    if (descEl) descEl.textContent = su.descripcion;
+    const colMap = { alcista:'var(--gr)', neutro:'var(--am)', bajista:'var(--rd)' };
+    const col = colMap[su.estado] || 'var(--am)';
+    ['su-tec','su-mac','su-sent'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      const vals = [su.componentes.tecnico, su.componentes.macro, su.componentes.sentimiento];
+      if (el) {
+        el.textContent = (vals[i] >= 0 ? '+' : '') + vals[i];
+        el.style.color = vals[i] >= 1 ? 'var(--gr)' : vals[i] <= -1 ? 'var(--rd)' : 'var(--am)';
+      }
+    });
+  }
+
+  // FINNHUB SENTIMIENTO
+  if (data.finnhub) {
+    S.finnhub = data.finnhub;
+    // Si hay noticias de Finnhub y no hay de NewsAPI, mostrarlas en el área geo
+    if (data.finnhub.noticias?.length > 0 && !data.noticias) {
+      const autoDiv = document.getElementById('geo-noticias-auto');
+      const lista = document.getElementById('geo-noticias-lista');
+      const badge = document.getElementById('geo-badge');
+      if (autoDiv) autoDiv.style.display = 'block';
+      if (badge) { badge.textContent = 'Finnhub Auto'; badge.className = 'ind-badge g'; }
+      if (lista) {
+        lista.innerHTML = data.finnhub.noticias.map(n => `
+          <div class="noticia-item">
+            <div class="noticia-titulo">${n.titulo}</div>
+            <div class="noticia-meta">
+              <span class="noticia-fuente">${n.fuente||'—'}</span>
+              <span class="noticia-fecha">${n.fecha||'—'}</span>
+            </div>
+          </div>`).join('');
+      }
+    }
+  }
+
+  // DATOS EMPRESARIALES
+  if (data.empresarial) {
+    S.empresarial = data.empresarial;
+    const ec = document.getElementById('emp-card');
+    if (ec) ec.style.display = 'block';
+    renderEmpresarial(data.empresarial);
+  }
+
+  // NOTICIAS AUTOMÁTICAS
+  if (data.noticias && data.noticias.length > 0) {
+    S.noticias = data.noticias;
+    const autoDiv = document.getElementById('geo-noticias-auto');
+    const lista = document.getElementById('geo-noticias-lista');
+    const badge = document.getElementById('geo-badge');
+    if (autoDiv) autoDiv.style.display = 'block';
+    if (badge) { badge.textContent = 'Auto + Manual'; badge.className = 'ind-badge g'; }
+    if (lista) {
+      lista.innerHTML = data.noticias.map(n => `
+        <div class="noticia-item">
+          <div class="noticia-titulo">${n.titulo}</div>
+          <div class="noticia-meta">
+            <span class="noticia-fuente">${n.fuente||'—'}</span>
+            <span class="noticia-fecha">${n.fecha||'—'}</span>
+          </div>
+        </div>`).join('');
+    }
   }
 
   // FRED MACRO
@@ -2869,10 +3110,14 @@ NASDAQ_REC: [0-100, cambio máx 20 puntos sin señal confirmada vs ${S.posNasdaq
 LIQUIDEZ_REC: [complementario]
 
 ═══════ ANÁLISIS MACRO ═══════
-[2-3 párrafos: tendencia estructural, indicadores macro clave (VIX, futuros, bonos, DXY, Fear&Greed), contexto d+1.
-INCLUIR obligatoriamente si disponible: Score FRED y los datos más relevantes (HY Spread, NFCI, Balance Fed, curva tipos).
-El HY Spread es especialmente importante — si supera 4% es señal de estrés crediticio seria. Si la curva está invertida, mencionar riesgo de recesión.
-Usa **negrita** para puntos clave. Máx 200 palabras.]
+[2-3 párrafos sobre el contexto macro para d+1. REGLA CLAVE: Solo menciona un dato si está en zona relevante o de alerta — no hagas un listado de todos los datos.
+Si hay contexto geopolítico relevante (noticias, tensiones comerciales, Fed speakers), intégralo naturalmente en el análisis — no como lista separada sino como contexto que explica los movimientos de VIX, yields o futuros.
+PRIORIDAD 1 (mencionar siempre si disponible): HY Spread (crítico si >4%), curva tipos (si invertida), NFCI (si >0), SOFR spread (si >0.5%).
+PRIORIDAD 2 (mencionar solo si en zona extrema): VIX >25, RSI >80 o <30, Fear&Greed <20 o >80, Balance Fed cambiando tendencia.
+PRIORIDAD 3 (solo si hay señal clara): Futuros NQ, DXY, bonos 10Y.
+EXPECTATIVAS FED: Si el sesgo es dovish o hawkish, mencionarlo — el mercado lo descuenta con semanas de antelación.
+El objetivo es un análisis conciso que destaque LO QUE IMPORTA HOY, no un inventario de datos.
+Usa **negrita** para alertas. Máx 180 palabras.]
 
 ═══════ CONTEXTO SEMANAL ═══════
 [Analiza el timeframe semanal como marco de referencia para la decisión d+1:
@@ -2886,6 +3131,9 @@ Usa **negrita**. Máx 150 palabras.]
 
 ═══════ ANÁLISIS TÉCNICO ═══════
 [2-3 párrafos: confluencia de indicadores técnicos, niveles Fibonacci relevantes, patrón de velas si aplica, señal técnica combinada. Usa **negrita**. Máx 180 palabras.]
+
+═══════ ANÁLISIS EMPRESARIAL ═══════
+[SOLO incluir esta sección si hay algo relevante: earnings de empresa importante esta semana, PER en zona extrema (>35x o <20x), o sorpresa de resultados que explique el movimiento del índice. Si todo está normal, OMITIR esta sección completamente. Si se incluye, máx 80 palabras.]
 
 ═══════ LECTURA INSTITUCIONAL ═══════
 [Analiza siguiendo este framework exacto:
@@ -3081,15 +3329,30 @@ DATOS DE MERCADO DE HOY:
 - SPX+SPXW Put/Call Ratio (S&P500): ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx + ' — ' + (S.pcr_spx < 1.2 ? 'normal' : S.pcr_spx <= 1.8 ? 'cautela' : 'ALERTA cobertura masiva') : 'no disponible'}
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
-- MACRO FRED (Federal Reserve Data):
-${S.fred ? `Score macro FRED: ${S.fred.score}/8 (${S.fred.estado})
-  Balance Fed: ${S.fred.walcl?.actual ? (S.fred.walcl.actual/1000000).toFixed(2)+'T' : '—'} (${S.fred.walcl?.tendencia||'—'})
-  Fed Funds: ${S.fred.fedfunds?.actual||'—'}% · SOFR spread repo: ${S.fred.sofrSpread !== null ? S.fred.sofrSpread+'%' : '—'}
-  HY Spread: ${S.fred.hySpread?.actual||'—'}% (${S.fred.hySpread?.tendencia||'—'}) — CRÍTICO si >4%
-  NFCI: ${S.fred.nfci?.actual||'—'} (${S.fred.nfci?.actual < 0 ? 'acomodaticio' : 'restrictivo'})
-  Curva 10Y-3M: ${S.fred.t10y3m?.actual||'—'}% · Curva 10Y-2Y: ${S.fred.t10y2y?.actual||'—'}%
-  ${S.fred.estadoCurva ? 'Estado curva: ' + S.fred.estadoCurva.descripcion : ''}
-  Expectativas largo plazo (5Y5Y): ${S.fred.t5y5y?.actual||'—'}%` : 'no disponible'}
+- SCORE UNIFICADO NQ COMPASS: ${S.scoreUnificado ? S.scoreUnificado.score + '/10 (' + S.scoreUnificado.estado + ') — ' + S.scoreUnificado.descripcion + ' | Técnico=' + S.scoreUnificado.componentes.tecnico + ' Macro=' + S.scoreUnificado.componentes.macro + ' Sentimiento=' + S.scoreUnificado.componentes.sentimiento : 'no disponible'}
+- SENTIMIENTO FINNHUB QQQ: ${S.finnhub?.sentimentScore ? S.finnhub.sentimentScore + '% alcistas — ' + S.finnhub.sentimentDesc : 'no disponible'}
+- DATOS EMPRESARIALES TOP 10 QQQ:
+${S.empresarial ? `PER QQQ: ${S.empresarial.qqqPER||'—'}x (${S.empresarial.valoracionQQQ}) — ${S.empresarial.valoracionDesc}
+  Earnings próximos 14 días: ${S.empresarial.earningsProximos?.length > 0 ? S.empresarial.earningsProximos.map(e => e.simbolo + '=' + e.fecha + (e.enProximos7dias ? '⚡ESTA_SEMANA' : '') + (e.crecimientoIngresos !== null ? ' rev_growth=' + e.crecimientoIngresos + '%' : '')).join(' | ') : 'ninguno'}
+  Earnings esta semana: ${S.empresarial.earningsSemana?.length > 0 ? S.empresarial.earningsSemana.map(e => e.simbolo).join(', ') : 'ninguno'}` : 'no disponible'}
+- CONTEXTO GEOPOLÍTICO Y NOTICIAS:
+${(S.geoTexto || (S.noticias?.length > 0)) ? 
+  (S.noticias?.length > 0 ? 'NOTICIAS AUTO: ' + S.noticias.map(n => n.titulo + ' (' + n.fuente + ')').join(' | ') + '\n' : '') +
+  (S.geoTexto ? 'CONTEXTO MANUAL: ' + S.geoTexto : '')
+  : 'Sin contexto geopolítico introducido'}
+- DATOS MACRO FRED — ALTA PRIORIDAD PARA EL INFORME:
+${S.fred ? `
+  SCORE MACRO FRED: ${S.fred.score} (${S.fred.estado.toUpperCase()})
+  · Balance Fed: ${S.fred.walcl?.actual ? (S.fred.walcl.actual/1000000).toFixed(2)+'T' : '—'} tendencia=${S.fred.walcl?.tendencia||'—'}
+  · Fed Funds Rate: ${S.fred.fedfunds?.actual||'—'}% · SOFR repo spread: ${S.fred.sofrSpread !== null ? S.fred.sofrSpread+'%' : '—'} ${Math.abs(S.fred.sofrSpread||0) > 0.5 ? '⚠️ ESTRÉS REPO' : ''}
+  · HY Credit Spread: ${S.fred.hySpread?.actual||'—'}% ${(S.fred.hySpread?.actual||0) > 4 ? '⚠️ ZONA PELIGRO' : (S.fred.hySpread?.actual||0) > 3 ? '(vigilar)' : '(normal)'}
+  · NFCI: ${S.fred.nfci?.actual||'—'} ${(S.fred.nfci?.actual||0) > 0 ? '⚠️ RESTRICTIVO' : '(acomodaticio)'}
+  · Curva 10Y-3M: ${S.fred.t10y3m?.actual||'—'}% ${(S.fred.t10y3m?.actual||1) < -0.5 ? '🚨 MUY INVERTIDA' : (S.fred.t10y3m?.actual||1) < 0 ? '⚠️ INVERTIDA' : '(normal)'}
+  · Curva 10Y-2Y: ${S.fred.t10y2y?.actual||'—'}% ${(S.fred.t10y2y?.actual||1) < 0 ? '⚠️ INVERTIDA' : '(normal)'}
+  · TIPS Breakeven 5Y: ${S.fred.t5yie?.actual||'—'}% · 10Y: ${S.fred.t10yie?.actual||'—'}%
+  · 5Y5Y: ${S.fred.t5y5y?.actual||'—'}%
+  · Expectativas Fed: ${S.fred.fedExpectativas?.descripcion||'no disponible'} (sesgo=${S.fred.fedExpectativas?.sesgo||'—'})
+  SEÑALES RELEVANTES: ${S.fred.señales?.filter(s=>s.señal!=='alcista'||s.ind.includes('Spread')||s.ind.includes('Curva')).map(s=>s.ind+'='+s.val+':'+s.desc).join(' | ')}` : 'FRED no disponible'}
 - Gamma Exposure aproximado: ${S.gex ? S.gex.estado + ' — ' + S.gex.descripcion + (S.gex.alerta ? ' ⚠️ ALERTA: ' + S.gex.alerta : '') : 'no disponible'}
 - Max Pain QQQ: ${S.maxpain ? 'Valor=' + S.maxpain.valor + ' Precio=' + S.maxpain.precio + ' Distancia=' + S.maxpain.distPct + '% Señal=' + S.maxpain.señal + ' (' + S.maxpain.descripcion + ') Venc=' + S.maxpain.expiracion : 'no disponible'}
 - CONTEXTO SEMANAL NDX (timeframe semanal):
@@ -3220,6 +3483,7 @@ function procesarRespuestaIA(texto) {
     const concMatch  = texto.match(/═+\s*CONCLUSIÓN CONJUNTA\s*═+\s*([\s\S]+)/i);
 
     const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*CONCLUSIÓN|$)/i);
+    const empMatch  = texto.match(/═+\s*ANÁLISIS EMPRESARIAL\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
     const instMatch = texto.match(/═+\s*LECTURA INSTITUCIONAL\s*═+\s*([\s\S]+?)(?:═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
     const giroMatch = texto.match(/═+\s*DETECCIÓN DE GIRO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
 
@@ -3229,6 +3493,7 @@ function procesarRespuestaIA(texto) {
       if (semMatch)   html += '\n\n<p><strong style="color:#8b5cf6">📅 CONTEXTO SEMANAL</strong></p>' + semMatch[1].trim();
       if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + tecMatch[1].trim();
       if (prtMatch)   html += '\n\n<p><strong style="color:#f0a500">📸 ANÁLISIS GRÁFICO PROREAL TIME</strong></p>' + prtMatch[1].trim();
+      if (empMatch)   html += '\n\n<p><strong style="color:#f59e0b">📈 ANÁLISIS EMPRESARIAL</strong></p>' + empMatch[1].trim();
       if (instMatch)  html += '\n\n<p><strong style="color:#8b5cf6">🏦 LECTURA INSTITUCIONAL</strong></p>' + instMatch[1].trim();
       if (giroMatch)  html += '\n\n<p><strong style="color:#ff6b6b">🔄 DETECCIÓN DE GIRO</strong></p>' + giroMatch[1].trim();
       if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
@@ -4402,6 +4667,60 @@ document.addEventListener('paste', function(e) {
 }, true);
 
 // ═══════════════════════════════════════
+// DATOS EMPRESARIALES
+// ═══════════════════════════════════════
+function renderEmpresarial(e) {
+  const badge = document.getElementById('emp-badge');
+  const perVal = document.getElementById('emp-per-val');
+  const perDesc = document.getElementById('emp-per-desc');
+  const perBadge = document.getElementById('emp-per-badge');
+  const lista = document.getElementById('emp-earnings-lista');
+
+  // PER QQQ
+  if (e.qqqPER && perVal) {
+    perVal.textContent = e.qqqPER + 'x';
+    const colMap = { cara:'var(--rd)', elevada:'var(--am)', normal:'var(--gr)', barata:'var(--gr)' };
+    const clsMap = { cara:'r', elevada:'a', normal:'g', barata:'g' };
+    perVal.style.color = colMap[e.valoracionQQQ] || 'var(--t1)';
+    if (perDesc) perDesc.textContent = e.valoracionDesc;
+    if (perBadge) {
+      perBadge.textContent = e.valoracionQQQ.charAt(0).toUpperCase() + e.valoracionQQQ.slice(1);
+      perBadge.className = 'ind-badge ' + (clsMap[e.valoracionQQQ] || 'a');
+    }
+  }
+
+  // Badge global
+  const hayEarnSemana = e.earningsSemana?.length > 0;
+  if (badge) {
+    badge.textContent = hayEarnSemana ? '⚡ ' + e.earningsSemana.length + ' earnings esta semana' : 'Sin earnings próximos';
+    badge.className = 'ind-badge ' + (hayEarnSemana ? 'a' : 'g');
+  }
+
+  // Lista de earnings
+  if (lista) {
+    if (!e.earningsProximos || e.earningsProximos.length === 0) {
+      lista.innerHTML = '<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px;">Sin earnings en los próximos 14 días para el Top 10</div>';
+      return;
+    }
+    lista.innerHTML = e.earningsProximos.map(earn => {
+      const urgente = earn.enProximos7dias;
+      const recColor = earn.recomendacion === 'buy' || earn.recomendacion === 'strongBuy' ? 'var(--gr)' :
+                       earn.recomendacion === 'sell' || earn.recomendacion === 'strongSell' ? 'var(--rd)' : 'var(--am)';
+      const extras = [];
+      if (earn.crecimientoIngresos !== null) extras.push('Rev. growth: ' + (earn.crecimientoIngresos >= 0 ? '+' : '') + earn.crecimientoIngresos + '%');
+      if (earn.targetPrecio) extras.push('Target: $' + earn.targetPrecio);
+      if (earn.recomendacion) extras.push(earn.recomendacion);
+      return `<div class="earn-item ${urgente ? 'urgente' : ''}">
+        <div class="earn-sym">${earn.simbolo}</div>
+        <div class="earn-fecha">${earn.fecha}</div>
+        <div class="earn-info">${extras.join(' · ') || '—'}</div>
+        ${urgente ? '<div class="earn-badge" style="background:var(--am2);color:var(--am);border:1px solid var(--amb);">Esta semana</div>' : ''}
+      </div>`;
+    }).join('');
+  }
+}
+
+// ═══════════════════════════════════════
 // FRED MACRO
 // ═══════════════════════════════════════
 function renderFred(fred) {
@@ -4434,6 +4753,21 @@ function renderFred(fred) {
       <div class="fred-item-tend" style="background:${tendCol}20;color:${tendCol};border:1px solid ${tendCol}40;">${tendEmoji} ${s.tend||'—'}</div>
     </div>`;
   }).join('');
+
+  // Expectativas Fed
+  if (fred.fedExpectativas) {
+    const fe = fred.fedExpectativas;
+    const col = fe.sesgo === 'dovish' ? 'var(--gr)' : fe.sesgo === 'hawkish' ? 'var(--rd)' : 'var(--am)';
+    const bg = fe.sesgo === 'dovish' ? 'var(--gr2)' : fe.sesgo === 'hawkish' ? 'var(--rd2)' : 'var(--am2)';
+    const bc = fe.sesgo === 'dovish' ? 'var(--grb)' : fe.sesgo === 'hawkish' ? 'var(--rdb)' : 'var(--amb)';
+    const emoji = fe.sesgo === 'dovish' ? '🕊️' : fe.sesgo === 'hawkish' ? '🦅' : '⚖️';
+    body.innerHTML += `
+      <div style="background:${bg};border:1px solid ${bc};border-radius:10px;padding:10px 12px;margin-top:2px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${col};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">${emoji} Expectativas política monetaria Fed</div>
+        <div style="font-size:12px;color:${col};font-weight:600;">${fe.descripcion}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:4px;">Sesgo implícito del mercado: <strong style="color:${col}">${fe.sesgo.toUpperCase()}</strong></div>
+      </div>`;
+  }
 
   // Curva de tipos visual
   if (fred.estadoCurva) {
