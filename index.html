@@ -963,6 +963,38 @@ input, textarea, button { font-family: inherit; }
 .earn-info { flex:1; font-size:11px; color:var(--t2); }
 .earn-badge { font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 7px; border-radius:100px; }
 
+/* PANEL RESUMEN VISUAL */
+.panel-resumen { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); margin:10px 20px 0; padding:14px 16px; }
+.pr-titulo { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t3); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+.pr-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.pr-item { display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 6px; border-radius:10px; background:var(--s2); border:1px solid var(--b1); cursor:pointer; transition:all 0.2s; }
+.pr-item:active { transform:scale(0.97); }
+.pr-item.verde { border-color:var(--grb); background:var(--gr2); }
+.pr-item.ambar { border-color:var(--amb); background:var(--am2); }
+.pr-item.rojo  { border-color:var(--rdb); background:var(--rd2); }
+.pr-item.gris  { border-color:var(--b1); background:var(--s2); }
+.pr-emoji { font-size:20px; line-height:1; }
+.pr-semaforo { width:10px; height:10px; border-radius:50%; background:var(--t4); }
+.pr-item.verde .pr-semaforo { background:var(--gr); box-shadow:0 0 6px var(--gr); }
+.pr-item.ambar .pr-semaforo { background:var(--am); box-shadow:0 0 6px var(--am); }
+.pr-item.rojo  .pr-semaforo { background:var(--rd); box-shadow:0 0 6px var(--rd); }
+.pr-nombre { font-size:10px; font-weight:600; color:var(--t2); text-align:center; line-height:1.2; }
+.pr-valor { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t3); text-align:center; }
+
+/* GDELT */
+.gdelt-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; }
+.gdelt-header { padding:12px 16px 10px; border-bottom:1px solid var(--b1); background:var(--s2); display:flex; align-items:center; gap:10px; }
+.gdelt-titulo { font-size:13px; font-weight:700; flex:1; }
+.gdelt-body { padding:10px 14px; display:flex; flex-direction:column; gap:5px; }
+.gdelt-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; background:var(--s2); border:1px solid var(--b1); }
+.gdelt-item.positivo { border-left:3px solid var(--gr); }
+.gdelt-item.negativo { border-left:3px solid var(--rd); }
+.gdelt-item.neutro   { border-left:3px solid var(--t4); }
+.gdelt-item.alerta   { border-left:3px solid var(--am); background:var(--am2); }
+.gdelt-tema { font-size:12px; font-weight:600; color:var(--t1); min-width:110px; }
+.gdelt-desc { font-size:11px; color:var(--t2); flex:1; line-height:1.3; }
+.gdelt-vol { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t3); }
+
 /* SCORE UNIFICADO */
 .score-unif-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); overflow:hidden; margin:10px 20px 0; position:relative; }
 .score-unif-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--t4); transition:all 0.4s; }
@@ -1145,30 +1177,73 @@ input, textarea, button { font-family: inherit; }
     </div>
 
     <!-- FETCH DATOS EN TIEMPO REAL -->
-    <!-- SCORE UNIFICADO — aparece arriba cuando hay datos -->
-    <div class="score-unif-card neutro" id="score-unif-card" style="display:none;">
-      <div class="su-header">
-        <div class="su-score" id="su-score">—</div>
-        <div class="su-info">
-          <div class="su-label">Score NQ Compass · d+1</div>
-          <div class="su-desc" id="su-desc">Actualizando datos...</div>
+    <!-- PANEL RESUMEN VISUAL + SCORE UNIFICADO -->
+    <div class="panel-resumen" id="panel-resumen" style="display:none;">
+      <div class="pr-titulo">NQ Compass · Resumen del mercado · d+1</div>
+      <div class="pr-grid" id="pr-grid">
+        <div class="pr-item gris" id="pr-tecnico" onclick="goTab('tecnico')">
+          <div class="pr-emoji">📐</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Técnico</div>
+          <div class="pr-valor" id="pr-tec-val">—</div>
+        </div>
+        <div class="pr-item gris" id="pr-institucional" onclick="document.getElementById('gex-card')?.scrollIntoView({behavior:'smooth'})">
+          <div class="pr-emoji">🏦</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Institucional</div>
+          <div class="pr-valor" id="pr-inst-val">—</div>
+        </div>
+        <div class="pr-item gris" id="pr-macro" onclick="document.getElementById('fred-card')?.scrollIntoView({behavior:'smooth'})">
+          <div class="pr-emoji">🌊</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Macro FRED</div>
+          <div class="pr-valor" id="pr-mac-val">—</div>
+        </div>
+        <div class="pr-item gris" id="pr-giro" onclick="document.getElementById('giro-card')?.scrollIntoView({behavior:'smooth'})">
+          <div class="pr-emoji">🔄</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Giro</div>
+          <div class="pr-valor" id="pr-giro-val">—</div>
+        </div>
+        <div class="pr-item gris" id="pr-semanal" onclick="goTab('tecnico')">
+          <div class="pr-emoji">📅</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Semanal</div>
+          <div class="pr-valor" id="pr-sem-val">—</div>
+        </div>
+        <div class="pr-item gris" id="pr-sentimiento" onclick="document.getElementById('emp-card')?.scrollIntoView({behavior:'smooth'})">
+          <div class="pr-emoji">🎭</div>
+          <div class="pr-semaforo"></div>
+          <div class="pr-nombre">Sentimiento</div>
+          <div class="pr-valor" id="pr-sent-val">—</div>
         </div>
       </div>
-      <div class="su-componentes">
-        <div class="su-comp">
-          <div class="su-comp-val" id="su-tec">—</div>
-          <div class="su-comp-lbl">Técnico</div>
-          <div class="su-comp-peso">Peso 40%</div>
+
+      <!-- Score unificado -->
+      <div class="score-unif-card neutro" id="score-unif-card" style="margin:12px -4px -4px; border-radius:0 0 var(--r-lg) var(--r-lg); border:none; border-top:1px solid var(--b1);">
+        <div class="su-header" style="padding:12px 14px 10px;">
+          <div class="su-score" id="su-score">—</div>
+          <div class="su-info">
+            <div class="su-label">Score unificado · -10 a +10</div>
+            <div class="su-desc" id="su-desc">Cargando datos...</div>
+          </div>
         </div>
-        <div class="su-comp">
-          <div class="su-comp-val" id="su-mac">—</div>
-          <div class="su-comp-lbl">Macro FRED</div>
-          <div class="su-comp-peso">Peso 30%</div>
-        </div>
-        <div class="su-comp">
-          <div class="su-comp-val" id="su-sent">—</div>
-          <div class="su-comp-lbl">Sentimiento</div>
-          <div class="su-comp-peso">Peso 30%</div>
+        <div class="su-componentes" style="padding:0 14px 12px;">
+          <div class="su-comp">
+            <div class="su-comp-val" id="su-tec">—</div>
+            <div class="su-comp-lbl">Técnico</div>
+            <div class="su-comp-peso">40%</div>
+          </div>
+          <div class="su-comp">
+            <div class="su-comp-val" id="su-mac">—</div>
+            <div class="su-comp-lbl">Macro</div>
+            <div class="su-comp-peso">30%</div>
+          </div>
+          <div class="su-comp">
+            <div class="su-comp-val" id="su-sent">—</div>
+            <div class="su-comp-lbl">Sentimiento</div>
+            <div class="su-comp-peso">30%</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1414,6 +1489,18 @@ input, textarea, button { font-family: inherit; }
           <a class="il blue" href="https://finance.yahoo.com/calendar/earnings" target="_blank">📅 Calendario earnings ↗</a>
           <a class="il blue" href="https://www.earningswhispers.com" target="_blank">📊 Earnings Whispers ↗</a>
         </div>
+      </div>
+    </div>
+
+    <!-- GDELT — Tono y volumen noticias globales -->
+    <div class="gdelt-card" id="gdelt-card" style="display:none;">
+      <div class="gdelt-header">
+        <span style="font-size:15px;">🌐</span>
+        <div class="gdelt-titulo">GDELT — Pulso global de noticias</div>
+        <div class="ind-badge" id="gdelt-badge">—</div>
+      </div>
+      <div class="gdelt-body" id="gdelt-body">
+        <div style="font-size:12px;color:var(--t3);text-align:center;">Cargando...</div>
       </div>
     </div>
 
@@ -2682,23 +2769,22 @@ function aplicarDatosAuto(data) {
     renderGiro(data.giro);
   }
 
-  // SCORE UNIFICADO
+  // SCORE UNIFICADO + PANEL RESUMEN
   if (data.scoreUnificado) {
     S.scoreUnificado = data.scoreUnificado;
     const su = data.scoreUnificado;
+
+    // Mostrar panel resumen
+    const panel = document.getElementById('panel-resumen');
+    if (panel) panel.style.display = 'block';
+
+    // Score unificado
     const card = document.getElementById('score-unif-card');
-    if (card) {
-      card.style.display = 'block';
-      card.className = 'score-unif-card ' + su.estado;
-    }
+    if (card) card.className = 'score-unif-card ' + su.estado;
     const scoreEl = document.getElementById('su-score');
-    if (scoreEl) {
-      scoreEl.textContent = (su.score >= 0 ? '+' : '') + su.score;
-    }
+    if (scoreEl) scoreEl.textContent = (su.score >= 0 ? '+' : '') + su.score;
     const descEl = document.getElementById('su-desc');
     if (descEl) descEl.textContent = su.descripcion;
-    const colMap = { alcista:'var(--gr)', neutro:'var(--am)', bajista:'var(--rd)' };
-    const col = colMap[su.estado] || 'var(--am)';
     ['su-tec','su-mac','su-sent'].forEach((id, i) => {
       const el = document.getElementById(id);
       const vals = [su.componentes.tecnico, su.componentes.macro, su.componentes.sentimiento];
@@ -2707,6 +2793,19 @@ function aplicarDatosAuto(data) {
         el.style.color = vals[i] >= 1 ? 'var(--gr)' : vals[i] <= -1 ? 'var(--rd)' : 'var(--am)';
       }
     });
+  }
+
+  // Actualizar panel resumen con semáforos individuales
+  actualizarPanelResumen(data);
+
+  // GDELT
+  if (data.gdelt) {
+    S.gdelt = data.gdelt;
+    const gc = document.getElementById('gdelt-card');
+    if (gc) gc.style.display = 'block';
+    renderGDELT(data.gdelt);
+    // Actualizar semáforo sentimiento con GDELT
+    actualizarPanelResumen(data);
   }
 
   // FINNHUB SENTIMIENTO
@@ -3339,6 +3438,8 @@ DATOS DE MERCADO DE HOY:
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
 - SCORE UNIFICADO NQ COMPASS: ${S.scoreUnificado ? S.scoreUnificado.score + '/10 (' + S.scoreUnificado.estado + ') — ' + S.scoreUnificado.descripcion + ' | Técnico=' + S.scoreUnificado.componentes.tecnico + ' Macro=' + S.scoreUnificado.componentes.macro + ' Sentimiento=' + S.scoreUnificado.componentes.sentimiento : 'no disponible'}
+- GDELT (Pulso global noticias):
+${S.gdelt ? 'Score=' + S.gdelt.score + ' estado=' + S.gdelt.estado + (S.gdelt.alertaVolatilidad ? ' ⚡PICO_NOTICIAS_VOLATILIDAD_PROBABLE' : '') + ' | ' + S.gdelt.temas?.map(t => t.tema + ':' + t.señal + '(tono=' + t.tono + (t.alertaVol ? ' PICO_VOL' : '') + ')').join(' | ') : 'no disponible'}
 - SENTIMIENTO NOTICIAS (Alpha Vantage): ${S.finnhub?.sentimentScore ? 'Score=' + S.finnhub.sentimentScore + '/100 — ' + S.finnhub.sentimentDesc : 'no disponible'}
 - NOTICIAS FINANCIERAS AV: ${S.finnhub?.noticias?.length > 0 ? S.finnhub.noticias.slice(0,5).map(n => n.titulo + ' [' + (n.sentiment||'neutral') + ']').join(' | ') : 'no disponible'}
 - DATOS EMPRESARIALES TOP 10 QQQ:
@@ -4675,6 +4776,119 @@ function renderSemanal(s) {
 document.addEventListener('paste', function(e) {
   // Override del paste existente para incluir sem
 }, true);
+
+// ═══════════════════════════════════════
+// GDELT
+// ═══════════════════════════════════════
+function renderGDELT(g) {
+  const body = document.getElementById('gdelt-body');
+  const badge = document.getElementById('gdelt-badge');
+  if (!body) return;
+
+  // Badge global
+  const colBadge = g.estado === 'positivo' ? 'g' : g.estado === 'negativo' ? 'r' : 'a';
+  if (badge) {
+    badge.textContent = g.alertaVolatilidad ? '⚡ Pico noticias' : g.estado === 'positivo' ? '🟢 Positivo' : g.estado === 'negativo' ? '🔴 Negativo' : '→ Neutro';
+    badge.className = 'ind-badge ' + colBadge;
+  }
+
+  if (!g.temas || g.temas.length === 0) {
+    body.innerHTML = '<div style="font-size:12px;color:var(--t3);text-align:center;">GDELT no disponible</div>';
+    return;
+  }
+
+  body.innerHTML = g.temas.map(t => {
+    const cls = t.alertaVol ? 'alerta' : t.señal;
+    const volStr = t.volCambioPct !== 0 ? (t.volCambioPct > 0 ? '+' : '') + t.volCambioPct + '% vol' : '';
+    return `<div class="gdelt-item ${cls}">
+      <div class="gdelt-tema">${t.tema}</div>
+      <div class="gdelt-desc">${t.desc}</div>
+      ${volStr ? `<div class="gdelt-vol">${volStr}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Nota explicativa
+  body.innerHTML += `<div style="font-size:10px;color:var(--t4);padding:4px 2px;line-height:1.5;">
+    Tono &lt;-2 = noticias negativas · &gt;+2 = positivas · Pico volumen &gt;50% = volatilidad probable
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// PANEL RESUMEN VISUAL
+// ═══════════════════════════════════════
+function setSemaforo(id, estado, valor) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'pr-item ' + (estado === 'g' ? 'verde' : estado === 'r' ? 'rojo' : estado === 'a' ? 'ambar' : 'gris');
+  const valEl = el.querySelector('.pr-valor');
+  if (valEl && valor) valEl.textContent = valor;
+}
+
+function actualizarPanelResumen(data) {
+  const panel = document.getElementById('panel-resumen');
+  if (panel) panel.style.display = 'block';
+
+  // 📐 TÉCNICO — basado en EMAs, RSI, MACD
+  if (data.tecnicos) {
+    const t = data.tecnicos;
+    const alcistas = [
+      t.ema50?.cruceEmas === 'alcista',
+      (t.sma200?.distanciaPct || 0) > 0,
+      (t.rsi?.valor || 50) > 45 && (t.rsi?.valor || 50) < 70,
+      (t.macd?.histogram || 0) > 0
+    ].filter(Boolean).length;
+    const estado = alcistas >= 3 ? 'g' : alcistas >= 2 ? 'a' : 'r';
+    setSemaforo('pr-tecnico', estado, 'RSI ' + (t.rsi?.valor || '—'));
+  }
+
+  // 🏦 INSTITUCIONAL — GEX + Max Pain + PCR
+  if (data.gex || data.maxpain || data.pcr) {
+    const gexOk = data.gex?.estado?.includes('positiva');
+    const mpOk = data.maxpain?.señal !== 'distribucion';
+    const pcrOk = (data.pcr?.equity || 0.7) > 0.4 && (data.pcr?.equity || 0.7) < 1.2;
+    const alcistas = [gexOk, mpOk, pcrOk].filter(Boolean).length;
+    const estado = alcistas >= 2 ? 'g' : alcistas >= 1 ? 'a' : 'r';
+    const gexLabel = data.gex?.estado?.replace('positiva_alta','G++'). replace('positiva','G+').replace('neutra','G~').replace('negativa','G-') || '—';
+    setSemaforo('pr-institucional', estado, gexLabel);
+  }
+
+  // 🌊 MACRO FRED
+  if (data.fred) {
+    const estado = data.fred.estado === 'favorable' ? 'g' : data.fred.estado === 'restrictivo' ? 'r' : 'a';
+    setSemaforo('pr-macro', estado, 'Score ' + (data.fred.score >= 0 ? '+' : '') + data.fred.score);
+  }
+
+  // 🔄 GIRO
+  if (data.giro) {
+    const señal = data.giro.señalGlobal;
+    const estado = señal === 'suelo' ? 'g' : señal === 'techo' ? 'r' : 'a';
+    const label = señal === 'techo' ? '⚠️ Techo' : señal === 'suelo' ? '🟢 Suelo' : '→ Neutro';
+    setSemaforo('pr-giro', estado, label);
+  }
+
+  // 📅 SEMANAL
+  if (data.semanal) {
+    const tend = data.semanal.tendencia;
+    const estado = tend?.includes('alcista') ? 'g' : tend?.includes('bajista') ? 'r' : 'a';
+    const rsiLabel = data.semanal.rsi ? 'RSI ' + data.semanal.rsi + 'W' : '—';
+    setSemaforo('pr-semanal', estado, rsiLabel);
+  }
+
+  // 🎭 SENTIMIENTO (PCR equity + Fear&Greed + AV sentiment)
+  const fng = S.fng;
+  const pcrEq = data.pcr?.equity;
+  const avSent = S.finnhub?.sentimentScore;
+  if (fng !== null || pcrEq || avSent) {
+    let sentScore = 0, n = 0;
+    if (fng !== null) { sentScore += fng > 75 ? -1 : fng > 50 ? 1 : fng < 25 ? -1 : 0.5; n++; }
+    if (pcrEq) { sentScore += pcrEq < 0.5 ? -1 : pcrEq > 0.8 ? 1 : 0.5; n++; }
+    if (avSent) { sentScore += avSent > 65 ? -1 : avSent > 55 ? 1 : avSent < 35 ? -1 : 0; n++; }
+    const avg = n > 0 ? sentScore / n : 0;
+    const estado = avg >= 0.3 ? 'g' : avg <= -0.3 ? 'r' : 'a';
+    const label = fng !== null ? 'F&G ' + fng : avSent ? 'AV ' + avSent + '%' : '—';
+    setSemaforo('pr-sentimiento', estado, label);
+  }
+}
 
 // ═══════════════════════════════════════
 // DATOS EMPRESARIALES
