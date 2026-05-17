@@ -68,6 +68,249 @@ body {
 input, textarea, button { font-family: inherit; }
 
 /* ═══════════════════════════════════════════════════
+   RADAR 2-5D
+═══════════════════════════════════════════════════ */
+.radar-header-banner {
+  margin: 16px 20px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(139,127,255,0.12), rgba(6,182,212,0.08));
+  border: 1px solid rgba(139,127,255,0.25);
+  border-radius: var(--r-lg);
+}
+.radar-banner-title {
+  font-size: 13px; font-weight: 700; color: var(--ac);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.radar-banner-desc {
+  font-size: 11px; color: var(--t3); line-height: 1.5;
+}
+
+.radar-score-row {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 8px; margin: 14px 20px 0;
+}
+.radar-score-box {
+  background: var(--s1); border: 1px solid var(--b2);
+  border-radius: var(--r-md); padding: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.rsb-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.rsb-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px; font-weight: 700; color: var(--t1);
+  line-height: 1;
+}
+.rsb-desc { font-size: 11px; color: var(--t3); line-height: 1.3; }
+.radar-score-box.alcista { border-color: var(--grb); background: rgba(46,204,138,0.05); }
+.radar-score-box.alcista .rsb-val { color: var(--gr); }
+.radar-score-box.bajista { border-color: var(--rdb); background: rgba(255,94,94,0.05); }
+.radar-score-box.bajista .rsb-val { color: var(--rd); }
+.radar-score-box.neutro { border-color: var(--amb); background: rgba(240,165,0,0.05); }
+.radar-score-box.neutro .rsb-val { color: var(--am); }
+
+.radar-card {
+  margin: 12px 20px 0;
+  background: var(--s1); border: 1px solid var(--b2);
+  border-radius: var(--r-lg); overflow: hidden;
+}
+.radar-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 14px 10px;
+  border-bottom: 1px solid var(--b1);
+}
+.radar-card-icon { font-size: 18px; flex-shrink: 0; }
+.radar-card-info { flex: 1; }
+.radar-card-title { font-size: 13px; font-weight: 700; color: var(--t1); }
+.radar-card-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+.radar-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 4px 10px; border-radius: 100px;
+  background: var(--s3); color: var(--t3);
+  border: 1px solid var(--b2); white-space: nowrap;
+}
+.radar-badge.g { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.radar-badge.a { background: var(--am2); color: var(--am); border-color: var(--amb); }
+.radar-badge.r { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+.radar-badge.p { background: var(--ac2); color: var(--ac); border-color: var(--acb); }
+
+.radar-card-body { padding: 12px 14px; }
+.radar-explain {
+  font-size: 11px; color: var(--t3); line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+/* COT inputs */
+.cot-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 10px;
+}
+.cot-item { display: flex; flex-direction: column; gap: 4px; }
+.cot-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3); text-transform: uppercase;
+}
+.cot-input {
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r-sm); padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 500;
+  color: var(--t1); outline: none;
+  -webkit-appearance: none; width: 100%;
+  transition: border-color 0.2s;
+}
+.cot-input:focus { border-color: var(--ac); }
+.cot-input::placeholder { color: var(--t4); font-size: 11px; }
+.cot-result {
+  margin-top: 8px; padding: 8px 10px;
+  background: var(--s2); border-radius: 8px;
+  border: 1px solid var(--b1);
+  font-size: 11px; color: var(--t3); line-height: 1.5;
+  display: none;
+}
+.cot-result.vis { display: block; }
+
+/* OI strike chart */
+.oi-strike-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+}
+.oi-strike-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--t2); min-width: 54px; text-align: right;
+}
+.oi-bar-wrap { flex: 1; height: 18px; display: flex; gap: 2px; }
+.oi-bar-call { height: 100%; background: var(--gr); border-radius: 3px; min-width: 2px; }
+.oi-bar-put  { height: 100%; background: var(--rd); border-radius: 3px; min-width: 2px; }
+.oi-bar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3); min-width: 40px; text-align: right;
+}
+.oi-legend {
+  display: flex; gap: 14px; margin-bottom: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--t3);
+  align-items: center;
+}
+.oi-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.oi-inputs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+}
+.oi-input-wrap { display: flex; flex-direction: column; gap: 4px; }
+
+/* VIX Term Structure */
+.vts-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;
+}
+.vts-box {
+  background: var(--s2); border: 1px solid var(--b1);
+  border-radius: var(--r-sm); padding: 10px 8px; text-align: center;
+}
+.vts-box-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px; font-weight: 600; color: var(--t1);
+}
+.vts-box-lbl { font-size: 9px; color: var(--t3); margin-top: 3px; }
+.vts-chart {
+  height: 48px; background: var(--s2); border-radius: 8px;
+  border: 1px solid var(--b1); position: relative; overflow: hidden;
+  margin-bottom: 10px; display: flex; align-items: flex-end; padding: 0 4px 4px; gap: 3px;
+}
+.vts-bar {
+  flex: 1; border-radius: 3px 3px 0 0;
+  min-height: 4px; transition: height 0.3s;
+}
+.vts-signal {
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 11px; line-height: 1.5; display: none;
+}
+.vts-signal.vis { display: block; }
+
+/* ETF Flows */
+.etf-days {
+  display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.etf-day-btn {
+  flex: 1; min-width: 36px; padding: 7px 4px;
+  background: var(--s2); border: 1px solid var(--b1);
+  border-radius: 8px; color: var(--t3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  text-align: center; transition: all 0.15s;
+}
+.etf-day-btn.pos { background: var(--gr2); color: var(--gr); border-color: var(--grb); }
+.etf-day-btn.neg { background: var(--rd2); color: var(--rd); border-color: var(--rdb); }
+.etf-day-btn.selected { box-shadow: 0 0 0 2px var(--ac); }
+.etf-inputs-row {
+  display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end;
+}
+.etf-input-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.etf-total-bar {
+  height: 6px; background: var(--s3); border-radius: 3px; margin-bottom: 10px; overflow: hidden;
+}
+.etf-bar-fill {
+  height: 100%; border-radius: 3px; transition: width 0.4s, background 0.3s;
+}
+.etf-signal {
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 11px; line-height: 1.5; display: none;
+}
+.etf-signal.vis { display: block; }
+
+/* RADAR IA BUTTON */
+.btn-radar-ia {
+  margin: 14px 20px 0;
+  width: calc(100% - 40px);
+  padding: 14px;
+  background: linear-gradient(135deg, var(--ac) 0%, var(--cyan) 100%);
+  border: none; border-radius: var(--r-lg);
+  color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(139,127,255,0.3);
+}
+.btn-radar-ia:disabled {
+  background: var(--s3) !important; animation: none;
+  color: var(--t3); box-shadow: none; cursor: not-allowed;
+}
+.btn-radar-ia .sp {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: none;
+}
+.btn-radar-ia.loading .sp { display: block; }
+
+.radar-ia-result {
+  margin: 12px 20px 0;
+  background: var(--s1); border: 1px solid var(--acb);
+  border-radius: var(--r-lg); overflow: hidden; display: none;
+}
+.radar-ia-result.vis { display: block; }
+.radar-ia-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 1px solid var(--b1);
+}
+.radar-ia-pill {
+  background: var(--ac2); border: 1px solid var(--acb);
+  color: var(--ac); font-size: 9px; font-weight: 700;
+  padding: 2px 8px; border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em;
+}
+.radar-ia-title { font-size: 13px; font-weight: 600; }
+.radar-ia-body { padding: 14px; font-size: 13px; color: var(--t2); line-height: 1.7; }
+.radar-ia-body p { margin-bottom: 10px; }
+.radar-ia-body p:last-child { margin-bottom: 0; }
+.radar-ia-body strong { color: var(--t1); }
+.radar-ia-body em { color: var(--ac); font-style: normal; }
+
+/* ═══════════════════════════════════════════════════
    SPLASH
 ═══════════════════════════════════════════════════ */
 #splash {
@@ -140,17 +383,17 @@ input, textarea, button { font-family: inherit; }
 .tab {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 5px;
+  gap: 4px;
   height: var(--tab-h);
   background: none; border: none;
   color: var(--t4); cursor: pointer;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
   transition: color 0.2s;
   position: relative;
 }
 .tab.active { color: var(--ac); }
-.tab svg { width: 22px; height: 22px; stroke-width: 1.6; }
+.tab svg { width: 20px; height: 20px; stroke-width: 1.6; }
 .tab-indicator {
   position: absolute; top: 0; left: 50%;
   transform: translateX(-50%);
@@ -2285,6 +2528,248 @@ input, textarea, button { font-family: inherit; }
     <div class="spacer"></div>
   </div><!-- /sc-tecnico -->
 
+  <!-- ══════════════ SCREEN: RADAR 2-5D ══════════════ -->
+  <div class="screen" id="sc-radar">
+    <div class="page-header">
+      <div class="ph-overline">
+        <div class="pulse-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></div>
+        <span>Señales predictivas 2-5 días</span>
+      </div>
+      <div class="ph-title">Radar <span style="color:var(--cyan)">2-5D</span></div>
+      <div class="ph-meta">
+        <div class="chip" style="border-color:rgba(6,182,212,0.3);color:var(--cyan);background:rgba(6,182,212,0.08);" id="radar-resumen-chip">Sin datos aún</div>
+      </div>
+    </div>
+
+    <!-- BANNER EXPLICATIVO -->
+    <div class="radar-header-banner">
+      <div class="radar-banner-title">
+        <span>🎯</span> Horizonte predictivo: 2 a 5 días vista
+      </div>
+      <div class="radar-banner-desc">
+        Estos 4 indicadores no son útiles para mañana (d+1), sino para anticipar el escenario de la semana.
+        Actualización: COT viernes · OI y Flows diario · VIX Term Structure en tiempo real.
+      </div>
+    </div>
+
+    <!-- SCORES RESUMEN -->
+    <div class="radar-score-row">
+      <div class="radar-score-box" id="rsb-global">
+        <div class="rsb-label">Score global</div>
+        <div class="rsb-val" id="rsb-global-val">—</div>
+        <div class="rsb-desc" id="rsb-global-desc">Introduce los datos para ver el sesgo a 2-5 días</div>
+      </div>
+      <div class="radar-score-box" id="rsb-sesgo">
+        <div class="rsb-label">Sesgo dominante</div>
+        <div class="rsb-val" id="rsb-sesgo-val">—</div>
+        <div class="rsb-desc" id="rsb-sesgo-desc">—</div>
+      </div>
+    </div>
+
+    <!-- ═══ 1. COT REPORT ═══ -->
+    <div class="radar-card" id="rc-cot">
+      <div class="radar-card-header">
+        <div class="radar-card-icon">📋</div>
+        <div class="radar-card-info">
+          <div class="radar-card-title">COT Report — Posicionamiento institucional</div>
+          <div class="radar-card-sub">CFTC · Datos del viernes · Señal contraria 1-2 semanas</div>
+        </div>
+        <div class="radar-badge" id="cot-badge">—</div>
+      </div>
+      <div class="radar-card-body">
+        <div class="radar-explain">
+          Cuando los <strong style="color:var(--t1)">Large Speculators</strong> (hedge funds, CTAs) acumulan una posición larga extrema en NQ, es señal contraria <strong style="color:var(--rd)">bajista</strong> con 1-2 semanas de antelación. Al revés cuando están muy cortos → rebote probable.
+        </div>
+        <div class="cot-grid">
+          <div class="cot-item">
+            <div class="cot-label">Largos (L. Spec)</div>
+            <input class="cot-input" type="number" id="cot-largos" placeholder="ej: 95000" inputmode="numeric" oninput="evalCOT()">
+          </div>
+          <div class="cot-item">
+            <div class="cot-label">Cortos (L. Spec)</div>
+            <input class="cot-input" type="number" id="cot-cortos" placeholder="ej: 28000" inputmode="numeric" oninput="evalCOT()">
+          </div>
+          <div class="cot-item">
+            <div class="cot-label">Neto anterior</div>
+            <input class="cot-input" type="number" id="cot-anterior" placeholder="ej: 60000" inputmode="numeric" oninput="evalCOT()">
+          </div>
+        </div>
+        <div class="cot-result" id="cot-result"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <a class="il blue" href="https://www.cftc.gov/dea/futures/financial_lf.htm" target="_blank">📥 CFTC Futuros Financieros ↗</a>
+          <a class="il blue" href="https://www.barchart.com/futures/commitment-of-traders/NQ*0" target="_blank">📊 Barchart COT NQ ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 2. OI POR STRIKE ═══ -->
+    <div class="radar-card" id="rc-oi">
+      <div class="radar-card-header">
+        <div class="radar-card-icon">⚙️</div>
+        <div class="radar-card-info">
+          <div class="radar-card-title">Open Interest por Strike — Paredes opciones</div>
+          <div class="radar-card-sub">QQQ · Próximo vencimiento · Rangos 3-7 días</div>
+        </div>
+        <div class="radar-badge" id="oi-badge">—</div>
+      </div>
+      <div class="radar-card-body">
+        <div class="radar-explain">
+          Los strikes con mayor OI de <strong style="color:var(--gr)">calls</strong> actúan como <strong style="color:var(--t1)">resistencia</strong> (gamma de dealers presiona el precio a la baja cerca de ellos). Los de <strong style="color:var(--rd)">puts</strong> como <strong style="color:var(--t1)">soporte</strong>. El <strong style="color:var(--ac)">Max Pain</strong> es hacia donde tiende el precio al vencimiento.
+        </div>
+        <div class="oi-inputs">
+          <div class="oi-input-wrap">
+            <div class="cot-label">Precio QQQ actual</div>
+            <input class="cot-input" type="number" id="oi-precio" placeholder="ej: 480.5" step="0.01" inputmode="decimal" oninput="evalOI()">
+          </div>
+          <div class="oi-input-wrap">
+            <div class="cot-label">Max Pain semanal</div>
+            <input class="cot-input" type="number" id="oi-maxpain" placeholder="ej: 475" step="0.5" inputmode="decimal" oninput="evalOI()">
+          </div>
+          <div class="oi-input-wrap">
+            <div class="cot-label">Strike resist. calls</div>
+            <input class="cot-input" type="number" id="oi-resist" placeholder="ej: 490" step="0.5" inputmode="decimal" oninput="evalOI()">
+          </div>
+          <div class="oi-input-wrap">
+            <div class="cot-label">Strike soporte puts</div>
+            <input class="cot-input" type="number" id="oi-soporte" placeholder="ej: 470" step="0.5" inputmode="decimal" oninput="evalOI()">
+          </div>
+        </div>
+        <!-- Visualización rango -->
+        <div id="oi-chart-wrap" style="display:none; margin-bottom:10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">Rango opciones esta semana</div>
+          <div id="oi-range-visual" style="
+            height: 36px; background: var(--s2); border-radius: 8px;
+            border: 1px solid var(--b1); position: relative; overflow: hidden;
+          "></div>
+        </div>
+        <div class="cot-result" id="oi-result"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <a class="il blue" href="https://optionstrat.com/analyze/qqq" target="_blank">📊 OptionStrat QQQ ↗</a>
+          <a class="il blue" href="https://unusualwhales.com/i/qqq" target="_blank">🐳 Unusual Whales ↗</a>
+          <a class="il blue" href="https://www.cboe.com/delayed_quotes/qqq/quote_table" target="_blank">🔗 CBOE QQQ ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 3. VIX TERM STRUCTURE ═══ -->
+    <div class="radar-card" id="rc-vts">
+      <div class="radar-card-header">
+        <div class="radar-card-icon">📉</div>
+        <div class="radar-card-info">
+          <div class="radar-card-title">VIX Term Structure — Contango / Backwardation</div>
+          <div class="radar-card-sub">CBOE · VIX spot vs futuros · Señal 2-5 días</div>
+        </div>
+        <div class="radar-badge" id="vts-badge">—</div>
+      </div>
+      <div class="radar-card-body">
+        <div class="radar-explain">
+          <strong style="color:var(--rd)">Backwardation</strong> (VIX spot &gt; futuros): pánico a corto plazo → rebote probable en 2-5 días.<br>
+          <strong style="color:var(--gr)">Contango pronunciado</strong> (futuros &gt;&gt; spot): complacencia → mercado vulnerable a sorpresas bajistas.<br>
+          <strong style="color:var(--am)">Contango normal</strong> (&lt;10%): entorno estable y equilibrado.
+        </div>
+        <div class="vts-grid">
+          <div class="vts-box">
+            <div class="vts-box-val" id="vts-spot-val">—</div>
+            <div class="vts-box-lbl">VIX Spot</div>
+          </div>
+          <div class="vts-box">
+            <div class="vts-box-val" id="vts-vx1-val">—</div>
+            <div class="vts-box-lbl">VX1 (1 mes)</div>
+          </div>
+          <div class="vts-box">
+            <div class="vts-box-val" id="vts-vx2-val">—</div>
+            <div class="vts-box-lbl">VX2 (2 meses)</div>
+          </div>
+        </div>
+        <div class="cot-grid" style="margin-bottom:10px;">
+          <div class="cot-item">
+            <div class="cot-label">VIX Spot</div>
+            <input class="cot-input" type="number" id="vts-spot" placeholder="ej: 18.5" step="0.1" inputmode="decimal" oninput="evalVTS()">
+          </div>
+          <div class="cot-item">
+            <div class="cot-label">VX1 Futuro 1M</div>
+            <input class="cot-input" type="number" id="vts-vx1" placeholder="ej: 20.2" step="0.1" inputmode="decimal" oninput="evalVTS()">
+          </div>
+          <div class="cot-item">
+            <div class="cot-label">VX2 Futuro 2M</div>
+            <input class="cot-input" type="number" id="vts-vx2" placeholder="ej: 22.0" step="0.1" inputmode="decimal" oninput="evalVTS()">
+          </div>
+        </div>
+        <!-- Chart visual term structure -->
+        <div class="vts-chart" id="vts-chart">
+          <div class="vts-bar" id="vts-b1" style="background:var(--s4);height:60%;"></div>
+          <div class="vts-bar" id="vts-b2" style="background:var(--s4);height:70%;"></div>
+          <div class="vts-bar" id="vts-b3" style="background:var(--s4);height:80%;"></div>
+        </div>
+        <div class="vts-signal" id="vts-result"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <a class="il blue" href="https://vixcentral.com/" target="_blank">📊 VIXCentral ↗</a>
+          <a class="il blue" href="https://www.cboe.com/tradable_products/vix/vix_futures/" target="_blank">🔗 CBOE VIX Futures ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 4. ETF FLOWS QQQ ═══ -->
+    <div class="radar-card" id="rc-etf">
+      <div class="radar-card-header">
+        <div class="radar-card-icon">💸</div>
+        <div class="radar-card-info">
+          <div class="radar-card-title">ETF Flows QQQ — Dinero entrando/saliendo</div>
+          <div class="radar-card-sub">ETF.com · Datos diarios · Precedent 3-7 días</div>
+        </div>
+        <div class="radar-badge" id="etf-badge">—</div>
+      </div>
+      <div class="radar-card-body">
+        <div class="radar-explain">
+          Salidas masivas de QQQ durante <strong style="color:var(--t1)">3+ días consecutivos</strong> preceden caídas adicionales del Nasdaq.
+          Entradas masivas sostenidas preceden continuación alcista. Introduce el flujo de cada día (positivo = entrada, negativo = salida).
+        </div>
+        <!-- 5 días -->
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Últimos 5 días (M$ = millones USD)</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px;">
+          <div class="cot-item"><div class="cot-label">D-4</div><input class="cot-input" type="number" id="etf-d4" placeholder="ej: -500" inputmode="decimal" step="10" oninput="evalETF()"></div>
+          <div class="cot-item"><div class="cot-label">D-3</div><input class="cot-input" type="number" id="etf-d3" placeholder="ej: -320" inputmode="decimal" step="10" oninput="evalETF()"></div>
+          <div class="cot-item"><div class="cot-label">D-2</div><input class="cot-input" type="number" id="etf-d2" placeholder="ej: -180" inputmode="decimal" step="10" oninput="evalETF()"></div>
+          <div class="cot-item"><div class="cot-label">D-1 (Ayer)</div><input class="cot-input" type="number" id="etf-d1" placeholder="ej: 120" inputmode="decimal" step="10" oninput="evalETF()"></div>
+          <div class="cot-item"><div class="cot-label">Hoy</div><input class="cot-input" type="number" id="etf-d0" placeholder="ej: 450" inputmode="decimal" step="10" oninput="evalETF()"></div>
+        </div>
+        <!-- Bar acumulado -->
+        <div id="etf-visual" style="display:none;">
+          <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:4px;">
+            <span>Flujo neto 5d</span>
+            <span id="etf-neto-txt">—</span>
+          </div>
+          <div class="etf-total-bar"><div class="etf-bar-fill" id="etf-bar" style="width:50%;background:var(--am);"></div></div>
+        </div>
+        <div class="etf-signal" id="etf-result"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <a class="il blue" href="https://www.etf.com/QQQ#flows" target="_blank">💸 ETF.com Flows QQQ ↗</a>
+          <a class="il blue" href="https://etfdb.com/etf/QQQ/#etf-ticker-profile" target="_blank">📊 ETFdb QQQ ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTÓN IA -->
+    <button class="btn-radar-ia" id="btn-radar-ia" onclick="generarRadarIA()" disabled>
+      <div class="sp"></div>
+      <span>🎯 Analizar perspectiva 2-5 días con IA</span>
+    </button>
+    <div style="font-size:11px;color:var(--t4);text-align:center;padding:6px 20px 0;line-height:1.5;">
+      Requiere al menos 2 de los 4 indicadores completados
+    </div>
+
+    <!-- RESULTADO IA -->
+    <div class="radar-ia-result" id="radar-ia-result">
+      <div class="radar-ia-header">
+        <div class="radar-ia-pill">IA · 2-5D</div>
+        <div class="radar-ia-title">Perspectiva semanal del NQ</div>
+      </div>
+      <div class="radar-ia-body" id="radar-ia-body">—</div>
+    </div>
+
+    <div class="spacer"></div>
+  </div><!-- /sc-radar -->
+
   <!-- TAB BAR -->
   <div class="tabbar">
     <button class="tab active" id="tab-datos" onclick="goTab('datos')">
@@ -2297,6 +2782,11 @@ input, textarea, button { font-family: inherit; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Técnico
     </button>
+    <button class="tab" id="tab-radar" onclick="goTab('radar')">
+      <div class="tab-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="2"/><path d="M12 2a10 10 0 0 1 7.38 16.74M4.62 5.26A10 10 0 0 0 12 22"/><path d="M12 6a6 6 0 0 1 4.24 10.24M7.76 7.76A6 6 0 0 0 12 18"/></svg>
+      2-5D
+    </button>
     <button class="tab" id="tab-informe" onclick="goTab('informe')">
       <div class="tab-indicator"></div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -2305,7 +2795,7 @@ input, textarea, button { font-family: inherit; }
     <button class="tab" id="tab-historial" onclick="goTab('historial')">
       <div class="tab-indicator"></div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Historial
+      Hist.
     </button>
   </div>
 
@@ -4014,7 +4504,7 @@ function guardarProxyUrl() {
 // NAVEGACIÓN
 // ═══════════════════════════════════════
 function goTab(tab) {
-  ['datos','tecnico','informe','historial'].forEach(t => {
+  ['datos','tecnico','radar','informe','historial'].forEach(t => {
     const sc = document.getElementById('sc-' + t);
     const tb = document.getElementById('tab-' + t);
     if (sc) sc.classList.remove('active');
@@ -5207,7 +5697,441 @@ function renderLiquidez(liq) {
   body.innerHTML = html;
 }
 
-// Calcular y mostrar Fibonacci
+// ═══════════════════════════════════════
+// RADAR 2-5D — LÓGICA DE LOS 4 INDICADORES
+// ═══════════════════════════════════════
+
+// Estado radar
+const R = {
+  cot: null,    // 'alcista' | 'bajista' | 'neutro'
+  oi:  null,
+  vts: null,
+  etf: null
+};
+
+function radarScore() {
+  const pesos = { alcista: 1, bajista: -1, neutro: 0 };
+  const vals = [R.cot, R.oi, R.vts, R.etf].filter(v => v !== null);
+  if (vals.length === 0) return null;
+  const total = vals.reduce((s, v) => s + (pesos[v] || 0), 0);
+  const norm = parseFloat((total / vals.length).toFixed(2));
+  return { score: norm, n: vals.length };
+}
+
+function actualizarRadarResumen() {
+  const sc = radarScore();
+  const globalBox = document.getElementById('rsb-global');
+  const sesgoBox  = document.getElementById('rsb-sesgo');
+  const globalVal = document.getElementById('rsb-global-val');
+  const globalDesc= document.getElementById('rsb-global-desc');
+  const sesgoVal  = document.getElementById('rsb-sesgo-val');
+  const sesgoDesc = document.getElementById('rsb-sesgo-desc');
+  const chip = document.getElementById('radar-resumen-chip');
+  const btn = document.getElementById('btn-radar-ia');
+
+  const nDatos = [R.cot, R.oi, R.vts, R.etf].filter(v => v !== null).length;
+  if (btn) btn.disabled = nDatos < 2;
+
+  if (!sc) return;
+
+  const s = sc.score;
+  let cls, sesgoTxt, sesgoDsc, chipTxt;
+  if (s >= 0.5)       { cls='alcista'; sesgoTxt='ALCISTA';  sesgoDsc='Mayoría de señales apuntan arriba';   chipTxt='📈 Sesgo alcista 2-5D'; }
+  else if (s <= -0.5) { cls='bajista'; sesgoTxt='BAJISTA';  sesgoDsc='Mayoría de señales apuntan abajo';    chipTxt='📉 Sesgo bajista 2-5D'; }
+  else                { cls='neutro';  sesgoTxt='NEUTRO';   sesgoDsc='Señales mixtas — sin convicción clara'; chipTxt='→ Radar mixto 2-5D'; }
+
+  if (globalVal)  globalVal.textContent = (s >= 0 ? '+' : '') + s;
+  if (globalDesc) globalDesc.textContent = sc.n + ' de 4 indicadores completados';
+  if (globalBox)  globalBox.className = 'radar-score-box ' + cls;
+  if (sesgoVal)   sesgoVal.textContent = sesgoTxt;
+  if (sesgoDesc)  sesgoDesc.textContent = sesgoDsc;
+  if (sesgoBox)   sesgoBox.className = 'radar-score-box ' + cls;
+  if (chip)       { chip.textContent = chipTxt; chip.style.color = cls === 'alcista' ? 'var(--gr)' : cls === 'bajista' ? 'var(--rd)' : 'var(--am)'; }
+}
+
+// ─── 1. COT ───────────────────────────────────────
+function evalCOT() {
+  const largos   = parseFloat(document.getElementById('cot-largos').value);
+  const cortos   = parseFloat(document.getElementById('cot-cortos').value);
+  const anterior = parseFloat(document.getElementById('cot-anterior').value);
+  const badge    = document.getElementById('cot-badge');
+  const result   = document.getElementById('cot-result');
+  const card     = document.getElementById('rc-cot');
+
+  if (isNaN(largos) || isNaN(cortos)) {
+    badge.textContent = '—'; badge.className = 'radar-badge';
+    result.classList.remove('vis'); R.cot = null;
+    actualizarRadarResumen(); return;
+  }
+
+  const neto = largos - cortos;
+  const cambio = !isNaN(anterior) ? neto - anterior : null;
+  const ratio = largos / (largos + cortos);   // % posición larga
+  const pctLargo = parseFloat((ratio * 100).toFixed(1));
+
+  let señal, badgeTxt, badgeCls, color, msg;
+
+  if (pctLargo > 75) {
+    señal = 'bajista'; badgeTxt = '🔴 Extremo alcista'; badgeCls = 'r'; color = 'var(--rd)';
+    msg = `<strong style="color:var(--rd)">⚠️ Posicionamiento extremo alcista (${pctLargo}% largos)</strong> — Los especuladores están muy largos. Señal contraria <strong>bajista</strong> con 1-2 semanas de antelación. Cuando todos están comprados, no quedan compradores para subir.`;
+  } else if (pctLargo > 65) {
+    señal = 'bajista'; badgeTxt = '⚠️ Largos elevados'; badgeCls = 'a'; color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Posicionamiento alcista elevado (${pctLargo}% largos)</strong> — Por encima de lo normal. Riesgo de corrección si cambia el sentimiento. Vigilar.`;
+  } else if (pctLargo < 25) {
+    señal = 'alcista'; badgeTxt = '🟢 Extremo bajista'; badgeCls = 'g'; color = 'var(--gr)';
+    msg = `<strong style="color:var(--gr)">📈 Posicionamiento extremo bajista (${pctLargo}% largos)</strong> — Los especuladores están muy cortos. Señal contraria <strong>alcista</strong>. Riesgo de short squeeze.`;
+  } else if (pctLargo < 35) {
+    señal = 'alcista'; badgeTxt = '🟡 Cortos elevados'; badgeCls = 'g'; color = 'var(--gr)';
+    msg = `<strong style="color:var(--gr)">Posicionamiento bajista elevado (${pctLargo}% largos)</strong> — Más cortos que lo normal. Podría alimentar un rebote.`;
+  } else {
+    señal = 'neutro'; badgeTxt = '→ Normal'; badgeCls = 'a'; color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Posicionamiento equilibrado (${pctLargo}% largos)</strong> — Neto: ${neto.toLocaleString()} contratos. Sin señal extrema del COT.`;
+  }
+
+  if (cambio !== null) {
+    const camDir = cambio > 0 ? 'aumentando' : 'reduciendo';
+    const camCol = (señal === 'bajista' && cambio > 0) || (señal === 'alcista' && cambio < 0) ? 'var(--rd)' : 'var(--gr)';
+    msg += ` · Neto <strong style="color:${camCol}">semana pasada: ${anterior.toLocaleString()} → ahora: ${neto.toLocaleString()} (${camDir} ${Math.abs(cambio).toLocaleString()})</strong>.`;
+  }
+
+  R.cot = señal;
+  badge.textContent = badgeTxt; badge.className = 'radar-badge ' + badgeCls;
+  result.innerHTML = msg; result.classList.add('vis');
+  result.style.background = 'var(--s2)'; result.style.borderColor = 'var(--b1)'; result.style.color = color;
+  actualizarRadarResumen();
+}
+
+// ─── 2. OI POR STRIKE ─────────────────────────────
+function evalOI() {
+  const precio   = parseFloat(document.getElementById('oi-precio').value);
+  const maxpain  = parseFloat(document.getElementById('oi-maxpain').value);
+  const resist   = parseFloat(document.getElementById('oi-resist').value);
+  const soporte  = parseFloat(document.getElementById('oi-soporte').value);
+  const badge    = document.getElementById('oi-badge');
+  const result   = document.getElementById('oi-result');
+
+  if (isNaN(precio) && isNaN(maxpain)) {
+    badge.textContent = '—'; badge.className = 'radar-badge';
+    result.classList.remove('vis'); R.oi = null;
+    actualizarRadarResumen(); return;
+  }
+
+  let señal = 'neutro', badgeTxt = '→ Neutro', badgeCls = 'a';
+  let msgs = [];
+
+  if (!isNaN(precio) && !isNaN(maxpain)) {
+    const distMP = parseFloat(((maxpain - precio) / precio * 100).toFixed(2));
+    const colMP = distMP > 0 ? 'var(--gr)' : distMP < 0 ? 'var(--rd)' : 'var(--am)';
+    msgs.push(`<strong style="color:var(--t1)">Max Pain QQQ: ${maxpain}</strong> · Precio: ${precio} · Distancia: <strong style="color:${colMP}">${distMP >= 0 ? '+' : ''}${distMP}%</strong>`);
+    if (distMP > 2) { señal = 'alcista'; msgs.push('<span style="color:var(--gr)">📈 Precio bajo el Max Pain — dealers incentivados a subir hacia ' + maxpain + '</span>'); }
+    else if (distMP < -2) { señal = 'bajista'; msgs.push('<span style="color:var(--rd)">📉 Precio sobre el Max Pain — presión gravitacional bajista hacia ' + maxpain + '</span>'); }
+    else msgs.push('<span style="color:var(--am)">→ Precio cerca del Max Pain — dealers en zona de equilibrio</span>');
+  }
+
+  if (!isNaN(precio) && !isNaN(resist)) {
+    const distR = parseFloat(((resist - precio) / precio * 100).toFixed(2));
+    msgs.push(`<strong style="color:var(--t1)">Resistencia calls: ${resist}</strong> · Distancia: <strong style="color:var(--rd)">+${distR}%</strong> — pared de vendedores, gamma negativa para el precio`);
+  }
+  if (!isNaN(precio) && !isNaN(soporte)) {
+    const distS = parseFloat(((soporte - precio) / precio * 100).toFixed(2));
+    msgs.push(`<strong style="color:var(--t1)">Soporte puts: ${soporte}</strong> · Distancia: <strong style="color:var(--gr)">${distS}%</strong> — pared de compradores, dealer hedging da soporte`);
+  }
+
+  if (!isNaN(precio) && !isNaN(resist) && !isNaN(soporte)) {
+    const rango = resist - soporte;
+    const rangoPct = parseFloat((rango / precio * 100).toFixed(1));
+    msgs.push(`<em style="color:var(--t3)">Rango implícito de opciones esta semana: ${soporte} – ${resist} (${rangoPct}% de amplitud)</em>`);
+    // Visual del rango
+    const wrap = document.getElementById('oi-chart-wrap');
+    const vis = document.getElementById('oi-range-visual');
+    if (wrap && vis) {
+      wrap.style.display = 'block';
+      const minRef = soporte * 0.98, maxRef = resist * 1.02;
+      const rRef = maxRef - minRef;
+      const pctP  = ((precio  - minRef) / rRef * 100).toFixed(1);
+      const pctMP = !isNaN(maxpain) ? ((maxpain - minRef) / rRef * 100).toFixed(1) : null;
+      const pctS  = ((soporte - minRef) / rRef * 100).toFixed(1);
+      const pctR  = ((resist  - minRef) / rRef * 100).toFixed(1);
+      vis.innerHTML = `
+        <div style="position:absolute;left:0;top:0;bottom:0;width:${pctS}%;background:rgba(46,204,138,0.15);"></div>
+        <div style="position:absolute;right:0;top:0;bottom:0;width:${100-pctR}%;background:rgba(255,94,94,0.15);"></div>
+        ${pctMP ? `<div title="Max Pain" style="position:absolute;left:${pctMP}%;top:0;bottom:0;width:2px;background:var(--ac);opacity:0.8;"></div>` : ''}
+        <div title="Precio actual" style="position:absolute;left:${pctP}%;top:0;bottom:0;width:3px;background:var(--t1);border-radius:2px;"></div>
+        <div style="position:absolute;bottom:2px;left:2px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gr);">${soporte}</div>
+        <div style="position:absolute;bottom:2px;right:2px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--rd);">${resist}</div>
+      `;
+    }
+  }
+
+  if (señal === 'alcista') { badgeTxt = '📈 Soporte opciones'; badgeCls = 'g'; }
+  else if (señal === 'bajista') { badgeTxt = '📉 Resistencia opciones'; badgeCls = 'r'; }
+
+  R.oi = señal;
+  badge.textContent = badgeTxt; badge.className = 'radar-badge ' + badgeCls;
+  result.innerHTML = msgs.join('<br>'); result.classList.add('vis');
+  result.style.background = 'var(--s2)'; result.style.color = 'var(--t2)';
+  actualizarRadarResumen();
+}
+
+// ─── 3. VIX TERM STRUCTURE ────────────────────────
+function evalVTS() {
+  const spot = parseFloat(document.getElementById('vts-spot').value);
+  const vx1  = parseFloat(document.getElementById('vts-vx1').value);
+  const vx2  = parseFloat(document.getElementById('vts-vx2').value);
+  const badge = document.getElementById('vts-badge');
+  const result= document.getElementById('vts-result');
+
+  // Actualizar display values
+  document.getElementById('vts-spot-val').textContent = isNaN(spot) ? '—' : spot.toFixed(1);
+  document.getElementById('vts-vx1-val').textContent  = isNaN(vx1)  ? '—' : vx1.toFixed(1);
+  document.getElementById('vts-vx2-val').textContent  = isNaN(vx2)  ? '—' : vx2.toFixed(1);
+
+  if (isNaN(spot) || isNaN(vx1)) {
+    badge.textContent = '—'; badge.className = 'radar-badge';
+    result.classList.remove('vis'); R.vts = null;
+    actualizarRadarResumen(); return;
+  }
+
+  // Term structure
+  const spread1 = parseFloat((vx1 - spot).toFixed(2));
+  const spread1Pct = parseFloat(((vx1 - spot) / spot * 100).toFixed(1));
+  const spread2 = !isNaN(vx2) ? parseFloat((vx2 - vx1).toFixed(2)) : null;
+
+  // Actualizar chart bars
+  const maxBar = Math.max(spot, vx1, isNaN(vx2) ? 0 : vx2, 1);
+  const b1 = document.getElementById('vts-b1');
+  const b2 = document.getElementById('vts-b2');
+  const b3 = document.getElementById('vts-b3');
+  const isBack = spot > vx1;
+  const colSpot = isBack ? 'var(--rd)' : 'var(--am)';
+  if (b1) { b1.style.height = (spot/maxBar*95)+'%'; b1.style.background = colSpot; }
+  if (b2) { b2.style.height = (vx1/maxBar*95)+'%';  b2.style.background = 'var(--ac)'; }
+  if (b3 && !isNaN(vx2)) { b3.style.height = (vx2/maxBar*95)+'%'; b3.style.background = 'var(--bl)'; }
+
+  let señal, badgeTxt, badgeCls, color, msg;
+
+  if (isBack) {
+    // Backwardation
+    señal = 'alcista'; badgeCls = 'g'; badgeTxt = '🔴 Backwardation';
+    color = 'var(--gr)';
+    msg = `<strong style="color:var(--rd)">⚡ BACKWARDATION detectada</strong> — VIX spot (${spot}) > VX1 (${vx1}), diferencial: <strong style="color:var(--rd)">${spread1}</strong> puntos.<br>
+    Esto indica <strong style="color:var(--t1)">pánico a corto plazo</strong>. Históricamente precede un <strong style="color:var(--gr)">rebote del Nasdaq en 2-5 días</strong> con alta probabilidad.
+    Cuando los inversores tienen más miedo hoy que dentro de un mes, el precio suele estar en un extremo.`;
+  } else if (spread1Pct > 20) {
+    // Contango pronunciado — complacencia
+    señal = 'bajista'; badgeCls = 'r'; badgeTxt = '⚠️ Contango pronunciado';
+    color = 'var(--rd)';
+    msg = `<strong style="color:var(--rd)">⚠️ Contango muy pronunciado</strong> — VX1 (${vx1}) supera al spot (${spot}) en un <strong style="color:var(--rd)">${spread1Pct}%</strong>.<br>
+    El mercado está <strong style="color:var(--t1)">extremadamente complaciente</strong>. Los inversores no esperan volatilidad próxima, lo que históricamente indica <strong style="color:var(--rd)">vulnerabilidad bajista</strong> ante cualquier sorpresa negativa.`;
+  } else if (spread1Pct > 10) {
+    // Contango normal-alto
+    señal = 'neutro'; badgeCls = 'a'; badgeTxt = '→ Contango normal';
+    color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Contango normal</strong> — VX1 (${vx1}) sobre spot (${spot}) en <strong style="color:var(--am)">${spread1Pct}%</strong>. Estructura saludable.
+    Mercado sin señales extremas. El contango por debajo del 15% es el estado habitual.`;
+  } else {
+    // Contango plano
+    señal = 'neutro'; badgeCls = 'a'; badgeTxt = '→ Estructura plana';
+    color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Estructura plana</strong> — Diferencial VX1-Spot mínimo (${spread1Pct}%). Incertidumbre creciente pero sin señal clara.`;
+  }
+
+  if (spread2 !== null) {
+    msg += `<br><em style="color:var(--t3)">Diferencial VX2-VX1: ${spread2 > 0 ? '+' : ''}${spread2} pts — ${spread2 > 0 ? 'curva empinándose' : 'curva aplanando/invirtiendo'}</em>`;
+  }
+
+  R.vts = señal;
+  badge.textContent = badgeTxt; badge.className = 'radar-badge ' + badgeCls;
+  result.innerHTML = msg; result.classList.add('vis');
+  result.style.background = señal === 'alcista' ? 'rgba(46,204,138,0.07)' : señal === 'bajista' ? 'rgba(255,94,94,0.07)' : 'var(--s2)';
+  result.style.borderLeft = '3px solid ' + color;
+  result.style.color = 'var(--t2)'; result.style.padding = '10px 12px';
+  actualizarRadarResumen();
+}
+
+// ─── 4. ETF FLOWS ─────────────────────────────────
+function evalETF() {
+  const ids = ['etf-d4','etf-d3','etf-d2','etf-d1','etf-d0'];
+  const vals = ids.map(id => {
+    const v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? null : v;
+  });
+  const badge  = document.getElementById('etf-badge');
+  const result = document.getElementById('etf-result');
+  const vis    = document.getElementById('etf-visual');
+
+  const filled = vals.filter(v => v !== null);
+  if (filled.length === 0) {
+    badge.textContent = '—'; badge.className = 'radar-badge';
+    result.classList.remove('vis'); if (vis) vis.style.display = 'none';
+    R.etf = null; actualizarRadarResumen(); return;
+  }
+
+  const neto5d = filled.reduce((s, v) => s + v, 0);
+  const negativos = filled.filter(v => v < 0);
+  const positivos = filled.filter(v => v > 0);
+  const diasNeg   = negativos.length;
+  const diasPos   = positivos.length;
+  const diasConsecNeg = (() => {
+    let c = 0;
+    for (let i = vals.length-1; i >= 0; i--) {
+      if (vals[i] !== null && vals[i] < 0) c++;
+      else if (vals[i] !== null) break;
+    }
+    return c;
+  })();
+  const diasConsecPos = (() => {
+    let c = 0;
+    for (let i = vals.length-1; i >= 0; i--) {
+      if (vals[i] !== null && vals[i] > 0) c++;
+      else if (vals[i] !== null) break;
+    }
+    return c;
+  })();
+
+  // Visual bar
+  if (vis) {
+    vis.style.display = 'block';
+    const netoTxt = document.getElementById('etf-neto-txt');
+    const bar = document.getElementById('etf-bar');
+    const absMax = Math.max(Math.abs(neto5d), 100);
+    const pct = Math.min(Math.abs(neto5d) / absMax * 50 + 50, 100);
+    const col = neto5d >= 0 ? 'var(--gr)' : 'var(--rd)';
+    if (netoTxt) netoTxt.textContent = (neto5d >= 0 ? '+' : '') + neto5d.toLocaleString() + ' M$';
+    if (bar) { bar.style.width = pct + '%'; bar.style.background = col; }
+  }
+
+  let señal, badgeTxt, badgeCls, color, msg;
+  const netoFmt = (neto5d >= 0 ? '+' : '') + Math.round(neto5d).toLocaleString() + ' M$';
+
+  if (diasConsecNeg >= 3 && neto5d < 0) {
+    señal = 'bajista'; badgeCls = 'r'; badgeTxt = '🔴 Salidas sostenidas';
+    color = 'var(--rd)';
+    msg = `<strong style="color:var(--rd)">⚠️ ${diasConsecNeg} días consecutivos de salidas</strong> — Flujo neto 5d: <strong style="color:var(--rd)">${netoFmt}</strong>.<br>
+    Las salidas masivas sostenidas de QQQ <strong>preceden caídas adicionales del Nasdaq</strong> en los siguientes 3-7 días. Los inversores están reduciendo exposición de forma sistemática.`;
+  } else if (diasConsecPos >= 3 && neto5d > 0) {
+    señal = 'alcista'; badgeCls = 'g'; badgeTxt = '🟢 Entradas sostenidas';
+    color = 'var(--gr)';
+    msg = `<strong style="color:var(--gr)">📈 ${diasConsecPos} días consecutivos de entradas</strong> — Flujo neto 5d: <strong style="color:var(--gr)">${netoFmt}</strong>.<br>
+    Las entradas sostenidas en QQQ son señal de <strong>rotación institucional hacia el Nasdaq</strong>. Precedente de continuación alcista.`;
+  } else if (neto5d < -500) {
+    señal = 'bajista'; badgeCls = 'a'; badgeTxt = '⚠️ Flujo negativo';
+    color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Flujo neto negativo significativo</strong> — ${netoFmt} en los últimos ${filled.length} días.
+    No es señal fuerte todavía (sin continuidad suficiente), pero indica distribución. Vigilar si continúa mañana.`;
+  } else if (neto5d > 500) {
+    señal = 'alcista'; badgeCls = 'a'; badgeTxt = '→ Flujo positivo';
+    color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Flujo neto positivo</strong> — ${netoFmt} en ${filled.length} días. Sin continuidad suficiente para señal fuerte. Apoya el lado alcista sin convicción.`;
+  } else {
+    señal = 'neutro'; badgeCls = 'a'; badgeTxt = '→ Flujo neutro';
+    color = 'var(--am)';
+    msg = `<strong style="color:var(--am)">Flujo QQQ neutro/mixto</strong> — ${netoFmt} en ${filled.length} días. Sin señal direccional clara.`;
+  }
+
+  R.etf = señal;
+  badge.textContent = badgeTxt; badge.className = 'radar-badge ' + badgeCls;
+  result.innerHTML = msg; result.classList.add('vis');
+  result.style.background = señal === 'alcista' ? 'rgba(46,204,138,0.07)' : señal === 'bajista' ? 'rgba(255,94,94,0.07)' : 'var(--s2)';
+  result.style.borderLeft = '3px solid ' + color;
+  result.style.color = 'var(--t2)'; result.style.padding = '10px 12px';
+  actualizarRadarResumen();
+}
+
+// ─── GENERAR INFORME IA RADAR 2-5D ────────────────
+async function generarRadarIA() {
+  const btn = document.getElementById('btn-radar-ia');
+  const resultDiv = document.getElementById('radar-ia-result');
+  const body = document.getElementById('radar-ia-body');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const cotL = document.getElementById('cot-largos').value;
+  const cotC = document.getElementById('cot-cortos').value;
+  const cotA = document.getElementById('cot-anterior').value;
+  const oiP  = document.getElementById('oi-precio').value;
+  const oiMP = document.getElementById('oi-maxpain').value;
+  const oiR  = document.getElementById('oi-resist').value;
+  const oiS  = document.getElementById('oi-soporte').value;
+  const vtsS = document.getElementById('vts-spot').value;
+  const vts1 = document.getElementById('vts-vx1').value;
+  const vts2 = document.getElementById('vts-vx2').value;
+  const etfVals = ['etf-d4','etf-d3','etf-d2','etf-d1','etf-d0'].map(id => document.getElementById(id).value || 'n/d').join(', ');
+  const sc = radarScore();
+
+  const prompt = `Eres un analista cuantitativo especializado en el Nasdaq 100. Tu tarea es interpretar 4 indicadores de posicionamiento y flujos para dar una perspectiva clara del escenario más probable en los PRÓXIMOS 2-5 DÍAS (no mañana).
+
+DATOS DISPONIBLES HOY:
+
+1. COT REPORT (Commitment of Traders — CFTC):
+   - Largos Large Speculators NQ: ${cotL || 'no disponible'}
+   - Cortos Large Speculators NQ: ${cotC || 'no disponible'}
+   - Neto semana anterior: ${cotA || 'no disponible'}
+   - Señal calculada: ${R.cot || 'no calculada'}
+
+2. OI POR STRIKE (Opciones QQQ):
+   - Precio QQQ actual: ${oiP || 'no disponible'}
+   - Max Pain semanal: ${oiMP || 'no disponible'}
+   - Strike resistencia (mayor OI calls): ${oiR || 'no disponible'}
+   - Strike soporte (mayor OI puts): ${oiS || 'no disponible'}
+   - Señal calculada: ${R.oi || 'no calculada'}
+
+3. VIX TERM STRUCTURE:
+   - VIX Spot: ${vtsS || 'no disponible'}
+   - VX1 Futuro 1 mes: ${vts1 || 'no disponible'}
+   - VX2 Futuro 2 meses: ${vts2 || 'no disponible'}
+   - Señal calculada: ${R.vts || 'no calculada'}
+
+4. ETF FLOWS QQQ (últimos 5 días en M$):
+   D-4, D-3, D-2, D-1, Hoy: ${etfVals}
+   - Señal calculada: ${R.etf || 'no calculada'}
+
+SCORE COMPUESTO: ${sc ? (sc.score >= 0 ? '+' : '') + sc.score + ' (de ' + sc.n + ' indicadores)' : 'insuficiente'}
+CONTEXTO ADICIONAL: VIX spot actual = ${S.vix || 'no disponible'}, NQ futuros cambio = ${S.nq !== null ? S.nq + '%' : 'no disponible'}, SMA200 dist = ${S.tecnicos?.sma200?.distanciaPct || 'no disponible'}%
+
+Proporciona un análisis estructurado de:
+1. **Posicionamiento institucional** (COT): interpreta si los grandes fondos están sobrepasados en un lado y qué implica
+2. **Estructura de opciones** (OI strikes): identifica el rango probable y los niveles clave de atracción/repulsión para esta semana
+3. **Sentimiento VIX** (term structure): backwardation/contango y qué históricamente ha pasado después
+4. **Flujos de capital** (ETF flows): si hay distribución o acumulación real
+
+Finaliza con una **conclusión integrada**: cuál es el escenario de mayor probabilidad para los próximos 2-5 días, qué niveles vigilar, y si las señales son convergentes o divergentes entre sí.
+
+Sé concreto y cuantitativo. Usa los números disponibles. Menciona solo los indicadores que tienen datos. Responde en español.`;
+
+  try {
+    resultDiv.classList.add('vis');
+    body.innerHTML = '<span style="color:var(--t3)">Analizando señales de medio plazo...</span>';
+    window.scrollTo({ top: document.getElementById('radar-ia-result').offsetTop - 20, behavior: 'smooth' });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || 'No se pudo generar el análisis.';
+    // Renderizar Markdown básico
+    body.innerHTML = texto
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^#{1,3} (.+)$/gm, '<strong style="font-size:14px;color:var(--t1);">$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p>')
+      .replace(/$/, '</p>');
+  } catch (e) {
+    body.innerHTML = '<span style="color:var(--rd)">Error al conectar con la IA. Verifica tu conexión.</span>';
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+}
+
 function calcularFibonacci(precio, max90, min90) {
   if (!precio || !max90 || !min90) return;
   S.fibonacciLevels = {};
