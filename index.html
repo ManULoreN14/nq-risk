@@ -3874,7 +3874,8 @@ Cada dato pertenece a UNA sola sección. No repetir el mismo dato en secciones d
 - EMPRESARIAL: PER QQQ, earnings próximos (SOLO si hay algo relevante esta semana).
 - INSTITUCIONAL: GEX, Max Pain, PCR (los 4 ratios), zonas de liquidez, equal highs/lows.
 - DETECCIÓN DE GIRO: Divergencias RSI con confirmadores, Bollinger bandas, ratio VXN/VIX, días consecutivos.
-- CONCLUSIÓN: Síntesis de máximo 3 frases. PROHIBIDO repetir datos ya mencionados. Solo responder: ¿sesgo direccional? ¿riesgo de giro? ¿posición recomendada?
+- CONCLUSIÓN: Síntesis de máximo 3 frases. PROHIBIDO repetir datos ya mencionados. Solo responder: ¿sesgo direccional? ¿riesgo de giro? ¿posición recomendada? ¿coherencia con Radar 2-5D?
+- RADAR 2-5D: Sus datos (COT, OI strikes, VIX term structure, ETF flows) SOLO se mencionan en la sección Radar 2-5D y en la Conclusión Conjunta. NO incluirlos en Macro ni en Institucional.
 
 Si un dato ya se mencionó en su sección, NO volver a citarlo en otra sección aunque sea relevante. En su lugar usar "como se indicó en [sección]" si es imprescindible referenciarlo.
 
@@ -3932,7 +3933,56 @@ Usa **negrita**. Máx 180 palabras.]
 Usa **negrita**. Máx 180 palabras.]
 
 ═══════ CONCLUSIÓN CONJUNTA ═══════
-[Síntesis de los 4 análisis anteriores. Responde estas 3 preguntas: ¿Cuál es el sesgo direccional para d+1? ¿Hay riesgo de giro inminente? ¿Qué posición recomiendas y por qué? Máx 100 palabras.]`;
+[Síntesis de los 4 análisis anteriores. Responde estas 3 preguntas: ¿Cuál es el sesgo direccional para d+1? ¿Hay riesgo de giro inminente? ¿Qué posición recomiendas y por qué?
+${(R.cot || R.oi || R.vts || R.etf) ? 'OBLIGATORIO: Indica si el sesgo d+1 es COHERENTE o DIVERGENTE con el Radar 2-5D. Si divergen, explica cuál prevalece y por qué.' : ''}
+Máx 120 palabras.]`;
+
+  // ── Inyectar bloque Radar 2-5D si hay datos disponibles ──────────────────
+  const radarDatos = (() => {
+    const lineas = [];
+    const sc = radarScore();
+
+    if (R.cot) {
+      const cotL = document.getElementById('cot-largos')?.value;
+      const cotC = document.getElementById('cot-cortos')?.value;
+      const pct  = (cotL && cotC && parseFloat(cotL)+parseFloat(cotC) > 0)
+        ? (parseFloat(cotL)/(parseFloat(cotL)+parseFloat(cotC))*100).toFixed(1) + '% largos'
+        : '';
+      lineas.push(`- COT Report: señal ${R.cot.toUpperCase()} ${pct ? '(' + pct + ' Large Speculators)' : ''}`);
+    }
+    if (R.oi) {
+      const precio  = document.getElementById('oi-precio')?.value;
+      const maxpain = document.getElementById('oi-maxpain')?.value;
+      const resist  = document.getElementById('oi-resist')?.value;
+      const soporte = document.getElementById('oi-soporte')?.value;
+      const partes  = [];
+      if (precio && maxpain) partes.push(`Max Pain ${maxpain} vs precio ${precio}`);
+      if (resist)  partes.push(`resist. calls ${resist}`);
+      if (soporte) partes.push(`soporte puts ${soporte}`);
+      lineas.push(`- OI por Strike QQQ: señal ${R.oi.toUpperCase()}${partes.length ? ' — ' + partes.join(' / ') : ''}`);
+    }
+    if (R.vts) {
+      const spot = document.getElementById('vts-spot')?.value;
+      const vx1  = document.getElementById('vts-vx1')?.value;
+      const spread = (spot && vx1) ? ' (spread VX1-spot: ' + (parseFloat(vx1)-parseFloat(spot)).toFixed(2) + ' pts)' : '';
+      const modo = (spot && vx1 && parseFloat(spot) > parseFloat(vx1)) ? 'BACKWARDATION' : 'contango';
+      lineas.push(`- VIX Term Structure: ${modo}${spread} → señal ${R.vts.toUpperCase()}`);
+    }
+    if (R.etf) {
+      const ids  = ['etf-d4','etf-d3','etf-d2','etf-d1','etf-d0'];
+      const vals = ids.map(id => parseFloat(document.getElementById(id)?.value)).filter(v => !isNaN(v));
+      const neto = vals.length ? vals.reduce((a,b)=>a+b,0).toFixed(0) : null;
+      lineas.push(`- ETF Flows QQQ 5d: señal ${R.etf.toUpperCase()}${neto ? ' (flujo neto estimado: ' + neto + ' M$)' : ''}`);
+    }
+
+    if (lineas.length === 0) return '';
+
+    const scoreStr = sc ? ' · Score compuesto: ' + (sc.score >= 0 ? '+' : '') + sc.score + '/1.0 (' + sc.n + ' indicadores)' : '';
+    return `\n\n═══════ RADAR 2-5D (sesgo semanal) ═══════
+Datos de posicionamiento e flujos para el horizonte 2-5 días:
+${lineas.join('\n')}${scoreStr}
+INSTRUCCIÓN: Usa este contexto para calibrar el sesgo d+1. Si el Radar apunta en la misma dirección que el análisis diario → mayor convicción. Si divergen → mencionar la divergencia y aclarar cuál tiene más peso para mañana.`;
+  })();
 
   try {
     const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
@@ -3947,6 +3997,8 @@ Usa **negrita**. Máx 180 palabras.]
     let mensajeContent;
     const tieneImgDiaria = !!imgBase64;
     const tieneImgSemanal = !!semImgBase64;
+    // Añadir bloque Radar 2-5D al prompt base si hay datos
+    const promptFinal = radarDatos ? prompt.replace('═══════ CONCLUSIÓN CONJUNTA ═══════', radarDatos + '\n\n═══════ CONCLUSIÓN CONJUNTA ═══════') : prompt;
 
     if (tieneImgDiaria || tieneImgSemanal) {
       const mediaType = window._imgMediaType || 'image/png';
@@ -3968,7 +4020,7 @@ Usa **negrita**. Máx 180 palabras.]
         });
       }
 
-      const promptConImagen = prompt + '\n\n' +
+      const promptConImagen = promptFinal + '\n\n' +
         (tieneImgSemanal ? 'PRIMERA IMAGEN: Gráfico SEMANAL de ProRealTime del NQ. Úsalo para la sección CONTEXTO SEMANAL.\n' : '') +
         (tieneImgDiaria ? (tieneImgSemanal ? 'SEGUNDA IMAGEN: ' : 'IMAGEN: ') + 'Gráfico DIARIO de ProRealTime del NQ. Úsalo para la sección ANÁLISIS GRÁFICO PROREAL TIME.\n' : '') + '\n' +
         'INSTRUCCIÓN ADICIONAL — ANÁLISIS DE IMAGEN PROREAL TIME:\n' +
@@ -3997,7 +4049,7 @@ Usa **negrita**. Máx 180 palabras.]
       contentParts.push({ type: 'text', text: promptConImagen });
       mensajeContent = contentParts;
     } else {
-      mensajeContent = prompt;
+      mensajeContent = promptFinal;
     }
 
     const resp = await fetch(proxyBase + '/api/ia', {
