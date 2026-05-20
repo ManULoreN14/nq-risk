@@ -3298,6 +3298,12 @@ function aplicarDatosAuto(data) {
     renderGiro(data.giro);
   }
 
+  // RADAR 2-5 DÍAS — datos automáticos
+  if (data.radar) {
+    S.radar = data.radar;
+    aplicarRadarAuto(data.radar);
+  }
+
   // SCORE UNIFICADO + PANEL RESUMEN
   if (data.scoreUnificado) {
     S.scoreUnificado = data.scoreUnificado;
@@ -3932,8 +3938,18 @@ Usa **negrita**. Máx 180 palabras.]
 7. **Veredicto de giro**: Techo probable (alta confluencia) / Condición de alerta (1 señal) / Sin señal clara
 Usa **negrita**. Máx 180 palabras.]
 
+═══════ HORIZONTE 2-5 DÍAS ═══════
+[Analiza específicamente el horizonte 2-5 días usando los datos del Radar automático:
+1. **VIX Term Structure**: ¿Contango o backwardation? ¿Qué implica para los próximos días?
+2. **ETF Flows QQQ**: ¿Entradas o salidas institucionales? ¿Confirman o contradicen la tendencia?
+3. **Max Pain / OI Strikes**: ¿Hacia dónde tira la gravedad de opciones en el próximo vencimiento?
+4. **Momentum ROC 5d**: ¿Hay sobreextensión que sugiera mean reversion?
+5. **Conclusión 2-5d**: ¿El riesgo aumenta o disminuye en los próximos días vs d+1?
+IMPORTANTE: Esta sección es DIFERENTE al d+1 — puede tener sesgo opuesto. Sé explícito si hay contradicción.
+Usa **negrita**. Máx 150 palabras.]
+
 ═══════ CONCLUSIÓN CONJUNTA ═══════
-[Síntesis de los 4 análisis anteriores. Responde estas 3 preguntas: ¿Cuál es el sesgo direccional para d+1? ¿Hay riesgo de giro inminente? ¿Qué posición recomiendas y por qué?
+[Síntesis final. Responde estas 3 preguntas: 1) ¿Sesgo d+1? 2) ¿Sesgo 2-5 días? 3) ¿Posición recomendada y qué vigilar?
 ${(R.cot || R.oi || R.vts || R.etf) ? 'OBLIGATORIO: Indica si el sesgo d+1 es COHERENTE o DIVERGENTE con el Radar 2-5D. Si divergen, explica cuál prevalece y por qué.' : ''}
 Máx 120 palabras.]`;
 
@@ -4157,6 +4173,7 @@ DATOS DE MERCADO DE HOY:
 - SPX+SPXW Put/Call Ratio (S&P500): ${S.pcr_spx !== null && S.pcr_spx !== undefined ? S.pcr_spx + ' — ' + (S.pcr_spx < 1.2 ? 'normal' : S.pcr_spx <= 1.8 ? 'cautela' : 'ALERTA cobertura masiva') : 'no disponible'}
 - Evento macro mañana: ${S.macro === 'g' ? 'Sin eventos de alto impacto' : S.macro === 'a' ? 'Resultados empresa grande (AAPL/NVDA/MSFT...)' : 'Evento de alta volatilidad (Fed/IPC/NFP/geopolítica)'}
 - Modo revisión: ${S.modo === 22 ? 'Cierre NY (22h)' : 'Premarket (7h)'}
+- RADAR 2-5 DÍAS (automático): ${S.radar ? `Score=${S.radar.score} (${S.radar.estado}) — ${S.radar.descripcion} | VTS=${S.radar.vixTermStructure ? S.radar.vixTermStructure.estructura+' spread='+S.radar.vixTermStructure.spread : 'n/d'} | Flows=${S.radar.etfFlows ? S.radar.etfFlows.flujoEstimado+' volRatio='+S.radar.etfFlows.volRatio : 'n/d'} | MaxPain=${S.radar.oiStrikes ? S.radar.oiStrikes.maxPain+' dist='+S.radar.oiStrikes.distPct+'%' : 'n/d'} | ROC5d=${S.radar.momentum ? S.radar.momentum.roc5d+'%' : 'n/d'}` : 'no disponible'}
 - SCORE UNIFICADO NQ COMPASS: ${S.scoreUnificado ? S.scoreUnificado.score + '/10 (' + S.scoreUnificado.estado + ') — ' + S.scoreUnificado.descripcion + ' | Técnico=' + S.scoreUnificado.componentes.tecnico + ' Macro=' + S.scoreUnificado.componentes.macro + ' Sentimiento=' + S.scoreUnificado.componentes.sentimiento : 'no disponible'}
 - GDELT (Pulso global noticias):
 ${S.gdelt ? 'Score=' + S.gdelt.score + ' estado=' + S.gdelt.estado + (S.gdelt.alertaVolatilidad ? ' ⚡PICO_NOTICIAS_VOLATILIDAD_PROBABLE' : '') + ' | ' + S.gdelt.temas?.map(t => t.tema + ':' + t.señal + '(tono=' + t.tono + (t.alertaVol ? ' PICO_VOL' : '') + ')').join(' | ') : 'no disponible'}
@@ -4316,7 +4333,8 @@ function procesarRespuestaIA(texto) {
     const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*CONCLUSIÓN|$)/i);
     const empMatch  = texto.match(/═+\s*ANÁLISIS EMPRESARIAL\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
     const instMatch = texto.match(/═+\s*LECTURA INSTITUCIONAL\s*═+\s*([\s\S]+?)(?:═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
-    const giroMatch = texto.match(/═+\s*DETECCIÓN DE GIRO\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
+    const giroMatch  = texto.match(/═+\s*DETECCIÓN DE GIRO\s*═+\s*([\s\S]+?)(?:═+\s*HORIZONTE|═+\s*CONCLUSIÓN|$)/i);
+    const horizMatch = texto.match(/═+\s*HORIZONTE 2-5 DÍAS\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
 
     if (macroMatch || semMatch || tecMatch || prtMatch || instMatch || giroMatch) {
       let html = '';
@@ -4327,6 +4345,7 @@ function procesarRespuestaIA(texto) {
       if (empMatch)   html += '\n\n<p><strong style="color:#f59e0b">📈 ANÁLISIS EMPRESARIAL</strong></p>' + empMatch[1].trim();
       if (instMatch)  html += '\n\n<p><strong style="color:#8b5cf6">🏦 LECTURA INSTITUCIONAL</strong></p>' + instMatch[1].trim();
       if (giroMatch)  html += '\n\n<p><strong style="color:#ff6b6b">🔄 DETECCIÓN DE GIRO</strong></p>' + giroMatch[1].trim();
+      if (horizMatch) html += '\n\n<p><strong style="color:#06b6d4">⏱️ HORIZONTE 2-5 DÍAS</strong></p>' + horizMatch[1].trim();
       if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
       return html;
     }
@@ -6441,6 +6460,60 @@ function calcularFibonacci(precio, max90, min90) {
       }
     }
   }
+}
+
+// ─── RADAR AUTO — rellena pantalla con datos del proxy ───
+function aplicarRadarAuto(radar) {
+  if (!radar) return;
+
+  if (radar.vixTermStructure) {
+    const vts = radar.vixTermStructure;
+    const elSpot = document.getElementById('i-vts-spot');
+    const el3m   = document.getElementById('i-vts-3m');
+    if (elSpot) elSpot.value = vts.vixSpot;
+    if (el3m)   el3m.value   = vts.vix3m;
+    const autoEl = document.getElementById('vts-auto-val');
+    if (autoEl) { autoEl.textContent = '⚡ Auto: ' + vts.descripcion; autoEl.style.display = 'block'; }
+    if (typeof evalVTS === 'function') evalVTS();
+  }
+
+  if (radar.etfFlows) {
+    const ef = radar.etfFlows;
+    const el = document.getElementById('i-etf-flow');
+    if (el) el.value = ef.flujoEstimado || 'neutro';
+    const autoEl = document.getElementById('etf-auto-val');
+    if (autoEl) { autoEl.textContent = '⚡ Auto: ' + ef.descripcion; autoEl.style.display = 'block'; }
+    if (typeof evalETF === 'function') evalETF();
+  }
+
+  if (radar.oiStrikes) {
+    const oi = radar.oiStrikes;
+    // Intentar rellenar campos OI si existen (compatibilidad con pantalla existente)
+    const elMP = document.getElementById('i-oi-mp') || document.getElementById('oi-maxpain');
+    const elPx = document.getElementById('i-oi-px') || document.getElementById('oi-precio');
+    if (elMP) elMP.value = oi.maxPain;
+    if (elPx) elPx.value = oi.precio;
+    const autoEl = document.getElementById('oi-auto-val');
+    if (autoEl) { autoEl.textContent = '⚡ Auto: Max Pain=' + oi.maxPain + ' · ' + oi.descripcion; autoEl.style.display = 'block'; }
+    if (typeof evalOI === 'function') evalOI();
+  }
+
+  if (radar.momentum) {
+    const mom = radar.momentum;
+    const el = document.getElementById('i-mom-roc');
+    if (el) el.value = mom.roc5d;
+    const autoEl = document.getElementById('mom-auto-val');
+    if (autoEl) { autoEl.textContent = '⚡ Auto: ' + mom.descripcion; autoEl.style.display = 'block'; }
+    if (typeof evalMOM === 'function') evalMOM();
+  }
+
+  // Score global
+  const scoreEl = document.getElementById('radar-score-val');
+  const descEl  = document.getElementById('radar-score-desc');
+  const card    = document.getElementById('radar-score-card') || document.getElementById('rsb-global');
+  if (scoreEl) scoreEl.textContent = (radar.score >= 0 ? '+' : '') + radar.score;
+  if (descEl)  descEl.textContent  = radar.descripcion;
+  if (card)    card.className = card.className.replace(/alcista|bajista|neutro/g, '').trim() + ' ' + radar.estado;
 }
 </script>
 </body>
