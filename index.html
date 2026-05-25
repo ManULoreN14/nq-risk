@@ -6589,13 +6589,29 @@ function aplicarRadarAuto(radar) {
       if (typeof evalOI === 'function') evalOI();
       if (typeof comprobarAnalizar === 'function') comprobarAnalizar();
 
-      // Banner de estado
+      // Mejora B: timestamp de frescura — "Datos de hace Xh Ym"
+      let frescuraStr = '';
+      if (data.generado) {
+        const generado = new Date(data.generado);
+        const diffMs   = Date.now() - generado.getTime();
+        const diffMin  = Math.round(diffMs / 60000);
+        if (diffMin < 60) {
+          frescuraStr = `hace ${diffMin}m`;
+        } else {
+          const h = Math.floor(diffMin / 60);
+          const m = diffMin % 60;
+          frescuraStr = m > 0 ? `hace ${h}h ${m}m` : `hace ${h}h`;
+        }
+      }
+
+      // Banner de estado con frescura
       const banner = document.getElementById('proxy-aviso');
       if (banner) {
         banner.innerHTML = '✅ MANENGIS v2 · Max Pain=' + v.max_pain +
           ' · PCR=' + v.put_call_ratio +
           ' · RSI=' + v.rsi +
-          ' · Score=' + v.risk_score + '/10';
+          ' · Score=' + v.risk_score + '/10' +
+          (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
       }
       console.log('[MANENGIS] Datos cargados', v);
