@@ -6516,5 +6516,72 @@ function aplicarRadarAuto(radar) {
   if (card)    card.className = card.className.replace(/alcista|bajista|neutro/g, '').trim() + ' ' + radar.estado;
 }
 </script>
+<!-- ═══ MANENGIS v2 — Carga automática JSON táctico ═══ -->
+<script>
+(function() {
+  const MANENGIS_URL = "https://nq-proxy-ij59.vercel.app/api/manengis";
+  const LIVE_URL     = "https://nq-proxy-ij59.vercel.app/api/live-tactico";
+
+  function setInput(id, val) {
+    const el = document.getElementById(id);
+    if (!el || val == null) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  async function cargarManengis() {
+    try {
+      const res  = await fetch(MANENGIS_URL + "?_=" + Date.now());
+      const data = await res.json();
+      const v    = data.variables_crudas || {};
+      const d    = data.derivados || {};
+
+      // Inputs que ya existen en tu HTML
+      setInput('oi-precio',  v.precio_qqq);
+      setInput('oi-maxpain', v.max_pain);
+      setInput('oi-resist',  d.top_call_strikes?.[0]?.strike);
+      setInput('oi-soporte', d.top_put_strikes?.[0]?.strike);
+      setInput('i-pcr-tot',  v.put_call_ratio);
+
+      // Llamar evalOI si existe
+      if (typeof evalOI === 'function') evalOI();
+      if (typeof comprobarAnalizar === 'function') comprobarAnalizar();
+
+      // Banner de estado
+      const banner = document.getElementById('proxy-aviso');
+      if (banner) {
+        banner.innerHTML = '✅ MANENGIS v2 · Max Pain=' + v.max_pain +
+          ' · PCR=' + v.put_call_ratio +
+          ' · RSI=' + v.rsi +
+          ' · Score=' + v.risk_score + '/10';
+        banner.style.color = 'var(--gr)';
+      }
+      console.log('[MANENGIS] Datos cargados', v);
+    } catch(e) {
+      console.warn('[MANENGIS] Error cargando JSON táctico:', e.message);
+    }
+  }
+
+  async function syncLive() {
+    try {
+      const res  = await fetch(LIVE_URL + "?_=" + Date.now());
+      const data = await res.json();
+      const L    = data.live || {};
+      setInput('oi-precio', L.precio_qqq);
+      if (typeof evalOI === 'function') evalOI();
+      console.log('[MANENGIS] Live sync OK', L);
+    } catch(e) {
+      console.warn('[MANENGIS] Live sync error:', e.message);
+    }
+  }
+
+  // Cargar al inicio
+  document.addEventListener('DOMContentLoaded', cargarManengis);
+
+  // Exponer para el botón de sync manual
+  window.manengisSync = syncLive;
+  window.manengisReload = cargarManengis;
+})();
+</script>
 </body>
 </html>
