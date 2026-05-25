@@ -630,6 +630,40 @@ input, textarea, button { font-family: inherit; }
 .btn-fetch.loading .spin { display: block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── BOTÓN SYNC LIVE ──────────────────────────────────────────────── */
+.btn-sync-live {
+  margin: 8px 16px 14px;
+  width: calc(100% - 32px);
+  padding: 11px 14px;
+  background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,127,255,0.12));
+  border: 1px solid rgba(6,182,212,0.35);
+  border-radius: var(--r-sm);
+  color: var(--cyan);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'Syne', sans-serif;
+}
+.btn-sync-live:hover { background: rgba(6,182,212,0.2); border-color: var(--cyan); color: var(--t1); }
+.btn-sync-live:active { transform: scale(0.98); }
+.btn-sync-live:disabled { opacity: 0.5; cursor: not-allowed; }
+.bsl-spin {
+  width: 14px; height: 14px; flex-shrink: 0;
+  border: 1.5px solid rgba(6,182,212,0.3);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+.btn-sync-live.loading .bsl-spin  { display: block; }
+.btn-sync-live.loading .bsl-icon  { display: none; }
+.bsl-txt  { flex: 1; text-align: center; }
+.bsl-ts   {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  white-space: nowrap;
+}
+
 .proxy-aviso {
   margin: 8px 16px 14px;
   padding: 10px 12px;
@@ -1537,6 +1571,14 @@ input, textarea, button { font-family: inherit; }
         ℹ️ Para datos automáticos necesitas configurar el proxy. <a href="#" onclick="mostrarInstrucciones()">Ver instrucciones →</a>
         <br>Sin proxy: introduce los valores manualmente abajo.
       </div>
+
+      <!-- ── BOTÓN SYNC LIVE (Bloque 3) ─────────────────────────────── -->
+      <button class="btn-sync-live" id="btn-sync-live" onclick="window.manengisSync()">
+        <div class="bsl-spin"></div>
+        <span class="bsl-icon">⚡</span>
+        <span class="bsl-txt">Sincronización Intradiaria</span>
+        <span class="bsl-ts" id="sync-live-ts"></span>
+      </button>
     </div>
 
     <!-- INDICADORES TÉCNICOS AUTOMÁTICOS -->
@@ -6563,15 +6605,76 @@ function aplicarRadarAuto(radar) {
   }
 
   async function syncLive() {
+    const btn = document.getElementById('btn-sync-live');
+    const tsEl = document.getElementById('sync-live-ts');
+    if (btn) { btn.classList.add('loading'); btn.disabled = true; }
+
     try {
       const res  = await fetch(LIVE_URL + "?_=" + Date.now());
       const data = await res.json();
       const L    = data.live || {};
+
+      // ── Precio QQQ → input OI (sandbox)
       setInput('oi-precio', L.precio_qqq);
+
+      // ── RSI → panel técnicos
+      const rsiEl = document.getElementById('td-rsi');
+      if (rsiEl && L.rsi_qqq != null) {
+        rsiEl.textContent = L.rsi_qqq;
+        const st = document.getElementById('ts-rsi');
+        if (st) {
+          st.textContent = L.rsi_qqq > 70 ? '⚠ Sobrecompra' : L.rsi_qqq < 30 ? '⚠ Sobreventa' : 'Normal';
+          st.className = 'fd-cambio ' + (L.rsi_qqq > 70 ? 'dn' : L.rsi_qqq < 30 ? 'up' : 'flat');
+        }
+      }
+
+      // ── VIX → panel tiempo real
+      const vixEl = document.getElementById('fd-vix');
+      const vixCh = document.getElementById('fc-vix');
+      if (vixEl && L.vix != null) {
+        vixEl.textContent = L.vix;
+        if (vixCh && L.vix_cambio != null) {
+          const sgn = L.vix_cambio >= 0 ? '+' : '';
+          vixCh.textContent = sgn + L.vix_cambio + '%';
+          vixCh.className = 'fd-cambio ' + (L.vix_cambio > 0 ? 'dn' : 'up');
+        }
+      }
+
+      // ── QQQ precio → panel NQ (fd-nq muestra precio QQQ como referencia)
+      const nqEl = document.getElementById('fd-nq');
+      const nqCh = document.getElementById('fc-nq');
+      if (nqEl && L.precio_qqq != null) {
+        nqEl.textContent = L.precio_qqq;
+        if (nqCh && L.cambio_qqq != null) {
+          const sgn = L.cambio_qqq >= 0 ? '+' : '';
+          nqCh.textContent = sgn + L.cambio_qqq + '%';
+          nqCh.className = 'fd-cambio ' + (L.cambio_qqq >= 0 ? 'up' : 'dn');
+        }
+      }
+
+      // ── Timestamp visible en el botón
+      const ahora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      if (tsEl) tsEl.textContent = ahora;
+
+      // ── Banner de estado actualizado
+      const banner = document.getElementById('proxy-aviso');
+      if (banner) {
+        banner.innerHTML = '⚡ Live sync · QQQ=' + (L.precio_qqq || '—') +
+          ' · VIX=' + (L.vix || '—') +
+          ' · RSI=' + (L.rsi_qqq || '—') +
+          ' <span style="color:var(--t3);font-size:10px;">(' + ahora + ')</span>';
+        banner.style.color = 'var(--cyan)';
+        banner.style.borderColor = 'rgba(6,182,212,0.3)';
+        banner.style.background = 'rgba(6,182,212,0.06)';
+      }
+
       if (typeof evalOI === 'function') evalOI();
       console.log('[MANENGIS] Live sync OK', L);
     } catch(e) {
+      if (tsEl) tsEl.textContent = 'Error';
       console.warn('[MANENGIS] Live sync error:', e.message);
+    } finally {
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
     }
   }
 
