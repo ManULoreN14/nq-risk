@@ -1525,6 +1525,60 @@ input, textarea, button { font-family: inherit; }
       </div>
     </div>
 
+    <!-- ═══ PLAN DE EXPOSICIÓN ESCALONADO (Fase 4 · Bloque 3) ═══ -->
+    <div id="plan-expo-card" style="display:none; background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-lg); padding:16px; margin-bottom:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <span style="font-size:15px;">🎚️</span>
+        <div style="font-size:13px; font-weight:700; color:var(--t1); letter-spacing:0.3px;">Plan de Exposición</div>
+        <div id="plan-expo-tramo" style="margin-left:auto; font-size:9px; color:var(--t3); text-transform:uppercase; letter-spacing:0.5px;">—</div>
+      </div>
+
+      <!-- Gauge principal -->
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:14px;">
+        <div id="plan-expo-circle" style="flex-shrink:0; width:84px; height:84px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; border:3px solid var(--gr); background:var(--gr2);">
+          <div id="plan-expo-pct" style="font-size:24px; font-weight:800; color:var(--gr); line-height:1;">—</div>
+          <div style="font-size:8px; color:var(--t3); margin-top:2px; text-transform:uppercase;">expos.</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div id="plan-expo-estado" style="font-size:14px; font-weight:700; color:var(--t1); margin-bottom:3px;">—</div>
+          <div id="plan-expo-accion" style="font-size:12px; color:var(--t2);">—</div>
+        </div>
+      </div>
+
+      <!-- Barra de exposición vs base -->
+      <div style="margin-bottom:14px;">
+        <div style="position:relative; height:10px; background:var(--s3); border-radius:5px; overflow:hidden;">
+          <div id="plan-expo-bar" style="position:absolute; left:0; top:0; height:100%; width:80%; background:var(--gr); border-radius:5px; transition:width 0.4s, background 0.4s;"></div>
+          <div id="plan-expo-base-mark" style="position:absolute; top:-2px; left:80%; width:2px; height:14px; background:var(--t1); opacity:0.5;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--t3); margin-top:4px;">
+          <span>0%</span>
+          <span id="plan-expo-base-lbl">base 80%</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <!-- Distancia desde máximos -->
+      <div style="display:flex; gap:10px; margin-bottom:12px;">
+        <div style="flex:1; background:var(--s2); border-radius:var(--r-sm); padding:10px;">
+          <div style="font-size:9px; color:var(--t3); text-transform:uppercase; margin-bottom:3px;">Desde máx. 60d</div>
+          <div id="plan-expo-dist" style="font-size:16px; font-weight:700; color:var(--t1);">—</div>
+        </div>
+        <div style="flex:1; background:var(--s2); border-radius:var(--r-sm); padding:10px;">
+          <div style="font-size:9px; color:var(--t3); text-transform:uppercase; margin-bottom:3px;">Tramo activo</div>
+          <div id="plan-expo-tramo-val" style="font-size:13px; font-weight:700; color:var(--t1);">—</div>
+        </div>
+      </div>
+
+      <!-- Motivos -->
+      <div id="plan-expo-motivos" style="display:none; margin-bottom:10px;"></div>
+
+      <!-- Nota aclaratoria -->
+      <div style="font-size:10px; color:var(--t3); line-height:1.5; border-top:1px solid var(--b1); padding-top:10px;">
+        ⚠️ Gestión de exposición por tramos, <strong style="color:var(--t2);">no una orden de compraventa</strong>. El sistema mide cuánto riesgo asumir, no predice techos ni suelos. Umbrales: 3% ruido · 5% recorte · 10%+ recompra.
+      </div>
+    </div>
+
     <div class="fetch-section">
       <div class="fetch-header">
         <span style="font-size:14px">⚡</span>
@@ -6571,6 +6625,90 @@ function aplicarRadarAuto(radar) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  // Fase 4 · Bloque 3: renderiza el panel del plan de exposición
+  function renderPlanExposicion(plan) {
+    const card = document.getElementById('plan-expo-card');
+    if (!card || !plan || plan.exposicion_sugerida_pct == null) {
+      if (card) card.style.display = 'none';
+      return;
+    }
+
+    // Paleta por semáforo
+    const colores = {
+      verde:    { c: 'var(--gr)', bg: 'var(--gr2)' },
+      amarillo: { c: 'var(--am)', bg: 'var(--am2)' },
+      naranja:  { c: '#ff8c42',   bg: 'rgba(255,140,66,0.12)' },
+      rojo:     { c: 'var(--rd)', bg: 'var(--rd2)' },
+    };
+    const sem = plan.semaforo || 'verde';
+    const col = colores[sem] || colores.verde;
+    const pct = plan.exposicion_sugerida_pct;
+    const base = plan.exposicion_base_pct || 80;
+
+    // Círculo gauge
+    const circle = document.getElementById('plan-expo-circle');
+    if (circle) { circle.style.borderColor = col.c; circle.style.background = col.bg; }
+    const pctEl = document.getElementById('plan-expo-pct');
+    if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = col.c; }
+
+    // Estado y acción
+    const estadoEl = document.getElementById('plan-expo-estado');
+    if (estadoEl) estadoEl.textContent = plan.estado || '—';
+    const accionEl = document.getElementById('plan-expo-accion');
+    if (accionEl) accionEl.textContent = plan.accion || '—';
+
+    // Barra de exposición + marca de base
+    const bar = document.getElementById('plan-expo-bar');
+    if (bar) { bar.style.width = pct + '%'; bar.style.background = col.c; }
+    const baseMark = document.getElementById('plan-expo-base-mark');
+    if (baseMark) baseMark.style.left = base + '%';
+    const baseLbl = document.getElementById('plan-expo-base-lbl');
+    if (baseLbl) baseLbl.textContent = 'base ' + base + '%';
+
+    // Distancia desde máximos
+    const distEl = document.getElementById('plan-expo-dist');
+    if (distEl && plan.dist_desde_max_pct != null) {
+      const d = plan.dist_desde_max_pct;
+      distEl.textContent = (d >= 0 ? '+' : '') + d + '%';
+      distEl.style.color = d <= -5 ? 'var(--rd)' : d <= -3 ? 'var(--am)' : 'var(--t1)';
+    }
+
+    // Tramo activo (legible)
+    const tramoMap = {
+      ruido:           'Ruido (<3%)',
+      vigilar_3_5:     'Vigilar (3-5%)',
+      recorte_5_10:    'Recorte (5-10%)',
+      recompra_10plus: 'Recompra (>10%)',
+      sin_dato:        'Sin dato',
+    };
+    const tramoTxt = tramoMap[plan.tramo_caida] || plan.tramo_caida || '—';
+    const tramoVal = document.getElementById('plan-expo-tramo-val');
+    if (tramoVal) tramoVal.textContent = tramoTxt;
+    const tramoTop = document.getElementById('plan-expo-tramo');
+    if (tramoTop) tramoTop.textContent = sem;
+
+    // Motivos (solo los que tienen impacto != 0)
+    const motivosBox = document.getElementById('plan-expo-motivos');
+    if (motivosBox) {
+      const conImpacto = (plan.motivos || []).filter(m => m.delta_pct !== 0);
+      if (conImpacto.length) {
+        motivosBox.style.display = 'block';
+        motivosBox.innerHTML = conImpacto.map(m => {
+          const signo = m.delta_pct > 0 ? '+' : '';
+          const cd = m.delta_pct > 0 ? 'var(--gr)' : 'var(--rd)';
+          return '<div style="display:flex; gap:8px; align-items:flex-start; font-size:11px; ' +
+                 'color:var(--t2); padding:5px 0; border-bottom:1px solid var(--b1); line-height:1.4;">' +
+                 '<span style="color:' + cd + '; font-weight:700; flex-shrink:0; font-family:JetBrains Mono,monospace;">' +
+                 signo + m.delta_pct + '%</span><span>' + m.texto + '</span></div>';
+        }).join('');
+      } else {
+        motivosBox.style.display = 'none';
+      }
+    }
+
+    card.style.display = 'block';
+  }
+
   async function cargarManengis() {
     try {
       const res  = await fetch(MANENGIS_URL + "?_=" + Date.now());
@@ -6588,6 +6726,9 @@ function aplicarRadarAuto(radar) {
       // Llamar evalOI si existe
       if (typeof evalOI === 'function') evalOI();
       if (typeof comprobarAnalizar === 'function') comprobarAnalizar();
+
+      // Fase 4 · Bloque 3: panel del plan de exposición
+      if (typeof renderPlanExposicion === 'function') renderPlanExposicion(data.plan_exposicion);
 
       // Mejora B: timestamp de frescura — "Datos de hace Xh Ym"
       let frescuraStr = '';
