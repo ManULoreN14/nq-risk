@@ -3638,22 +3638,62 @@ function aplicarDatosRadar(data) {
   };
 
   // ── COT ──────────────────────────────────────────────────────────────────
-  if (data.cot && !data.cot.error && data.cot.largos) {
-    const c = data.cot;
+  // Fix 4.5: el motor Python exporta leveraged_long/short/net + asset_manager_*
+  // El HTML esperaba largos/cortos/neto — traducimos aqui sin tocar el motor.
+  const cotRaw = data.cot || {};
+  const cotOk = !cotRaw.error && (cotRaw.leveraged_long != null || cotRaw.largos != null);
+  if (cotOk) {
     const setV = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
-    setV('cot-largos',   c.largos);
-    setV('cot-cortos',   c.cortos);
-    if (c.netoPrev != null) setV('cot-anterior', c.netoPrev + c.cortos - (c.largos - c.neto)); // reconstruir anterior
-    // El campo "anterior" espera el neto previo
-    const elAnt = document.getElementById('cot-anterior');
-    if (elAnt && c.netoPrev != null) elAnt.value = c.netoPrev;
+    const largos = cotRaw.leveraged_long  ?? cotRaw.largos;
+    const cortos = cotRaw.leveraged_short ?? cotRaw.cortos;
+    setV('cot-largos', largos);
+    setV('cot-cortos', cortos);
+    // netoPrev: el motor no lo guarda aun; cot-anterior queda para relleno manual
+    const netoPrev = cotRaw.netoPrev ?? null;
+    if (netoPrev != null) {
+      const elAnt = document.getElementById('cot-anterior');
+      if (elAnt) elAnt.value = netoPrev;
+    }
     evalCOT();
-    chipEstado('cot-auto-chip', true, 'CFTC · ' + (c.fecha || '—'));
+    const fecha = cotRaw.fecha_reporte || cotRaw.fecha || '—';
+    chipEstado('cot-auto-chip', true, 'CFTC · ' + fecha);
   } else {
     chipEstado('cot-auto-chip', false, 'Introducir manualmente');
   }
 
   // ── OI por Strike ─────────────────────────────────────────────────────────
+  // Fix 4.5: el motor exporta data.derivados.top_call_strikes / top_put_strikes
+  // como listas planas [{strike, oi, dist}]. El HTML espera data.oiStrikes con
+  // topCalls, topPuts, resistenciaPrincipal, soportePrincipal.
+  // Construimos oiStrikes desde derivados si no viene ya con esa estructura.
+  if (!data.oiStrikes && data.derivados?.top_call_strikes?.length) {
+    const d = data.derivados;
+    const precio = d.precio_qqq ?? data.variables_crudas?.precio_qqq;
+    const topCalls = (d.top_call_strikes || []).map(s => ({
+      strike: s.strike ?? s,
+      oi:     s.oi    ?? 0,
+      dist:   precio  ? +((((s.strike ?? s) - precio) / precio) * 100).toFixed(2) : 0,
+    }));
+    const topPuts = (d.top_put_strikes || []).map(s => ({
+      strike: s.strike ?? s,
+      oi:     s.oi    ?? 0,
+      dist:   precio  ? +((((s.strike ?? s) - precio) / precio) * 100).toFixed(2) : 0,
+    }));
+    // Resistencia principal = call con mayor OI por encima del precio
+    const callsArriba = topCalls.filter(c => c.strike > (precio || 0));
+    const resistencia = callsArriba.length ? callsArriba.reduce((a,b) => b.oi > a.oi ? b : a) : topCalls[0];
+    // Soporte principal = put con mayor OI por debajo del precio
+    const putsAbajo   = topPuts.filter(p => p.strike < (precio || Infinity));
+    const soporte     = putsAbajo.length ? putsAbajo.reduce((a,b) => b.oi > a.oi ? b : a) : topPuts[0];
+    data.oiStrikes = {
+      precio,
+      topCalls,
+      topPuts,
+      resistenciaPrincipal: resistencia,
+      soportePrincipal:     soporte,
+      expiracion: d.vencimientos?.[0] ?? '—',
+    };
+  }
   if (data.oiStrikes && !data.oiStrikes.error && data.oiStrikes.precio) {
     const oi = data.oiStrikes;
     const setV = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
