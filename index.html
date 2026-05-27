@@ -1579,6 +1579,48 @@ input, textarea, button { font-family: inherit; }
       </div>
     </div>
 
+    <!-- ── PANEL HISTÓRICO 30D (Fase 7 - B3) ──────────────────────────── -->
+    <div id="hist-panel" style="display:none; margin:10px 20px 0; background:var(--s1); border:1px solid var(--b2); border-radius:var(--r-lg); overflow:hidden;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:14px;">📈</span>
+          <div style="font-size:13px; font-weight:700; color:var(--t1);">Evolución 30 días</div>
+        </div>
+        <div id="hist-dias-badge" style="font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--t3); background:var(--s3); border:1px solid var(--b1); border-radius:6px; padding:2px 8px;">— d</div>
+      </div>
+
+      <!-- Leyenda -->
+      <div style="display:flex; gap:16px; padding:0 14px 10px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:5px;">
+          <div style="width:14px; height:2px; background:#ff5e5e; border-radius:1px;"></div>
+          <span style="font-size:10px; color:var(--t3);">Risk Score (0-10)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:5px;">
+          <div style="width:14px; height:2px; background:#8b7fff; border-radius:1px; opacity:0.7;"></div>
+          <span style="font-size:10px; color:var(--t3);">QQQ precio</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:5px;">
+          <div style="display:flex; gap:2px;">
+            <div style="width:6px; height:10px; background:#2ecc8a; border-radius:2px; opacity:0.8;"></div>
+            <div style="width:6px; height:10px; background:#f0a500; border-radius:2px; opacity:0.8;"></div>
+            <div style="width:6px; height:10px; background:#ff5e5e; border-radius:2px; opacity:0.8;"></div>
+          </div>
+          <span style="font-size:10px; color:var(--t3);">Semáforo exposición</span>
+        </div>
+      </div>
+
+      <!-- Canvas Chart.js -->
+      <div style="padding:0 10px; position:relative; height:180px;">
+        <canvas id="hist-chart"></canvas>
+      </div>
+
+      <!-- Chips de semáforo por día -->
+      <div id="hist-semaforo-strip" style="display:flex; gap:3px; padding:10px 14px 4px; flex-wrap:wrap; min-height:26px;"></div>
+
+      <!-- Última entrada legible -->
+      <div id="hist-last-row" style="display:flex; gap:8px; padding:8px 14px 12px; border-top:1px solid var(--b1); flex-wrap:wrap;"></div>
+    </div>
+
     <div class="fetch-section">
       <div class="fetch-header">
         <span style="font-size:14px">⚡</span>
@@ -6770,6 +6812,11 @@ function aplicarRadarAuto(radar) {
       // Fase 4 · Bloque 3: panel del plan de exposición
       if (typeof renderPlanExposicion === 'function') renderPlanExposicion(data.plan_exposicion);
 
+      // Fase 7 · B3: dashboard histórico 30d
+      if (data.historico_30d && data.historico_30d.length > 0) {
+        renderHistorico(data.historico_30d);
+      }
+
       // Mejora B: timestamp de frescura — "Datos de hace Xh Ym"
       let frescuraStr = '';
       if (data.generado) {
@@ -6875,6 +6922,230 @@ function aplicarRadarAuto(radar) {
     }
   }
 
+  // ── FASE 7 · B3 — Dashboard histórico 30 días ────────────────────────
+  //
+  //  Lee data.historico_30d (array embebido en el JSON táctico).
+  //  Pinta con Chart.js:
+  //    - Eje izq (0-10):  risk_score  → línea roja
+  //    - Eje der (precio): precio_qqq → línea violeta semitransparente
+  //  Chips de color por día: semáforo verde/amarillo/naranja/rojo.
+  //  Última fila: resumen de la foto más reciente con datos completos.
+  //
+  //  Dependencia: Chart.js cargado desde cdnjs al final del <body>.
+  //  Si Chart.js no está disponible todavía (carga asíncrona), reintenta
+  //  cada 200ms hasta 10 veces antes de abortar silenciosamente.
+
+  let _histChartInstance = null;  // referencia para destruir antes de recrear
+
+  function renderHistorico(hist) {
+    const panel = document.getElementById('hist-panel');
+    if (!panel) return;
+
+    // Filtrar entradas con al menos fecha
+    const entradas = (hist || []).filter(h => h && h.fecha);
+    if (!entradas.length) return;
+
+    // Si Chart.js aún no cargó, reintentar
+    if (typeof Chart === 'undefined') {
+      let intentos = 0;
+      const esperar = setInterval(() => {
+        intentos++;
+        if (typeof Chart !== 'undefined') {
+          clearInterval(esperar);
+          renderHistorico(hist);
+        } else if (intentos >= 10) {
+          clearInterval(esperar);
+          console.warn('[MANENGIS] Chart.js no disponible — histórico no pintado');
+        }
+      }, 200);
+      return;
+    }
+
+    panel.style.display = 'block';
+
+    // ── Badge de días con datos completos
+    const conDatos = entradas.filter(h => h.risk_score != null).length;
+    const badge = document.getElementById('hist-dias-badge');
+    if (badge) badge.textContent = conDatos + ' d';
+
+    // ── Paleta semáforo
+    const SEM_COLOR = {
+      verde:    '#2ecc8a',
+      amarillo: '#f0a500',
+      naranja:  '#ff8c42',
+      rojo:     '#ff5e5e',
+    };
+    function semColor(s) { return SEM_COLOR[s] || '#55536e'; }
+
+    // ── Labels (fechas cortas DD/MM)
+    const labels = entradas.map(h => {
+      const p = h.fecha.split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] : h.fecha;
+    });
+
+    // ── Series (null donde no hay dato → Chart.js pinta gap)
+    const riskData  = entradas.map(h => h.risk_score  != null ? h.risk_score  : null);
+    const precioData = entradas.map(h => h.precio_qqq != null ? h.precio_qqq  : null);
+
+    // ── Colores de punto por semáforo (para risk_score)
+    const puntosColor = entradas.map(h => semColor(h.exposicion_semaforo));
+
+    // ── Destruir instancia anterior si existe (re-render al recargar)
+    if (_histChartInstance) {
+      _histChartInstance.destroy();
+      _histChartInstance = null;
+    }
+
+    const ctx = document.getElementById('hist-chart');
+    if (!ctx) return;
+
+    _histChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Risk Score',
+            data: riskData,
+            yAxisID: 'yRisk',
+            borderColor: '#ff5e5e',
+            backgroundColor: 'rgba(255,94,94,0.08)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: puntosColor,
+            pointBorderColor:     puntosColor,
+            pointHoverRadius: 5,
+            tension: 0.35,
+            fill: true,
+            spanGaps: false,
+          },
+          {
+            label: 'QQQ',
+            data: precioData,
+            yAxisID: 'yPrecio',
+            borderColor: 'rgba(139,127,255,0.55)',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            tension: 0.35,
+            fill: false,
+            spanGaps: false,
+            borderDash: [4, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#12121e',
+            borderColor: 'rgba(255,255,255,0.09)',
+            borderWidth: 1,
+            titleColor: '#9896b8',
+            bodyColor:  '#f0eeff',
+            padding: 10,
+            callbacks: {
+              title: (items) => {
+                const i = items[0].dataIndex;
+                return entradas[i]?.fecha || items[0].label;
+              },
+              afterBody: (items) => {
+                const i = items[0].dataIndex;
+                const h = entradas[i] || {};
+                const lines = [];
+                if (h.exposicion_semaforo) lines.push('Semáforo: ' + h.exposicion_semaforo + ' (' + (h.exposicion_pct ?? '—') + '%)');
+                if (h.fear_greed_score != null) lines.push('F&G: ' + h.fear_greed_score);
+                if (h.regimen_mercado)   lines.push('Régimen: ' + h.regimen_mercado.replace('_', ' '));
+                if (h.vix != null)       lines.push('VIX: ' + h.vix);
+                return lines;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#55536e',
+              font: { family: "'JetBrains Mono', monospace", size: 9 },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 10,
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { color: 'rgba(255,255,255,0.06)' },
+          },
+          yRisk: {
+            type: 'linear',
+            position: 'left',
+            min: 0,
+            max: 10,
+            ticks: {
+              color: '#ff5e5e',
+              font: { family: "'JetBrains Mono', monospace", size: 9 },
+              stepSize: 2,
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { color: 'rgba(255,94,94,0.3)' },
+          },
+          yPrecio: {
+            type: 'linear',
+            position: 'right',
+            ticks: {
+              color: 'rgba(139,127,255,0.6)',
+              font: { family: "'JetBrains Mono', monospace", size: 9 },
+              maxTicksLimit: 5,
+            },
+            grid: { drawOnChartArea: false },
+            border: { color: 'rgba(139,127,255,0.2)' },
+          },
+        },
+      },
+    });
+
+    // ── Strip de chips de semáforo
+    const strip = document.getElementById('hist-semaforo-strip');
+    if (strip) {
+      strip.innerHTML = entradas.map(h => {
+        const col = semColor(h.exposicion_semaforo);
+        const label = h.fecha ? h.fecha.slice(5) : '?';  // MM-DD
+        const title = h.fecha + (h.exposicion_semaforo ? ' · ' + h.exposicion_semaforo : '');
+        const opacity = h.exposicion_semaforo ? '1' : '0.25';
+        return '<div title="' + title + '" style="' +
+          'width:10px; height:16px; border-radius:3px; flex-shrink:0;' +
+          'background:' + col + '; opacity:' + opacity + ';' +
+          'cursor:default;">' +
+          '</div>';
+      }).join('');
+    }
+
+    // ── Fila resumen de la última entrada con datos completos
+    const lastRow = document.getElementById('hist-last-row');
+    if (lastRow) {
+      const ultima = [...entradas].reverse().find(h => h.risk_score != null);
+      if (ultima) {
+        const semCol = semColor(ultima.exposicion_semaforo);
+        const chips = [
+          ultima.fecha                   ? { l: 'Última foto', v: ultima.fecha,                         c: 'var(--t2)' } : null,
+          ultima.risk_score    != null   ? { l: 'Risk',        v: ultima.risk_score + '/10',             c: ultima.risk_score >= 7 ? 'var(--rd)' : ultima.risk_score >= 5 ? 'var(--am)' : 'var(--gr)' } : null,
+          ultima.exposicion_semaforo     ? { l: 'Semáforo',    v: ultima.exposicion_semaforo + ' ' + (ultima.exposicion_pct ?? '') + '%', c: semCol } : null,
+          ultima.fear_greed_score != null? { l: 'F&G',         v: ultima.fear_greed_score,              c: 'var(--t2)' } : null,
+          ultima.regimen_mercado         ? { l: 'Régimen',     v: ultima.regimen_mercado.replace(/_/g,' '), c: 'var(--ac)' } : null,
+        ].filter(Boolean);
+
+        lastRow.innerHTML = chips.map(ch =>
+          '<div style="background:var(--s2); border:1px solid var(--b1); border-radius:8px; padding:4px 10px; flex-shrink:0;">' +
+          '<div style="font-size:9px; color:var(--t3); text-transform:uppercase; margin-bottom:1px;">' + ch.l + '</div>' +
+          '<div style="font-size:11px; font-weight:700; color:' + ch.c + '; font-family:\'JetBrains Mono\',monospace;">' + ch.v + '</div>' +
+          '</div>'
+        ).join('');
+      }
+    }
+  }
+
   // Cargar al inicio
   document.addEventListener('DOMContentLoaded', cargarManengis);
 
@@ -6883,5 +7154,7 @@ function aplicarRadarAuto(radar) {
   window.manengisReload = cargarManengis;
 })();
 </script>
+<!-- Chart.js — cargado al final para no bloquear el render (Fase 7 B3) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
