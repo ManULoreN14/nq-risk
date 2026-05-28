@@ -6905,12 +6905,25 @@ function aplicarRadarAuto(radar) {
       // Banner de estado con frescura
       const banner = document.getElementById('proxy-aviso');
       if (banner) {
+        // Modo full: banner verde estándar
         banner.innerHTML = '✅ MANENGIS v2 · Max Pain=' + v.max_pain +
           ' · PCR=' + v.put_call_ratio +
           ' · RSI=' + v.rsi +
           ' · Score=' + v.risk_score + '/10' +
           (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
+        banner.style.borderColor = '';
+        banner.style.background  = '';
+        // Modo fast: sobreescribir banner con aviso ámbar
+        if (data.modo === 'fast') {
+          banner.innerHTML = '⚡ Modo intradiario · RSI=' + v.rsi +
+            ' · Score=' + v.risk_score + '/10' +
+            ' <span style="color:var(--am);font-size:10px;">· PCR/COT/Opciones del cierre anterior</span>' +
+            (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
+          banner.style.color       = 'var(--am)';
+          banner.style.borderColor = 'rgba(240,165,0,0.3)';
+          banner.style.background  = 'rgba(240,165,0,0.06)';
+        }
       }
       // ── Zonas de liquidez desde JSON MANENGIS ───────────────────────
       if (data.derivados && data.tecnicos) {
@@ -7071,12 +7084,22 @@ function aplicarRadarAuto(radar) {
       const ahora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       if (tsEl) tsEl.textContent = ahora;
 
-      // ── Banner de estado actualizado
+      // ── Banner de estado actualizado (enriquecido con US10Y, DXY, sesgo)
       const banner = document.getElementById('proxy-aviso');
       if (banner) {
+        // Construir extras opcionales
+        const us10Str = L.us10y    != null ? ' · US10Y=' + L.us10y    + '%' : '';
+        const dxyStr  = L.dxy      != null ? ' · DXY='   + L.dxy              : '';
+        // Sesgo: colorear el banner según el sesgo intradiario
+        const sesgo   = L.sesgo_live || 'neutral';
+        const sesgoBadge = sesgo === 'cauto'          ? ' <span style="color:var(--rd);font-size:10px;">▲ CAUTO</span>'
+                         : sesgo === 'neutral_cauto'  ? ' <span style="color:var(--am);font-size:10px;">▲ vigilar</span>'
+                         : sesgo === 'euforia'        ? ' <span style="color:var(--ac);font-size:10px;">↑ euforia</span>'
+                         : '';
         banner.innerHTML = '⚡ Live sync · QQQ=' + (L.precio_qqq || '—') +
           ' · VIX=' + (L.vix || '—') +
           ' · RSI=' + (L.rsi_qqq || '—') +
+          us10Str + dxyStr + sesgoBadge +
           ' <span style="color:var(--t3);font-size:10px;">(' + ahora + ')</span>';
         banner.style.color = 'var(--cyan)';
         banner.style.borderColor = 'rgba(6,182,212,0.3)';
