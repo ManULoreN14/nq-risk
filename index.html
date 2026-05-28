@@ -3282,6 +3282,12 @@ async function fetchDatos() {
       }
     }
 
+    // Rellenar tarjetas individuales de indicadores (inputs manuales)
+    if (L.vix != null)        { setInput('i-vix',   L.vix);   if(typeof evalInd==='function') evalInd('vix'); }
+    if (L.cambio_qqq != null) { setInput('i-nq',    L.cambio_qqq); if(typeof evalInd==='function') evalInd('nq'); }
+    if (L.us10y != null)      { setInput('i-us10',  L.us10y); if(typeof evalInd==='function') evalInd('us10'); }
+    if (L.dxy != null)        { setInput('i-dxy',   L.dxy);   if(typeof evalInd==='function') evalInd('dxy'); }
+
     // Intentar también datos.js en paralelo (sin bloquear)
     const proxyUrl = S.proxyUrl;
     if (proxyUrl) {
@@ -6861,6 +6867,12 @@ function aplicarRadarAuto(radar) {
       setInput('oi-resist',  d.top_call_strikes?.[0]?.strike);
       setInput('oi-soporte', d.top_put_strikes?.[0]?.strike);
       setInput('i-pcr-tot',  v.put_call_ratio);
+
+      // Rellenar tarjetas individuales desde JSON MANENGIS
+      if (v.vix != null)              { setInput('i-vix',  v.vix);              if(typeof evalInd==='function') evalInd('vix'); }
+      if (v.rsi != null)              { setInput('i-rsi',  v.rsi); }
+      if (v.us10y != null)            { setInput('i-us10', v.us10y);            if(typeof evalInd==='function') evalInd('us10'); }
+      if (v.fear_greed_score != null) { setInput('i-fng',  v.fear_greed_score); if(typeof evalInd==='function') evalInd('fng'); }
 
       // Llamar evalOI si existe
       if (typeof evalOI === 'function') evalOI();
