@@ -3258,6 +3258,30 @@ async function fetchDatos() {
       rsiEl.textContent = L.rsi_qqq;
     }
 
+    // Aplicar US10Y
+    const us10El = document.getElementById('fd-us10');
+    const us10Ch = document.getElementById('fc-us10');
+    if (us10El && L.us10y != null) {
+      us10El.textContent = L.us10y;
+      if (us10Ch && L.us10y_cambio != null) {
+        const sgn = L.us10y_cambio >= 0 ? '+' : '';
+        us10Ch.textContent = sgn + L.us10y_cambio + '%';
+        us10Ch.className = 'fd-cambio ' + (L.us10y_cambio >= 0 ? 'dn' : 'up');
+      }
+    }
+
+    // Aplicar DXY
+    const dxyEl = document.getElementById('fd-dxy');
+    const dxyCh = document.getElementById('fc-dxy');
+    if (dxyEl && L.dxy != null) {
+      dxyEl.textContent = L.dxy;
+      if (dxyCh && L.dxy_cambio != null) {
+        const sgn = L.dxy_cambio >= 0 ? '+' : '';
+        dxyCh.textContent = sgn + L.dxy_cambio + '%';
+        dxyCh.className = 'fd-cambio ' + (L.dxy_cambio >= 0 ? 'dn' : 'up');
+      }
+    }
+
     // Intentar también datos.js en paralelo (sin bloquear)
     const proxyUrl = S.proxyUrl;
     if (proxyUrl) {
