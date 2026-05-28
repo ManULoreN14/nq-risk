@@ -3045,23 +3045,7 @@ const S = {
   informeTexto: null,
   posRecNasdaq: null,
   posRecLiquidez: null,
-  proxyUrl: localStorage.getItem('nqr_proxy') || 'https://nq-proxy-ij59.vercel.app',
-  // ── Campos MANENGIS motor Python (Fases 4-7) ──────────────────
-  manengis_risk_score:       null,  // 0-10 calculado por el motor
-  manengis_semaforo:         null,  // verde/amarillo/naranja/rojo
-  manengis_semaforo_pct:     null,  // exposicion sugerida %
-  manengis_regimen:          null,  // tendencia_alcista/lateral/distribucion
-  manengis_fear_greed:       null,  // score 0-100 proxy interno
-  manengis_fear_greed_est:   null,  // estado textual
-  manengis_aceleracion:      null,  // boolean: riesgo acelerando
-  manengis_breadth:          null,  // % Mag7 sobre EMA20
-  manengis_skew_est:         null,  // estado del skew opciones
-  manengis_vts_est:          null,  // estado term structure VIX
-  manengis_cot_sesgo:        null,  // alcista/bajista/neutro
-  manengis_cot_lev:          null,  // leveraged funds net
-  manengis_hist_tendencia:   null,  // tendencia risk_score 5d: subiendo/bajando/estable
-  manengis_dias_semaforo:    null,  // dias consecutivos en semaforo actual
-  manengis_modo:             null,  // fast/full
+  proxyUrl: localStorage.getItem('nqr_proxy') || 'https://nq-proxy-ij59.vercel.app'
 };
 
 // Reglas de evaluación
@@ -3304,15 +3288,7 @@ async function fetchDatos() {
     if (L.us10y != null)      { setInput('i-us10', L.us10y);      if(typeof evalInd==='function') evalInd('us10'); }
     if (L.dxy != null)        { setInput('i-dxy',  L.dxy);        if(typeof evalInd==='function') evalInd('dxy'); }
 
-    // Intentar también datos.js en paralelo (sin bloquear)
-    const proxyUrl = S.proxyUrl;
-    if (proxyUrl) {
-      fetch(proxyUrl + '/api/datos').then(r => r.json()).then(d => {
-        if (d && d.vix !== undefined) aplicarDatosAuto(d);
-        rellenarResultadosAuto();
-      }).catch(() => {});
-    }
-
+    // datos.js da siempre 504 — no llamar, usar solo live-tactico
     estado.textContent = 'Actualizado ✓';
     estado.className = 'fetch-estado ok';
   } catch (e) {
@@ -4118,45 +4094,6 @@ ${tecSecciones}
 ${histCtx}
 ${btCtx}
 
-${(() => {
-  if (!S.manengis_risk_score && !S.manengis_semaforo) return '';
-  const sem     = S.manengis_semaforo || '—';
-  const semPct  = S.manengis_semaforo_pct != null ? S.manengis_semaforo_pct + '%' : '—';
-  const dias    = S.manengis_dias_semaforo ? S.manengis_dias_semaforo + 'd consecutivos' : '';
-  const tend    = S.manengis_hist_tendencia || '—';
-  const acel    = S.manengis_aceleracion === true ? '⚠️ SÍ — riesgo acelerando' : S.manengis_aceleracion === false ? 'no' : '—';
-  const reg     = (S.manengis_regimen || '—').replace(/_/g,' ');
-  const fg      = S.manengis_fear_greed != null ? S.manengis_fear_greed + '/100 (' + (S.manengis_fear_greed_est||'') + ')' : '—';
-  const br      = S.manengis_breadth != null ? S.manengis_breadth + '% Mag7 sobre EMA20' : '—';
-  const skew    = (S.manengis_skew_est || '—').replace(/_/g,' ');
-  const vts     = (S.manengis_vts_est  || '—').replace(/_/g,' ');
-  const cotS    = S.manengis_cot_sesgo || '—';
-  const cotL    = S.manengis_cot_lev != null ? (S.manengis_cot_lev > 0 ? '+' : '') + S.manengis_cot_lev.toLocaleString() + ' contratos' : '—';
-  const modo    = S.manengis_modo === 'fast' ? ' [modo intradiario — PCR/opciones del cierre anterior]' : '';
-  return `
-
-SEÑALES DEL MOTOR MANENGIS (análisis cuantitativo nocturno Fases 4-7)${modo}:
-INSTRUCCIÓN CRÍTICA: Estas señales provienen de un motor Python que calcula
-indicadores compuestos con reglas backtestadas sobre 2018/2020/2022/2025.
-Deben tener MAYOR PESO que los indicadores individuales porque ya integran
-múltiples factores. Si el semáforo lleva varios días en un nivel y el
-risk_score tiene tendencia clara, eso es SEÑAL, no solo condición.
-- Risk Score: ${S.manengis_risk_score}/10 (tendencia últimos días: ${tend})
-- Semáforo de exposición: ${sem.toUpperCase()} ${semPct} ${dias}
-- Régimen de mercado: ${reg}
-- Aceleración de riesgo (señal de urgencia): ${acel}
-- Fear & Greed proxy interno: ${fg}
-- Breadth Mag7: ${br}
-- Skew de opciones: ${skew}
-- VIX Term Structure: ${vts}
-- COT sesgo: ${cotS} (largos netos especulativos: ${cotL})
-REGLA DE INTERPRETACIÓN:
-· Semáforo VERDE + risk_score <5 + tendencia estable = entorno favorable confirmado.
-· Semáforo AMARILLO/NARANJA + risk_score >6 + tendencia subiendo = CONDICIÓN REAL de alerta.
-· Semáforo ROJO o aceleración=SÍ = señal activa — recomendar reducción proporcional.
-· Si días consecutivos >= 3 en amarillo/naranja/rojo, la persistencia refuerza la señal.`;
-})()}
-
 MARCO DE ANÁLISIS PROFESIONAL:
 1. TENDENCIA PRIMERO: Si precio > EMA50 y SMA200, sesgo alcista. No recomendar reducción sin justificación técnica sólida.
 2. CONDICIÓN ≠ SEÑAL: RSI alto = CONDICIÓN de alerta, NO señal. Una mecha en resistencia = CONDICIÓN, no "ventas institucionales". Solo llamar SEÑAL cuando hay confirmación múltiple.
@@ -4415,45 +4352,6 @@ async function generarInforme() {
   const tendStr = (v, k) => v ? ` (tendencia: ${mapT[k] || k})` : '';
 
   const prompt = `Eres el analista personal de mercado de un inversor español que opera un fondo de inversión Nasdaq 100 con ejecución en d+1 (las órdenes dadas hoy se ejecutan al precio de cierre de MAÑANA). Su posición actual: ${S.posNasdaq}% en fondo Nasdaq, ${S.posLiquidez}% en liquidez.
-
-${(() => {
-  if (!S.manengis_risk_score && !S.manengis_semaforo) return '';
-  const sem     = S.manengis_semaforo || '—';
-  const semPct  = S.manengis_semaforo_pct != null ? S.manengis_semaforo_pct + '%' : '—';
-  const dias    = S.manengis_dias_semaforo ? S.manengis_dias_semaforo + 'd consecutivos' : '';
-  const tend    = S.manengis_hist_tendencia || '—';
-  const acel    = S.manengis_aceleracion === true ? '⚠️ SÍ — riesgo acelerando' : S.manengis_aceleracion === false ? 'no' : '—';
-  const reg     = (S.manengis_regimen || '—').replace(/_/g,' ');
-  const fg      = S.manengis_fear_greed != null ? S.manengis_fear_greed + '/100 (' + (S.manengis_fear_greed_est||'') + ')' : '—';
-  const br      = S.manengis_breadth != null ? S.manengis_breadth + '% Mag7 sobre EMA20' : '—';
-  const skew    = (S.manengis_skew_est || '—').replace(/_/g,' ');
-  const vts     = (S.manengis_vts_est  || '—').replace(/_/g,' ');
-  const cotS    = S.manengis_cot_sesgo || '—';
-  const cotL    = S.manengis_cot_lev != null ? (S.manengis_cot_lev > 0 ? '+' : '') + S.manengis_cot_lev.toLocaleString() + ' contratos' : '—';
-  const modo    = S.manengis_modo === 'fast' ? ' [modo intradiario — PCR/opciones del cierre anterior]' : '';
-  return `
-
-SEÑALES DEL MOTOR MANENGIS (análisis cuantitativo nocturno Fases 4-7)${modo}:
-INSTRUCCIÓN CRÍTICA: Estas señales provienen de un motor Python que calcula
-indicadores compuestos con reglas backtestadas sobre 2018/2020/2022/2025.
-Deben tener MAYOR PESO que los indicadores individuales porque ya integran
-múltiples factores. Si el semáforo lleva varios días en un nivel y el
-risk_score tiene tendencia clara, eso es SEÑAL, no solo condición.
-- Risk Score: ${S.manengis_risk_score}/10 (tendencia últimos días: ${tend})
-- Semáforo de exposición: ${sem.toUpperCase()} ${semPct} ${dias}
-- Régimen de mercado: ${reg}
-- Aceleración de riesgo (señal de urgencia): ${acel}
-- Fear & Greed proxy interno: ${fg}
-- Breadth Mag7: ${br}
-- Skew de opciones: ${skew}
-- VIX Term Structure: ${vts}
-- COT sesgo: ${cotS} (largos netos especulativos: ${cotL})
-REGLA DE INTERPRETACIÓN:
-· Semáforo VERDE + risk_score <5 + tendencia estable = entorno favorable confirmado.
-· Semáforo AMARILLO/NARANJA + risk_score >6 + tendencia subiendo = CONDICIÓN REAL de alerta.
-· Semáforo ROJO o aceleración=SÍ = señal activa — recomendar reducción proporcional.
-· Si días consecutivos >= 3 en amarillo/naranja/rojo, la persistencia refuerza la señal.`;
-})()}
 
 MARCO DE ANÁLISIS PROFESIONAL — SIGUE ESTAS REGLAS SIEMPRE:
 
@@ -6968,42 +6866,6 @@ function aplicarRadarAuto(radar) {
       if (v.us10y != null)            { setInput('i-us10', v.us10y);            if(typeof evalInd==='function') evalInd('us10'); }
       if (v.fear_greed_score != null) { setInput('i-fng',  v.fear_greed_score); if(typeof evalInd==='function') evalInd('fng'); }
 
-      // ── Paso 1: Guardar señales del motor Python en S para el prompt IA ──
-      // Estos campos enriquecen el razonamiento de la IA con el análisis
-      // de las Fases 4-7: plan de exposición, régimen, fear&greed propio,
-      // breadth, skew, VIX term structure, COT y tendencia del risk_score.
-      S.manengis_risk_score     = v.risk_score       ?? null;
-      S.manengis_semaforo       = v.exposicion_semaforo ?? null;
-      S.manengis_semaforo_pct   = v.exposicion_sugerida_pct ?? null;
-      S.manengis_regimen        = v.regimen_mercado   ?? null;
-      S.manengis_fear_greed     = v.fear_greed_score  ?? null;
-      S.manengis_fear_greed_est = v.fear_greed_estado ?? null;
-      S.manengis_aceleracion    = (data.velocidad?.aceleracion_riesgo) ?? null;
-      S.manengis_breadth        = v.breadth_pct_ema20 ?? null;
-      S.manengis_skew_est       = v.skew_estado       ?? null;
-      S.manengis_vts_est        = v.vix_ts_estado     ?? null;
-      S.manengis_cot_sesgo      = v.cot_sesgo         ?? null;
-      S.manengis_cot_lev        = v.cot_lev_net       ?? null;
-      S.manengis_modo           = data.modo           ?? null;
-      // Tendencia del risk_score en los últimos 5 días (del histórico embebido)
-      if (data.historico_30d && data.historico_30d.length >= 3) {
-        const hist = data.historico_30d.filter(h => h.risk_score != null);
-        if (hist.length >= 2) {
-          const ultimo   = hist[hist.length - 1].risk_score;
-          const penultimo = hist[hist.length - 2].risk_score;
-          const delta = ultimo - penultimo;
-          S.manengis_hist_tendencia = delta > 0.3 ? 'subiendo' : delta < -0.3 ? 'bajando' : 'estable';
-        }
-        // Días consecutivos en semáforo actual
-        if (S.manengis_semaforo) {
-          let dias = 0;
-          for (let i = data.historico_30d.length - 1; i >= 0; i--) {
-            if (data.historico_30d[i].exposicion_semaforo === S.manengis_semaforo) dias++;
-            else break;
-          }
-          S.manengis_dias_semaforo = dias;
-        }
-      }
 
       // Llamar evalOI si existe
       if (typeof evalOI === 'function') evalOI();
