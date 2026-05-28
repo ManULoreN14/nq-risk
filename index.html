@@ -6912,6 +6912,45 @@ function aplicarRadarAuto(radar) {
           (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
       }
+      // ── Zonas de liquidez desde JSON MANENGIS ───────────────────────
+      if (data.derivados && data.tecnicos) {
+        const precio = data.derivados.precio_qqq || data.tecnicos.precio;
+        // Construir objeto liquidez con datos que tenemos
+        const liq = {
+          precio: precio,
+          arriba: {
+            max20: parseFloat((precio * 1.03).toFixed(2)),
+            max50: parseFloat((precio * 1.06).toFixed(2)),
+            max90: parseFloat((data.plan_exposicion?.max_referencia || precio * 1.08).toFixed(2)),
+            zonas: (data.derivados.top_call_strikes || []).slice(0,3).map(s => ({
+              nivel:   s.strike,
+              distPct: parseFloat(((s.strike - precio)/precio*100).toFixed(1)),
+              fuerza:  s.oi > 1500 ? 'alta' : 'media',
+              igualdad: false,
+              reciente: true,
+              count: 1
+            })).filter(z => z.distPct > 0.1)
+          },
+          abajo: {
+            min20: parseFloat((precio * 0.97).toFixed(2)),
+            min50: parseFloat((precio * 0.94).toFixed(2)),
+            min90: parseFloat((data.barrida_estructural?.nivel_barrida || precio * 0.88).toFixed(2)),
+            zonas: (data.derivados.top_put_strikes || []).slice(0,3).map(s => ({
+              nivel:   s.strike,
+              distPct: parseFloat(((s.strike - precio)/precio*100).toFixed(1)),
+              fuerza:  s.oi > 1500 ? 'alta' : 'media',
+              igualdad: false,
+              reciente: true,
+              count: 1
+            })).filter(z => z.distPct < -0.1)
+          }
+        };
+        if (typeof renderLiquidez === 'function') {
+          renderLiquidez(liq);
+          S.liquidez = liq;
+        }
+      }
+
       // ── Noticias: mostrar titulares FinBERT desde JSON MANENGIS ─────
       if (data.sentimiento && data.sentimiento.titulares_muestra && data.sentimiento.titulares_muestra.length > 0) {
         const autoDiv = document.getElementById('geo-noticias-auto');
