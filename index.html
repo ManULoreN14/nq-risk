@@ -3219,26 +3219,59 @@ async function fetchDatos() {
   estado.textContent = 'Cargando...';
   estado.className = 'fetch-estado loading';
 
-  const proxyUrl = S.proxyUrl;
-  if (!proxyUrl) {
-    // Intentar Yahoo Finance CORS directo (funciona a veces en móvil)
-    await fetchYahooDirecto();
-    btn.classList.remove('loading');
-    return;
-  }
+  // Usar live-tactico.js — endpoint ligero que nunca da timeout
+  const LIVE = 'https://nq-proxy-ij59.vercel.app/api/live-tactico';
 
   try {
-    const resp = await fetch(`${proxyUrl}/api/datos`);
+    const resp = await fetch(LIVE + '?_=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    if (data.vix !== undefined) aplicarDatosAuto(data);
+    const L = data.live || {};
+
+    // Aplicar VIX
+    const vixEl = document.getElementById('fd-vix');
+    const vixCh = document.getElementById('fc-vix');
+    if (vixEl && L.vix != null) {
+      vixEl.textContent = L.vix;
+      if (vixCh && L.vix_cambio != null) {
+        const sgn = L.vix_cambio >= 0 ? '+' : '';
+        vixCh.textContent = sgn + L.vix_cambio + '%';
+        vixCh.className = 'fd-cambio ' + (L.vix_cambio >= 0 ? 'dn' : 'up');
+      }
+    }
+
+    // Aplicar NQ (usando QQQ como referencia)
+    const nqEl = document.getElementById('fd-nq');
+    const nqCh = document.getElementById('fc-nq');
+    if (nqEl && L.precio_qqq != null) {
+      nqEl.textContent = L.precio_qqq;
+      if (nqCh && L.cambio_qqq != null) {
+        const sgn = L.cambio_qqq >= 0 ? '+' : '';
+        nqCh.textContent = sgn + L.cambio_qqq + '%';
+        nqCh.className = 'fd-cambio ' + (L.cambio_qqq >= 0 ? 'up' : 'dn');
+      }
+    }
+
+    // Aplicar RSI al panel técnico si existe
+    const rsiEl = document.getElementById('td-rsi');
+    if (rsiEl && L.rsi_qqq != null) {
+      rsiEl.textContent = L.rsi_qqq;
+    }
+
+    // Intentar también datos.js en paralelo (sin bloquear)
+    const proxyUrl = S.proxyUrl;
+    if (proxyUrl) {
+      fetch(proxyUrl + '/api/datos').then(r => r.json()).then(d => {
+        if (d && d.vix !== undefined) aplicarDatosAuto(d);
+        rellenarResultadosAuto();
+      }).catch(() => {});
+    }
+
     estado.textContent = 'Actualizado ✓';
     estado.className = 'fetch-estado ok';
-    // Rellenar backtesting automáticamente
-    rellenarResultadosAuto();
   } catch (e) {
-    estado.textContent = 'Error proxy';
+    estado.textContent = 'Error red';
     estado.className = 'fetch-estado err';
-    await fetchYahooDirecto();
   }
 
   btn.classList.remove('loading');
@@ -7149,7 +7182,18 @@ function aplicarRadarAuto(radar) {
   // Cargar al inicio
   window.addEventListener('load', cargarManengis);
 
-  // Exponer para el botón de sync manual
+  // Inicializar badge de proxy al arrancar
+  window.addEventListener('load', function() {
+    const estado = document.getElementById('fetch-estado');
+    const aviso  = document.getElementById('proxy-aviso');
+    if (estado) { estado.textContent = 'Listo'; estado.className = 'fetch-estado ok'; }
+    if (aviso) {
+      aviso.innerHTML = '\u2705 Proxy activo \u00b7 <a href="#" onclick="fetchDatos();return false;" style="color:var(--ac)">Pulsa Actualizar datos para cargar VIX, DXY y FRED \u2192</a>';
+    }
+    setTimeout(fetchDatos, 1800);
+  });
+
+  // Exponer para el bot\u00f3n de sync manual
   window.manengisSync = syncLive;
   window.manengisReload = cargarManengis;
 })();
