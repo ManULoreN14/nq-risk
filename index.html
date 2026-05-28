@@ -6912,6 +6912,55 @@ function aplicarRadarAuto(radar) {
           (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
       }
+      // ── Noticias: mostrar titulares FinBERT desde JSON MANENGIS ─────
+      if (data.sentimiento && data.sentimiento.titulares_muestra && data.sentimiento.titulares_muestra.length > 0) {
+        const autoDiv = document.getElementById('geo-noticias-auto');
+        const lista   = document.getElementById('geo-noticias-lista');
+        const badge   = document.getElementById('geo-badge');
+        if (autoDiv) autoDiv.style.display = 'block';
+        if (badge) {
+          const score = data.sentimiento.score || 0;
+          const col   = score > 20 ? 'g' : score < -20 ? 'r' : 'a';
+          badge.textContent = 'FinBERT · ' + data.sentimiento.titulares + ' titulares · score ' + (score >= 0 ? '+' : '') + score;
+          badge.className = 'ind-badge ' + col;
+        }
+        if (lista) {
+          lista.innerHTML = data.sentimiento.titulares_muestra.map(t => {
+            return '<div class="noticia-item"><div class="noticia-titulo">' + t + '</div><div class="noticia-meta"><span class="noticia-fuente">FinBERT</span></div></div>';
+          }).join('');
+        }
+      }
+
+      // ── Técnicos: poblar panel técnico desde JSON MANENGIS ──────────
+      if (data.tecnicos) {
+        const t = data.tecnicos;
+        // Construir objeto compatible con aplicarDatosAuto
+        const tecObj = {
+          tecnicos: {
+            rsi:    { valor: t.rsi14, estado: t.rsi14 > 70 ? 'sobrecompra' : t.rsi14 < 30 ? 'sobreventa' : 'neutro',
+                      alertaRsi: t.rsi14 > 85 ? 'extrema' : t.rsi14 > 80 ? 'alta' : 'ninguna',
+                      tendencia: 'estable', diasRsiAlto: 0 },
+            ema20:  { valor: t.ema20, precioVsEma: t.precio > t.ema20 ? 'por_encima' : 'por_debajo' },
+            ema50:  { valor: t.ema50, precioVsEma: t.precio > t.ema50 ? 'por_encima' : 'por_debajo',
+                      cruceEmas: t.ema20 > t.ema50 ? 'alcista' : 'bajista' },
+            sma200: { valor: t.ema50, distanciaPct: t.ema50 ? parseFloat(((t.precio - t.ema50)/t.ema50*100).toFixed(2)) : 0 },
+            sma20:  { distanciaPct: t.ema20 ? parseFloat(((t.precio - t.ema20)/t.ema20*100).toFixed(2)) : 0 },
+            sma50:  { distanciaPct: t.ema50 ? parseFloat(((t.precio - t.ema50)/t.ema50*100).toFixed(2)) : 0 },
+            atr:    { valor: t.atr14 },
+            precio: t.precio,
+          }
+        };
+        if (typeof aplicarDatosAuto === 'function') aplicarDatosAuto(tecObj);
+
+        // Fibonacci: usar precio actual, EMA50 como soporte y precio+10% como resistencia
+        const precio = t.precio || v.precio_qqq;
+        const min90  = (data.plan_exposicion?.barrida_estructural?.nivel_barrida) || (precio * 0.85);
+        const max90  = (data.plan_exposicion?.max_referencia) || (precio * 1.05);
+        if (typeof calcularFibonacci === 'function' && precio && max90 && min90) {
+          calcularFibonacci(precio, max90, min90);
+        }
+      }
+
       // FRED — cargar desde JSON de MANENGIS si existe
       if (data.fred && data.fred.señales && data.fred.señales.length > 0) {
         S.fred = data.fred;
