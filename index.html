@@ -6875,6 +6875,19 @@ function aplicarRadarAuto(radar) {
           (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
       }
+      // FRED — cargar desde JSON de MANENGIS si existe
+      if (data.fred && data.fred.señales && data.fred.señales.length > 0) {
+        S.fred = data.fred;
+        const fc = document.getElementById('fred-card');
+        if (fc) fc.style.display = '';
+        if (typeof renderFred === 'function') renderFred(data.fred);
+        // Actualizar semáforo macro
+        if (typeof setSemaforo === 'function') {
+          const estado = data.fred.estado === 'favorable' ? 'g' : data.fred.estado === 'restrictivo' ? 'r' : 'a';
+          setSemaforo('pr-macro', estado, 'Score ' + (data.fred.score >= 0 ? '+' : '') + data.fred.score);
+        }
+      }
+
       console.log('[MANENGIS] Datos cargados', v);
     } catch(e) {
       console.warn('[MANENGIS] Error cargando JSON táctico:', e.message);
