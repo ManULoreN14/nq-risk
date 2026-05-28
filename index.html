@@ -1621,6 +1621,34 @@ input, textarea, button { font-family: inherit; }
       <div id="hist-last-row" style="display:flex; gap:8px; padding:8px 14px 12px; border-top:1px solid var(--b1); flex-wrap:wrap;"></div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════════════════════ -->
+    <!-- FASE 8: SIMILITUD HISTÓRICA — Barras de parecido con correcciones pasadas    -->
+    <!-- ════════════════════════════════════════════════════════════════════════════ -->
+    <div id="similitud-panel" style="display:none; margin:10px 20px 0; background:var(--s1); border:1px solid var(--b2); border-radius:var(--r-lg); overflow:hidden;">
+      <!-- Cabecera -->
+      <div style="padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--b1); flex-wrap:wrap;">
+        <div style="font-size:14px;">🔍</div>
+        <div style="font-size:13px; font-weight:600; color:var(--t1);">Similitud histórica</div>
+        <div id="similitud-fiable-badge" style="font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--t3); background:var(--s3); border:1px solid var(--b1); border-radius:6px; padding:2px 8px;">—</div>
+        <div style="flex:1;"></div>
+        <div id="similitud-meta" style="font-size:10px; color:var(--t3); font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+      <!-- Descripción -->
+      <div style="padding:8px 14px; font-size:11px; color:var(--t2); line-height:1.5; border-bottom:1px solid var(--b1);">
+        De los <span id="similitud-k-vecinos" style="color:var(--ac); font-weight:600;">50</span> momentos más similares al actual (8 años de histórico),
+        esto es lo que pasó en los siguientes 20 días:
+      </div>
+      <!-- Barras -->
+      <div id="similitud-barras" style="padding:12px 14px; display:flex; flex-direction:column; gap:8px;"></div>
+      <!-- Interpretación -->
+      <div id="similitud-interpretacion" style="padding:10px 14px; font-size:11px; color:var(--t2); border-top:1px solid var(--b1); background:rgba(0,0,0,0.15); line-height:1.5;"></div>
+      <!-- Top 3 días más parecidos -->
+      <div style="padding:8px 14px 10px; border-top:1px solid var(--b1);">
+        <div style="font-size:10px; color:var(--t3); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">Top 3 días más parecidos</div>
+        <div id="similitud-top3" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      </div>
+    </div>
+
     <div class="fetch-section">
       <div class="fetch-header">
         <span style="font-size:14px">⚡</span>
@@ -3045,7 +3073,24 @@ const S = {
   informeTexto: null,
   posRecNasdaq: null,
   posRecLiquidez: null,
-  proxyUrl: localStorage.getItem('nqr_proxy') || 'https://nq-proxy-ij59.vercel.app'
+  proxyUrl: localStorage.getItem('nqr_proxy') || 'https://nq-proxy-ij59.vercel.app',
+  // ── Campos MANENGIS motor Python (Fases 4-7) ──────────────────
+  manengis_risk_score:       null,  // 0-10 calculado por el motor
+  manengis_semaforo:         null,  // verde/amarillo/naranja/rojo
+  manengis_semaforo_pct:     null,  // exposicion sugerida %
+  manengis_regimen:          null,  // tendencia_alcista/lateral/distribucion
+  manengis_fear_greed:       null,  // score 0-100 proxy interno
+  manengis_fear_greed_est:   null,  // estado textual
+  manengis_aceleracion:      null,  // boolean: riesgo acelerando
+  manengis_breadth:          null,  // % Mag7 sobre EMA20
+  manengis_skew_est:         null,  // estado del skew opciones
+  manengis_vts_est:          null,  // estado term structure VIX
+  manengis_cot_sesgo:        null,  // alcista/bajista/neutro
+  manengis_cot_lev:          null,  // leveraged funds net
+  manengis_hist_tendencia:   null,  // tendencia risk_score 5d: subiendo/bajando/estable
+  manengis_dias_semaforo:    null,  // dias consecutivos en semaforo actual
+  manengis_modo:             null,  // fast/full
+  manengis_similitud:        null,  // Fase 8: dict completo de similitud historica
 };
 
 // Reglas de evaluación
@@ -3288,7 +3333,15 @@ async function fetchDatos() {
     if (L.us10y != null)      { setInput('i-us10', L.us10y);      if(typeof evalInd==='function') evalInd('us10'); }
     if (L.dxy != null)        { setInput('i-dxy',  L.dxy);        if(typeof evalInd==='function') evalInd('dxy'); }
 
-    // datos.js da siempre 504 — no llamar, usar solo live-tactico
+    // Intentar también datos.js en paralelo (sin bloquear)
+    const proxyUrl = S.proxyUrl;
+    if (proxyUrl) {
+      fetch(proxyUrl + '/api/datos').then(r => r.json()).then(d => {
+        if (d && d.vix !== undefined) aplicarDatosAuto(d);
+        rellenarResultadosAuto();
+      }).catch(() => {});
+    }
+
     estado.textContent = 'Actualizado ✓';
     estado.className = 'fetch-estado ok';
   } catch (e) {
@@ -4094,6 +4147,74 @@ ${tecSecciones}
 ${histCtx}
 ${btCtx}
 
+${(() => {
+  if (!S.manengis_risk_score && !S.manengis_semaforo) return '';
+  const sem     = S.manengis_semaforo || '—';
+  const semPct  = S.manengis_semaforo_pct != null ? S.manengis_semaforo_pct + '%' : '—';
+  const dias    = S.manengis_dias_semaforo ? S.manengis_dias_semaforo + 'd consecutivos' : '';
+  const tend    = S.manengis_hist_tendencia || '—';
+  const acel    = S.manengis_aceleracion === true ? '⚠️ SÍ — riesgo acelerando' : S.manengis_aceleracion === false ? 'no' : '—';
+  const reg     = (S.manengis_regimen || '—').replace(/_/g,' ');
+  const fg      = S.manengis_fear_greed != null ? S.manengis_fear_greed + '/100 (' + (S.manengis_fear_greed_est||'') + ')' : '—';
+  const br      = S.manengis_breadth != null ? S.manengis_breadth + '% Mag7 sobre EMA20' : '—';
+  const skew    = (S.manengis_skew_est || '—').replace(/_/g,' ');
+  const vts     = (S.manengis_vts_est  || '—').replace(/_/g,' ');
+  const cotS    = S.manengis_cot_sesgo || '—';
+  const cotL    = S.manengis_cot_lev != null ? (S.manengis_cot_lev > 0 ? '+' : '') + S.manengis_cot_lev.toLocaleString() + ' contratos' : '—';
+  const modo    = S.manengis_modo === 'fast' ? ' [modo intradiario — PCR/opciones del cierre anterior]' : '';
+  return `
+
+SEÑALES DEL MOTOR MANENGIS (análisis cuantitativo nocturno Fases 4-7)${modo}:
+INSTRUCCIÓN CRÍTICA: Estas señales provienen de un motor Python que calcula
+indicadores compuestos con reglas backtestadas sobre 2018/2020/2022/2025.
+Deben tener MAYOR PESO que los indicadores individuales porque ya integran
+múltiples factores. Si el semáforo lleva varios días en un nivel y el
+risk_score tiene tendencia clara, eso es SEÑAL, no solo condición.
+- Risk Score: ${S.manengis_risk_score}/10 (tendencia últimos días: ${tend})
+- Semáforo de exposición: ${sem.toUpperCase()} ${semPct} ${dias}
+- Régimen de mercado: ${reg}
+- Aceleración de riesgo (señal de urgencia): ${acel}
+- Fear & Greed proxy interno: ${fg}
+- Breadth Mag7: ${br}
+- Skew de opciones: ${skew}
+- VIX Term Structure: ${vts}
+- COT sesgo: ${cotS} (largos netos especulativos: ${cotL})
+REGLA DE INTERPRETACIÓN:
+· Semáforo VERDE + risk_score <5 + tendencia estable = entorno favorable confirmado.
+· Semáforo AMARILLO/NARANJA + risk_score >6 + tendencia subiendo = CONDICIÓN REAL de alerta.
+· Semáforo ROJO o aceleración=SÍ = señal activa — recomendar reducción proporcional.
+· Si días consecutivos >= 3 en amarillo/naranja/rojo, la persistencia refuerza la señal.`;
+})()}
+
+${(() => {
+  if (!S.manengis_similitud || !S.manengis_similitud.distribucion) return '';
+  const d = S.manengis_similitud.distribucion;
+  const fiable = S.manengis_similitud.fiable;
+  const interp = S.manengis_similitud.interpretacion || '';
+  const meta = S.manengis_similitud.config || {};
+  const topV = (S.manengis_similitud.vecinos_top10 || []).slice(0,3);
+  const top3str = topV.map(v => v.fecha+'('+v.categoria+' '+v.caida_max_20d.toFixed(1)+'%)').join(', ');
+  return `
+
+SIMILITUD HISTÓRICA (Fase 8 — base empírica retrospectiva):
+INSTRUCCIÓN: Estos porcentajes vienen de comparar el fingerprint actual del mercado
+(distancia desde máximo, RSI, VIX, aceleración VIX, momentum, breadth Mag7) contra
+${meta.n_dias_base || 'N'} días históricos (2018-hoy). Los ${meta.k_vecinos || 50} días más similares
+al actual terminaron así en los siguientes 20 días de mercado:
+- Ruido (<3% caída):       ${d.ruido?.porcentaje ?? 0}% (${d.ruido?.n ?? 0} días)
+- Leve (3-5% caída):       ${d.leve?.porcentaje ?? 0}% (${d.leve?.n ?? 0} días)
+- Moderada (5-10% caída):  ${d.moderada?.porcentaje ?? 0}% (${d.moderada?.n ?? 0} días)
+- Fuerte (10-20% caída):   ${d.fuerte?.porcentaje ?? 0}% (${d.fuerte?.n ?? 0} días)
+- Crash (>20% caída):      ${d.crash?.porcentaje ?? 0}% (${d.crash?.n ?? 0} días)
+Fiabilidad de la base: ${fiable ? 'FIABLE (mejor similitud >'+Math.round((meta.similitud_minima_fiable||0.3)*100)+'%)' : 'BAJA — situación actual sin buen análogo histórico, interpretar con cautela'}
+Top 3 días más parecidos: ${top3str || '—'}
+Interpretación automática: ${interp}
+USO RECOMENDADO: Estos porcentajes NO predicen el futuro, son probabilidad empírica
+retrospectiva. Si pct(fuerte+crash) ≥ 25% es señal de cola gorda real (riesgo
+asimétrico). Si pct(ruido+leve) ≥ 70% el contexto es históricamente benigno.
+Integra este dato en tu evaluación de riesgo, NO como predicción sino como evidencia.`;
+})()}
+
 MARCO DE ANÁLISIS PROFESIONAL:
 1. TENDENCIA PRIMERO: Si precio > EMA50 y SMA200, sesgo alcista. No recomendar reducción sin justificación técnica sólida.
 2. CONDICIÓN ≠ SEÑAL: RSI alto = CONDICIÓN de alerta, NO señal. Una mecha en resistencia = CONDICIÓN, no "ventas institucionales". Solo llamar SEÑAL cuando hay confirmación múltiple.
@@ -4352,6 +4473,74 @@ async function generarInforme() {
   const tendStr = (v, k) => v ? ` (tendencia: ${mapT[k] || k})` : '';
 
   const prompt = `Eres el analista personal de mercado de un inversor español que opera un fondo de inversión Nasdaq 100 con ejecución en d+1 (las órdenes dadas hoy se ejecutan al precio de cierre de MAÑANA). Su posición actual: ${S.posNasdaq}% en fondo Nasdaq, ${S.posLiquidez}% en liquidez.
+
+${(() => {
+  if (!S.manengis_risk_score && !S.manengis_semaforo) return '';
+  const sem     = S.manengis_semaforo || '—';
+  const semPct  = S.manengis_semaforo_pct != null ? S.manengis_semaforo_pct + '%' : '—';
+  const dias    = S.manengis_dias_semaforo ? S.manengis_dias_semaforo + 'd consecutivos' : '';
+  const tend    = S.manengis_hist_tendencia || '—';
+  const acel    = S.manengis_aceleracion === true ? '⚠️ SÍ — riesgo acelerando' : S.manengis_aceleracion === false ? 'no' : '—';
+  const reg     = (S.manengis_regimen || '—').replace(/_/g,' ');
+  const fg      = S.manengis_fear_greed != null ? S.manengis_fear_greed + '/100 (' + (S.manengis_fear_greed_est||'') + ')' : '—';
+  const br      = S.manengis_breadth != null ? S.manengis_breadth + '% Mag7 sobre EMA20' : '—';
+  const skew    = (S.manengis_skew_est || '—').replace(/_/g,' ');
+  const vts     = (S.manengis_vts_est  || '—').replace(/_/g,' ');
+  const cotS    = S.manengis_cot_sesgo || '—';
+  const cotL    = S.manengis_cot_lev != null ? (S.manengis_cot_lev > 0 ? '+' : '') + S.manengis_cot_lev.toLocaleString() + ' contratos' : '—';
+  const modo    = S.manengis_modo === 'fast' ? ' [modo intradiario — PCR/opciones del cierre anterior]' : '';
+  return `
+
+SEÑALES DEL MOTOR MANENGIS (análisis cuantitativo nocturno Fases 4-7)${modo}:
+INSTRUCCIÓN CRÍTICA: Estas señales provienen de un motor Python que calcula
+indicadores compuestos con reglas backtestadas sobre 2018/2020/2022/2025.
+Deben tener MAYOR PESO que los indicadores individuales porque ya integran
+múltiples factores. Si el semáforo lleva varios días en un nivel y el
+risk_score tiene tendencia clara, eso es SEÑAL, no solo condición.
+- Risk Score: ${S.manengis_risk_score}/10 (tendencia últimos días: ${tend})
+- Semáforo de exposición: ${sem.toUpperCase()} ${semPct} ${dias}
+- Régimen de mercado: ${reg}
+- Aceleración de riesgo (señal de urgencia): ${acel}
+- Fear & Greed proxy interno: ${fg}
+- Breadth Mag7: ${br}
+- Skew de opciones: ${skew}
+- VIX Term Structure: ${vts}
+- COT sesgo: ${cotS} (largos netos especulativos: ${cotL})
+REGLA DE INTERPRETACIÓN:
+· Semáforo VERDE + risk_score <5 + tendencia estable = entorno favorable confirmado.
+· Semáforo AMARILLO/NARANJA + risk_score >6 + tendencia subiendo = CONDICIÓN REAL de alerta.
+· Semáforo ROJO o aceleración=SÍ = señal activa — recomendar reducción proporcional.
+· Si días consecutivos >= 3 en amarillo/naranja/rojo, la persistencia refuerza la señal.`;
+})()}
+
+${(() => {
+  if (!S.manengis_similitud || !S.manengis_similitud.distribucion) return '';
+  const d = S.manengis_similitud.distribucion;
+  const fiable = S.manengis_similitud.fiable;
+  const interp = S.manengis_similitud.interpretacion || '';
+  const meta = S.manengis_similitud.config || {};
+  const topV = (S.manengis_similitud.vecinos_top10 || []).slice(0,3);
+  const top3str = topV.map(v => v.fecha+'('+v.categoria+' '+v.caida_max_20d.toFixed(1)+'%)').join(', ');
+  return `
+
+SIMILITUD HISTÓRICA (Fase 8 — base empírica retrospectiva):
+INSTRUCCIÓN: Estos porcentajes vienen de comparar el fingerprint actual del mercado
+(distancia desde máximo, RSI, VIX, aceleración VIX, momentum, breadth Mag7) contra
+${meta.n_dias_base || 'N'} días históricos (2018-hoy). Los ${meta.k_vecinos || 50} días más similares
+al actual terminaron así en los siguientes 20 días de mercado:
+- Ruido (<3% caída):       ${d.ruido?.porcentaje ?? 0}% (${d.ruido?.n ?? 0} días)
+- Leve (3-5% caída):       ${d.leve?.porcentaje ?? 0}% (${d.leve?.n ?? 0} días)
+- Moderada (5-10% caída):  ${d.moderada?.porcentaje ?? 0}% (${d.moderada?.n ?? 0} días)
+- Fuerte (10-20% caída):   ${d.fuerte?.porcentaje ?? 0}% (${d.fuerte?.n ?? 0} días)
+- Crash (>20% caída):      ${d.crash?.porcentaje ?? 0}% (${d.crash?.n ?? 0} días)
+Fiabilidad de la base: ${fiable ? 'FIABLE (mejor similitud >'+Math.round((meta.similitud_minima_fiable||0.3)*100)+'%)' : 'BAJA — situación actual sin buen análogo histórico, interpretar con cautela'}
+Top 3 días más parecidos: ${top3str || '—'}
+Interpretación automática: ${interp}
+USO RECOMENDADO: Estos porcentajes NO predicen el futuro, son probabilidad empírica
+retrospectiva. Si pct(fuerte+crash) ≥ 25% es señal de cola gorda real (riesgo
+asimétrico). Si pct(ruido+leve) ≥ 70% el contexto es históricamente benigno.
+Integra este dato en tu evaluación de riesgo, NO como predicción sino como evidencia.`;
+})()}
 
 MARCO DE ANÁLISIS PROFESIONAL — SIGUE ESTAS REGLAS SIEMPRE:
 
@@ -6762,6 +6951,93 @@ function aplicarRadarAuto(radar) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // FASE 8: renderSimilitud — Dibuja las 5 barras de parecido con correcciones
+  // ════════════════════════════════════════════════════════════════════════
+  function renderSimilitud(sim) {
+    const panel = document.getElementById('similitud-panel');
+    if (!panel) return;
+    if (!sim || !sim.distribucion) { panel.style.display = 'none'; return; }
+
+    panel.style.display = 'block';
+
+    // Colores por categoría (degradado verde→rojo)
+    const colores = {
+      ruido:    { bg: 'rgba(34,197,94,0.85)',  text: 'var(--gr)',  label: 'Ruido (<3%)' },
+      leve:     { bg: 'rgba(132,204,22,0.85)', text: '#a3e635',    label: 'Leve (3-5%)' },
+      moderada: { bg: 'rgba(240,165,0,0.85)',  text: 'var(--am)',  label: 'Moderada (5-10%)' },
+      fuerte:   { bg: 'rgba(249,115,22,0.85)', text: '#fb923c',    label: 'Fuerte (10-20%)' },
+      crash:    { bg: 'rgba(239,68,68,0.85)',  text: 'var(--rd)',  label: 'Crash (>20%)' },
+    };
+
+    // Badge de fiabilidad
+    const badge = document.getElementById('similitud-fiable-badge');
+    if (badge) {
+      if (sim.fiable) {
+        badge.innerHTML = '✓ FIABLE';
+        badge.style.color = 'var(--gr)';
+        badge.style.borderColor = 'rgba(34,197,94,0.4)';
+        badge.style.background = 'rgba(34,197,94,0.08)';
+      } else {
+        badge.innerHTML = '⚠ SIN ANÁLOGO';
+        badge.style.color = 'var(--am)';
+        badge.style.borderColor = 'rgba(240,165,0,0.4)';
+        badge.style.background = 'rgba(240,165,0,0.08)';
+      }
+    }
+
+    // Meta (N base, K vecinos, similitud máxima)
+    const meta = document.getElementById('similitud-meta');
+    if (meta && sim.config) {
+      meta.innerHTML = `N=${sim.config.n_dias_base} · K=${sim.config.k_vecinos} · top sim=${(sim.mejor_similitud*100).toFixed(0)}%`;
+    }
+    const kEl = document.getElementById('similitud-k-vecinos');
+    if (kEl && sim.config) kEl.textContent = sim.config.k_vecinos;
+
+    // Barras
+    const cont = document.getElementById('similitud-barras');
+    if (cont) {
+      cont.innerHTML = '';
+      const ordenCat = ['ruido','leve','moderada','fuerte','crash'];
+      ordenCat.forEach(cat => {
+        const info = sim.distribucion[cat];
+        if (!info) return;
+        const pct = info.porcentaje;
+        const col = colores[cat] || colores.ruido;
+        const ancho = Math.max(2, pct); // mínimo 2% para que se vea aunque sea 0
+        const item = document.createElement('div');
+        item.style.cssText = 'display:grid; grid-template-columns:120px 1fr 60px; gap:10px; align-items:center;';
+        item.innerHTML = `
+          <div style="font-size:11px; color:var(--t2); font-family:'JetBrains Mono',monospace;">${col.label}</div>
+          <div style="background:var(--s3); border:1px solid var(--b1); border-radius:6px; height:18px; position:relative; overflow:hidden;">
+            <div style="width:${ancho}%; height:100%; background:${col.bg}; border-radius:5px; transition:width 0.4s ease;"></div>
+          </div>
+          <div style="font-size:12px; font-weight:600; font-family:'JetBrains Mono',monospace; color:${col.text}; text-align:right;">${pct.toFixed(0)}% <span style="font-size:9px; color:var(--t3); font-weight:400;">(${info.n})</span></div>
+        `;
+        cont.appendChild(item);
+      });
+    }
+
+    // Interpretación
+    const interp = document.getElementById('similitud-interpretacion');
+    if (interp) {
+      interp.innerHTML = sim.interpretacion || '—';
+    }
+
+    // Top 3 vecinos
+    const top3El = document.getElementById('similitud-top3');
+    if (top3El && sim.vecinos_top10 && sim.vecinos_top10.length > 0) {
+      top3El.innerHTML = '';
+      sim.vecinos_top10.slice(0, 3).forEach(v => {
+        const col = colores[v.categoria] || colores.ruido;
+        const chip = document.createElement('div');
+        chip.style.cssText = `font-size:10px; font-family:'JetBrains Mono',monospace; padding:3px 8px; background:var(--s3); border:1px solid ${col.bg}; border-radius:6px; color:${col.text};`;
+        chip.innerHTML = `${v.fecha} · ${v.categoria} (${v.caida_max_20d.toFixed(1)}%) · sim ${(v.similitud*100).toFixed(0)}%`;
+        top3El.appendChild(chip);
+      });
+    }
+  }
+
   // Fase 4 · Bloque 3: renderiza el panel del plan de exposición
   function renderPlanExposicion(plan) {
     const card = document.getElementById('plan-expo-card');
@@ -6866,6 +7142,42 @@ function aplicarRadarAuto(radar) {
       if (v.us10y != null)            { setInput('i-us10', v.us10y);            if(typeof evalInd==='function') evalInd('us10'); }
       if (v.fear_greed_score != null) { setInput('i-fng',  v.fear_greed_score); if(typeof evalInd==='function') evalInd('fng'); }
 
+      // ── Paso 1: Guardar señales del motor Python en S para el prompt IA ──
+      // Estos campos enriquecen el razonamiento de la IA con el análisis
+      // de las Fases 4-7: plan de exposición, régimen, fear&greed propio,
+      // breadth, skew, VIX term structure, COT y tendencia del risk_score.
+      S.manengis_risk_score     = v.risk_score       ?? null;
+      S.manengis_semaforo       = v.exposicion_semaforo ?? null;
+      S.manengis_semaforo_pct   = v.exposicion_sugerida_pct ?? null;
+      S.manengis_regimen        = v.regimen_mercado   ?? null;
+      S.manengis_fear_greed     = v.fear_greed_score  ?? null;
+      S.manengis_fear_greed_est = v.fear_greed_estado ?? null;
+      S.manengis_aceleracion    = (data.velocidad?.aceleracion_riesgo) ?? null;
+      S.manengis_breadth        = v.breadth_pct_ema20 ?? null;
+      S.manengis_skew_est       = v.skew_estado       ?? null;
+      S.manengis_vts_est        = v.vix_ts_estado     ?? null;
+      S.manengis_cot_sesgo      = v.cot_sesgo         ?? null;
+      S.manengis_cot_lev        = v.cot_lev_net       ?? null;
+      S.manengis_modo           = data.modo           ?? null;
+      // Tendencia del risk_score en los últimos 5 días (del histórico embebido)
+      if (data.historico_30d && data.historico_30d.length >= 3) {
+        const hist = data.historico_30d.filter(h => h.risk_score != null);
+        if (hist.length >= 2) {
+          const ultimo   = hist[hist.length - 1].risk_score;
+          const penultimo = hist[hist.length - 2].risk_score;
+          const delta = ultimo - penultimo;
+          S.manengis_hist_tendencia = delta > 0.3 ? 'subiendo' : delta < -0.3 ? 'bajando' : 'estable';
+        }
+        // Días consecutivos en semáforo actual
+        if (S.manengis_semaforo) {
+          let dias = 0;
+          for (let i = data.historico_30d.length - 1; i >= 0; i--) {
+            if (data.historico_30d[i].exposicion_semaforo === S.manengis_semaforo) dias++;
+            else break;
+          }
+          S.manengis_dias_semaforo = dias;
+        }
+      }
 
       // Llamar evalOI si existe
       if (typeof evalOI === 'function') evalOI();
@@ -6877,6 +7189,13 @@ function aplicarRadarAuto(radar) {
       // Fase 7 · B3: dashboard histórico 30d
       if (data.historico_30d && data.historico_30d.length > 0) {
         renderHistorico(data.historico_30d);
+      }
+
+      // Fase 8: similitud histórica (5 barras de parecido con correcciones pasadas)
+      if (data.similitud_historica) {
+        if (typeof renderSimilitud === 'function') renderSimilitud(data.similitud_historica);
+        // Guardar también en S para que el prompt IA lo pueda usar
+        S.manengis_similitud = data.similitud_historica;
       }
 
       // Mejora B: timestamp de frescura — "Datos de hace Xh Ym"
@@ -6903,6 +7222,17 @@ function aplicarRadarAuto(radar) {
           ' · Score=' + v.risk_score + '/10' +
           (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
         banner.style.color = 'var(--gr)';
+        banner.style.borderColor = '';
+        banner.style.background  = '';
+        if (data.modo === 'fast') {
+          banner.innerHTML = '⚡ Modo intradiario · RSI=' + v.rsi +
+            ' · Score=' + v.risk_score + '/10' +
+            ' <span style="color:var(--am);font-size:10px;">· PCR/COT/Opciones del cierre anterior</span>' +
+            (frescuraStr ? ' <span style="color:var(--t3);font-size:10px;">(' + frescuraStr + ')</span>' : '');
+          banner.style.color       = 'var(--am)';
+          banner.style.borderColor = 'rgba(240,165,0,0.3)';
+          banner.style.background  = 'rgba(240,165,0,0.06)';
+        }
       }
       // ── Zonas de liquidez desde JSON MANENGIS ───────────────────────
       if (data.derivados && data.tecnicos) {
@@ -7063,12 +7393,20 @@ function aplicarRadarAuto(radar) {
       const ahora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       if (tsEl) tsEl.textContent = ahora;
 
-      // ── Banner de estado actualizado
+      // ── Banner de estado actualizado (enriquecido con US10Y, DXY, sesgo)
       const banner = document.getElementById('proxy-aviso');
       if (banner) {
+        const us10Str = L.us10y  != null ? ' · US10Y=' + L.us10y + '%' : '';
+        const dxyStr  = L.dxy    != null ? ' · DXY='   + L.dxy           : '';
+        const sesgo   = L.sesgo_live || 'neutral';
+        const sesgoBadge = sesgo === 'cauto'         ? ' <span style="color:var(--rd);font-size:10px;">▲ CAUTO</span>'
+                         : sesgo === 'neutral_cauto' ? ' <span style="color:var(--am);font-size:10px;">▲ vigilar</span>'
+                         : sesgo === 'euforia'       ? ' <span style="color:var(--ac);font-size:10px;">↑ euforia</span>'
+                         : '';
         banner.innerHTML = '⚡ Live sync · QQQ=' + (L.precio_qqq || '—') +
           ' · VIX=' + (L.vix || '—') +
           ' · RSI=' + (L.rsi_qqq || '—') +
+          us10Str + dxyStr + sesgoBadge +
           ' <span style="color:var(--t3);font-size:10px;">(' + ahora + ')</span>';
         banner.style.color = 'var(--cyan)';
         banner.style.borderColor = 'rgba(6,182,212,0.3)';
