@@ -4066,29 +4066,11 @@ async function generarInformeCompleto() {
     10:'VXN', 11:'Patrón velas', 12:'Soporte/Resistencia'
   };
   const colorLabel = { g:'ALCISTA', a:'NEUTRAL', r:'BAJISTA' };
-  const tecSecciones = Object.entries(tecEstado).length > 0
-    ? '\n\nANÁLISIS TÉCNICO MANUAL (12 indicadores):\n' +
-      Object.entries(tecEstado).map(([k,v]) => '- ' + tecLabels[k] + ': ' + colorLabel[v]).join('\n')
-    : '\n\nANÁLISIS TÉCNICO: No completado (opcional)';
+  const tecSecciones = ''; // Movido al botón técnico dedicado
 
-  const tecAuto = S.tecnicos ? '\n\nINDICADORES TÉCNICOS AUTOMÁTICOS:\n' + [
-    'RSI14=' + (S.tecnicos.rsi?.valor || '—') + ' tendencia=' + (S.tecnicos.rsi?.tendencia || '—') + ' alerta=' + (S.tecnicos.rsi?.alertaRsi || 'ninguna') + (S.tecnicos.rsi?.divergenciaBajista ? ' DIVERGENCIA_BAJISTA' : ''),
-    'EMA20=' + (S.tecnicos.ema20?.valor || '—') + ' precio_' + (S.tecnicos.ema20?.precioVsEma || '—'),
-    'EMA50=' + (S.tecnicos.ema50?.valor || '—') + ' cruce_EMAs=' + (S.tecnicos.ema50?.cruceEmas || '—'),
-    'SMA200=' + (S.tecnicos.sma200?.valor || '—') + ' dist=' + (S.tecnicos.sma200?.distanciaPct || '—') + '%',
-    'SMA20_dist=' + (S.tecnicos.sma20?.distanciaPct || '—') + '%',
-    'SMA50_dist=' + (S.tecnicos.sma50?.distanciaPct || '—') + '%',
-    'MACD=' + (S.tecnicos.macd?.macd || '—') + ' hist=' + (S.tecnicos.macd?.histogram || '—'),
-    'ATR14=' + (S.tecnicos.atr?.valor || '—'),
-    'AccDis=' + (S.tecnicos.accdis?.trend || '—'),
-    'Precio_NDX=' + (S.tecnicos.precio || '—')
-  ].join(', ') : '';
+  const tecAuto = ''; // Movido al botón técnico dedicado
 
-  const fibCtx = S.fibonacciLevels && Object.keys(S.fibonacciLevels).length > 0
-    ? '\n\nFIBONACCI NDX (90d máx/mín): ' + Object.entries(S.fibonacciLevels)
-        .map(([k,v]) => k + '=' + v.valor + '(' + (v.distPct >= 0 ? '+' : '') + v.distPct + '%)')
-        .join(' | ')
-    : '';
+  const fibCtx = ''; // Movido al botón técnico dedicado
 
   const prompt = `Eres el analista personal de mercado de un inversor español con fondo Nasdaq 100, ejecución d+1. Posición actual: ${S.posNasdaq}% Nasdaq / ${S.posLiquidez}% liquidez.
 
