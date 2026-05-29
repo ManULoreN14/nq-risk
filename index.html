@@ -4235,77 +4235,79 @@ Cada dato pertenece a UNA sola sección. No repetir el mismo dato en secciones d
 - INSTITUCIONAL: GEX, Max Pain, PCR (los 4 ratios), zonas de liquidez, equal highs/lows.
 - DETECCIÓN DE GIRO: Divergencias RSI con confirmadores, Bollinger bandas, ratio VXN/VIX, días consecutivos.
 - CONCLUSIÓN: Síntesis de máximo 3 frases. PROHIBIDO repetir datos ya mencionados. Solo responder: ¿sesgo direccional? ¿riesgo de giro? ¿posición recomendada? ¿coherencia con Radar 2-5D?
-- RADAR 2-5D: Sus datos (COT, OI strikes, VIX term structure, ETF flows) SOLO se mencionan en la sección Radar 2-5D y en la Conclusión Conjunta. NO incluirlos en Macro ni en Institucional.
+- RADAR 2-5D: Sus datos (COT, OI strikes, VIX term structure, ETF flows) SOLO se integran en la sección HORIZONTE 2-5 DÍAS o como SEÑAL en la tabla (si están en zona extrema). NO incluirlos en otras partes del informe.
 
 Si un dato ya se mencionó en su sección, NO volver a citarlo en otra sección aunque sea relevante. En su lugar usar "como se indicó en [sección]" si es imprescindible referenciarlo.
 
-Responde EXACTAMENTE en este formato:
+REGLAS DE INTERPRETACIÓN CAUSAL — MOTOR MANENGIS + SIMILITUD
+Estas reglas convierten los datos del motor en razonamiento. Aplícalas SIEMPRE antes de redactar.
+
+A) COMBINACIONES QUE SON SEÑAL CONFIRMADA (no condición):
+   · Si manengis_dias_semaforo >= 3 Y manengis_hist_tendencia = "subiendo" Y manengis_risk_score >= 6 → SEÑAL real de presión persistente. Trátalo como giro probable, no como ruido.
+   · Si manengis_regimen = "distribucion_bajista" Y manengis_breadth < 50 Y manengis_aceleracion = true → tripleta que históricamente precede correcciones moderadas. Recomendar reducción.
+   · Si manengis_semaforo = "rojo" (cualquier número de días) → señal activa inmediata. Reducción proporcional al risk_score.
+   · Si similitud_historica.fuerte + similitud_historica.crash >= 25 Y similitud_historica.fiable = true → riesgo de cola REAL. Debe aparecer como señal en la tabla y como factor en RIESGO PRINCIPAL.
+
+B) COMBINACIONES QUE SON SOLO CONDICIÓN (alerta sin confirmación):
+   · Semáforo amarillo/naranja con dias_semaforo = 1 → primer día, vigilancia. NO recomendar acción todavía.
+   · manengis_aceleracion = true aislada (sin breadth bajo ni régimen distribución confirmando) → movimiento corto reversible. Condición.
+   · similitud_historica.fiable = false → sin buen análogo histórico. Interpreta el resto con cautela extra y menciónalo en RIESGO PRINCIPAL.
+
+C) RESOLUCIÓN DE CONTRADICCIONES — MOTOR vs INDICADORES INDIVIDUALES:
+   · Motor en rojo/naranja persistente Y VIX bajo → MOTOR PREVALECE. El VIX es reactivo; el motor ya está descontando lo que el VIX no refleja aún.
+   · Motor en verde Y un indicador aislado extremo (ej. RSI 80, divergencia sin confirmar) → el indicador es CONDICIÓN, no señal. El motor integra múltiples factores; el indicador aislado puede ser ruido. Menciónalo como riesgo de fondo, no como señal bajista.
+   · Similitud con crash+fuerte >= 25% Y motor en verde → CONTRADICCIÓN REAL. Es un factor de cola que el contexto actual no captura. Debe aparecer explícitamente en RIESGO PRINCIPAL.
+
+D) PRIORIDAD JERÁRQUICA DE EVIDENCIA (de mayor a menor peso):
+   1) Combinaciones del motor en categoría A (señal confirmada)
+   2) Macro de alerta (HY Spread >4%, curva invertida, NFCI>0, SOFR spread alto)
+   3) Similitud histórica fiable con sesgo claro
+   4) Indicadores técnicos con divergencia confirmada (2+ confirmadores)
+   5) Niveles institucionales (Max Pain, GEX, PCR)
+   6) Sentimiento (Fear&Greed, GDELT)
+
+═══════════════════════════════════════════════════════════════════
+FORMATO DE SALIDA — "CASO DE INVERSIÓN" (NO análisis seccional)
+═══════════════════════════════════════════════════════════════════
+
+Mantén las 4 líneas de cabecera idénticas (el parser depende de ellas):
 
 NIVEL: [VERDE/ÁMBAR/ROJO]
 DECISIÓN: [máximo 8 palabras, lenguaje probabilístico]
 NASDAQ_REC: [0-100, cambio máx 20 puntos sin señal confirmada vs ${S.posNasdaq}% actual]
 LIQUIDEZ_REC: [complementario]
 
-═══════ ANÁLISIS MACRO ═══════
-[2-3 párrafos sobre el contexto macro para d+1. REGLA CLAVE: Solo menciona un dato si está en zona relevante o de alerta — no hagas un listado de todos los datos.
-Si hay contexto geopolítico relevante (noticias, tensiones comerciales, Fed speakers), intégralo naturalmente en el análisis — no como lista separada sino como contexto que explica los movimientos de VIX, yields o futuros.
-PRIORIDAD 1 (mencionar siempre si disponible): HY Spread (crítico si >4%), curva tipos (si invertida), NFCI (si >0), SOFR spread (si >0.5%).
-PRIORIDAD 2 (mencionar solo si en zona extrema): VIX >25, RSI >80 o <30, Fear&Greed <20 o >80, Balance Fed cambiando tendencia.
-PRIORIDAD 3 (solo si hay señal clara): Futuros NQ, DXY, bonos 10Y.
-EXPECTATIVAS FED: Si el sesgo es dovish o hawkish, mencionarlo — el mercado lo descuenta con semanas de antelación.
-El objetivo es un análisis conciso que destaque LO QUE IMPORTA HOY, no un inventario de datos.
-Usa **negrita** para alertas. Máx 180 palabras.]
+═══════ TESIS CENTRAL ═══════
+[3-4 frases. ÚNICA sección narrativa libre. Construye UN argumento causal único que conecta: estado del motor MANENGIS (semáforo, régimen, risk_score, tendencia) + contexto macro que importa hoy (solo lo relevante) + posicionamiento técnico/institucional + decisión tomada arriba. Aplica las reglas A-D antes de redactar. Si hay contradicción motor vs indicador, decláralo aquí. PROHIBIDO listar datos. Solo argumento causal: "X está pasando, por eso Y, por tanto Z."]
 
-═══════ CONTEXTO SEMANAL ═══════
-[Analiza el timeframe semanal como marco de referencia para la decisión d+1:
-1. **Tendencia semanal**: ¿Cuál es el sesgo estructural en semanal? ¿Opera a favor o en contra del diario?
-2. **RSI semanal**: ¿Está en sobrecompra/sobreventa semanal? Esto tiene más peso que el diario.
-3. **EMAs semanales**: ¿Precio sobre o bajo EMA20/50/200 semanal?
-4. **Confluencia semanal/diario**: ¿Los dos timeframes apuntan en la misma dirección o hay divergencia?
-5. **Conclusión**: ¿El contexto semanal apoya o contradice la operación de mañana?
-${semImgBase64 ? 'Se adjunta gráfico semanal de ProRealTime — léelo e incorpora su análisis.' : ''}
-Usa **negrita**. Máx 150 palabras.]
+═══════ SEÑALES QUE SOSTIENEN LA DECISIÓN ═══════
+[Tabla de máximo 8 señales. FILTRO ESTRICTO: solo aparecen señales en ZONA RELEVANTE.
+- VIX <20 no aparece (neutral). VIX >20 aparece como ⚠️, VIX >30 como ❌.
+- RSI 40-70 no aparece (zona normal). RSI >70 o <30 aparece.
+- Fear&Greed 30-70 no aparece. Solo extremos (<20 o >80).
+- Indicadores en zona neutral DESAPARECEN. No los menciones.
+Formato exacto, una señal por línea (sin saltos extra entre líneas):
+✅ ALCISTA   [factor] — [dato concreto, máx 12 palabras]
+⚠️ VIGILAR  [factor] — [dato concreto, máx 12 palabras]
+❌ BAJISTA   [factor] — [dato concreto, máx 12 palabras]
+Incluye OBLIGATORIAMENTE (si están en zona relevante):
+- Estado del motor MANENGIS (semáforo + días consecutivos + tendencia risk_score)
+- Régimen + breadth (si refuerza o contradice)
+- Similitud histórica si fiable Y sesgada (ruido+leve >=70% es alcista; fuerte+crash >=25% es bajista)
+- COT sesgo si extremo
+- Macro de alerta si aplica (HY Spread, curva invertida, NFCI>0)
+- Skew o VIX term structure si en zona no-normal
+Máx 8 señales totales. Si hay menos de 3 en zona relevante, decláralo: "Pocas señales en zona relevante — mercado en equilibrio."]
 
-═══════ ANÁLISIS TÉCNICO ═══════
-[2-3 párrafos: confluencia de indicadores técnicos, niveles Fibonacci relevantes, patrón de velas si aplica, señal técnica combinada. Usa **negrita**. Máx 180 palabras.]
+═══════ RIESGO PRINCIPAL ═══════
+[UNA SOLA FRASE específica. El escenario concreto que haría que la decisión de arriba fuera errónea. Ejemplos del nivel exigido: "Que el VIX rompa 20 con volumen — invalidaría el contango." / "Que la similitud histórica con crashes (8%) se materialice antes del rebalance." NO frases vagas tipo "siempre hay riesgo" o "vigilar el mercado". Específico o no vale.]
 
-═══════ ANÁLISIS EMPRESARIAL ═══════
-[SOLO incluir esta sección si hay algo relevante: earnings de empresa importante esta semana, PER en zona extrema (>35x o <20x), o sorpresa de resultados que explique el movimiento del índice. Si todo está normal, OMITIR esta sección completamente. Si se incluye, máx 80 palabras.]
-
-═══════ LECTURA INSTITUCIONAL ═══════
-[Analiza siguiendo este framework exacto:
-1. **PCR**: ¿Está el retail demasiado alcista (Equity PCR bajo)? ¿Están los institucionales protegidos (Index PCR medio/alto)?
-2. **VIX + GEX**: ¿Los dealers estabilizan o amplifican? ¿Hay trampa institucional (precio sube + VIX sube)?
-3. **Max Pain**: ¿Está el precio por encima o debajo? ¿Qué incentivo tienen los dealers?
-4. **Liquidez**: ¿Dónde está la liquidez más cercana arriba y abajo? ¿Hacia qué zona va el precio?
-5. **Fase del mercado**: subida controlada / barrido de máximos / distribución / reversión inminente
-Usa **negrita**. Máx 180 palabras.]
-
-═══════ DETECCIÓN DE GIRO ═══════
-[Analiza específicamente si hay señales de giro bajista (techo) o alcista (suelo):
-1. **Divergencias RSI**: ¿Hay divergencia? ¿Cuál es su fiabilidad (confirmadores)? RECORDAR: sin confirmadores es solo condición, no señal.
-2. **Bandas de Bollinger**: ¿El precio está en banda superior o inferior? ¿Hay squeeze?
-3. **Ratio VXN/VIX**: ¿Hay estrés específico en tech?
-4. **Días consecutivos + mercado estirado**: ¿Agotamiento? ¿Distancia excesiva a EMA20 semanal?
-5. **Breadth**: ¿Los semiconductores lideran o rezagan? ¿Qué dice el %EMA50?
-6. **Confluencia**: Una señal sola NO es suficiente. Necesitas 2+ confirmadores para hablar de giro probable. Sé explícito sobre qué confirma y qué no.
-7. **Veredicto de giro**: Techo probable (alta confluencia) / Condición de alerta (1 señal) / Sin señal clara
-Usa **negrita**. Máx 180 palabras.]
+═══════ NIVELES CLAVE d+1 ═══════
+[UNA SOLA LÍNEA con 3 números: Max Pain: [valor] · Resistencia: [strike calls o nivel técnico] · Soporte: [strike puts o nivel técnico]. Si no hay datos institucionales, usa EMA20 y máximos/mínimos recientes.]
 
 ═══════ HORIZONTE 2-5 DÍAS ═══════
-[Analiza específicamente el horizonte 2-5 días usando los datos del Radar automático:
-1. **VIX Term Structure**: ¿Contango o backwardation? ¿Qué implica para los próximos días?
-2. **ETF Flows QQQ**: ¿Entradas o salidas institucionales? ¿Confirman o contradicen la tendencia?
-3. **Max Pain / OI Strikes**: ¿Hacia dónde tira la gravedad de opciones en el próximo vencimiento?
-4. **Momentum ROC 5d**: ¿Hay sobreextensión que sugiera mean reversion?
-5. **Conclusión 2-5d**: ¿El riesgo aumenta o disminuye en los próximos días vs d+1?
-IMPORTANTE: Esta sección es DIFERENTE al d+1 — puede tener sesgo opuesto. Sé explícito si hay contradicción.
-Usa **negrita**. Máx 150 palabras.]
-
-═══════ CONCLUSIÓN CONJUNTA ═══════
-[Síntesis final. Responde estas 3 preguntas: 1) ¿Sesgo d+1? 2) ¿Sesgo 2-5 días? 3) ¿Posición recomendada y qué vigilar?
-${(R.cot || R.oi || R.vts || R.etf) ? 'OBLIGATORIO: Indica si el sesgo d+1 es COHERENTE o DIVERGENTE con el Radar 2-5D. Si divergen, explica cuál prevalece y por qué.' : ''}
-Máx 120 palabras.]`;
+[2-3 frases. ¿El sesgo a 2-5 días es COHERENTE o DIVERGENTE con d+1? Usa: VIX term structure, ETF flows, similitud histórica (que mira 20d hacia adelante), COT, momentum 5d. Si DIVERGENTE, explica cuál prevalece y por qué. Si COHERENTE, di qué refuerza la convicción.
+${(R.cot || R.oi || R.vts || R.etf) ? 'OBLIGATORIO: integrar Radar 2-5D.' : 'Usar similitud histórica como proxy.'}]`;
 
   // ── Inyectar bloque Radar 2-5D si hay datos disponibles ──────────────────
   const radarDatos = (() => {
@@ -4368,7 +4370,7 @@ INSTRUCCIÓN: Usa este contexto para calibrar el sesgo d+1. Si el Radar apunta e
     const tieneImgDiaria = !!imgBase64;
     const tieneImgSemanal = !!semImgBase64;
     // Añadir bloque Radar 2-5D al prompt base si hay datos
-    const promptFinal = radarDatos ? prompt.replace('═══════ CONCLUSIÓN CONJUNTA ═══════', radarDatos + '\n\n═══════ CONCLUSIÓN CONJUNTA ═══════') : prompt;
+    const promptFinal = radarDatos ? prompt.replace('═══════ HORIZONTE 2-5 DÍAS ═══════', radarDatos + '\n\n═══════ HORIZONTE 2-5 DÍAS ═══════') : prompt;
 
     if (tieneImgDiaria || tieneImgSemanal) {
       const mediaType = window._imgMediaType || 'image/png';
@@ -4652,21 +4654,75 @@ INDICADORES TÉCNICOS NDX (calculados automáticamente):
 ${histCtx}
 ${btCtx}
 
-Responde EXACTAMENTE en este formato (sin markdown extra):
+REGLAS DE INTERPRETACIÓN CAUSAL — MOTOR MANENGIS + SIMILITUD
+Estas reglas convierten los datos del motor en razonamiento. Aplícalas SIEMPRE antes de redactar.
+
+A) COMBINACIONES QUE SON SEÑAL CONFIRMADA (no condición):
+   · Si manengis_dias_semaforo >= 3 Y manengis_hist_tendencia = "subiendo" Y manengis_risk_score >= 6 → SEÑAL real de presión persistente. Trátalo como giro probable, no como ruido.
+   · Si manengis_regimen = "distribucion_bajista" Y manengis_breadth < 50 Y manengis_aceleracion = true → tripleta que históricamente precede correcciones moderadas. Recomendar reducción.
+   · Si manengis_semaforo = "rojo" (cualquier número de días) → señal activa inmediata. Reducción proporcional al risk_score.
+   · Si similitud_historica.fuerte + similitud_historica.crash >= 25 Y similitud_historica.fiable = true → riesgo de cola REAL. Debe aparecer como señal en la tabla y como factor en RIESGO PRINCIPAL.
+
+B) COMBINACIONES QUE SON SOLO CONDICIÓN (alerta sin confirmación):
+   · Semáforo amarillo/naranja con dias_semaforo = 1 → primer día, vigilancia. NO recomendar acción todavía.
+   · manengis_aceleracion = true aislada (sin breadth bajo ni régimen distribución confirmando) → movimiento corto reversible. Condición.
+   · similitud_historica.fiable = false → sin buen análogo histórico. Interpreta el resto con cautela extra y menciónalo en RIESGO PRINCIPAL.
+
+C) RESOLUCIÓN DE CONTRADICCIONES — MOTOR vs INDICADORES INDIVIDUALES:
+   · Motor en rojo/naranja persistente Y VIX bajo → MOTOR PREVALECE. El VIX es reactivo; el motor ya está descontando lo que el VIX no refleja aún.
+   · Motor en verde Y un indicador aislado extremo (ej. RSI 80, divergencia sin confirmar) → el indicador es CONDICIÓN, no señal. El motor integra múltiples factores; el indicador aislado puede ser ruido. Menciónalo como riesgo de fondo, no como señal bajista.
+   · Similitud con crash+fuerte >= 25% Y motor en verde → CONTRADICCIÓN REAL. Es un factor de cola que el contexto actual no captura. Debe aparecer explícitamente en RIESGO PRINCIPAL.
+
+D) PRIORIDAD JERÁRQUICA DE EVIDENCIA (de mayor a menor peso):
+   1) Combinaciones del motor en categoría A (señal confirmada)
+   2) Macro de alerta (HY Spread >4%, curva invertida, NFCI>0, SOFR spread alto)
+   3) Similitud histórica fiable con sesgo claro
+   4) Indicadores técnicos con divergencia confirmada (2+ confirmadores)
+   5) Niveles institucionales (Max Pain, GEX, PCR)
+   6) Sentimiento (Fear&Greed, GDELT)
+
+═══════════════════════════════════════════════════════════════════
+FORMATO DE SALIDA — "CASO DE INVERSIÓN" (NO análisis seccional)
+═══════════════════════════════════════════════════════════════════
+
+Mantén las 4 líneas de cabecera idénticas (el parser depende de ellas):
 
 NIVEL: [VERDE/ÁMBAR/ROJO]
-DECISIÓN: [una frase de máximo 8 palabras — usa lenguaje probabilístico, ej: "Mantener con vigilancia", "Reducción moderada prudente", "Riesgo creciente, reducir parcialmente"]
-NASDAQ_REC: [número del 0 al 100 — IMPORTANTE: cambio máximo de 20 puntos respecto a posición actual (${S.posNasdaq}%) salvo señal confirmada de giro]
-LIQUIDEZ_REC: [complementario al NASDAQ_REC, suma 100]
+DECISIÓN: [máximo 8 palabras, lenguaje probabilístico]
+NASDAQ_REC: [0-100, cambio máx 20 puntos sin señal confirmada vs ${S.posNasdaq}% actual]
+LIQUIDEZ_REC: [complementario]
 
-ANÁLISIS:
-[Estructura obligatoria en este orden:
-1. TENDENCIA (1 frase): ¿Cuál es la tendencia estructural? ¿Precio sobre/bajo EMA50 y SMA200?
-2. CONDICIONES ACTUALES (2-3 frases): Describe el estado del mercado sin hacer predicciones. Usa "señales de fatiga", "riesgo creciente", "binomio riesgo/beneficio".
-3. INDICADORES CLAVE (2-3 frases): Los 2-3 indicadores más relevantes de hoy con su lectura exacta.
-4. CONCLUSIÓN d+1 (2 frases): Qué implica esto para mañana. Usa lenguaje probabilístico — nunca afirmes una dirección con certeza.
-5. POSICIÓN RECOMENDADA (1 frase): Justifica el cambio o la no variación. Si no hay señal confirmada, la justificación debe ser explícita.
-Usa **negrita** para los puntos clave. Máximo 320 palabras.]`;
+═══════ TESIS CENTRAL ═══════
+[3-4 frases. ÚNICA sección narrativa libre. Construye UN argumento causal único que conecta: estado del motor MANENGIS (semáforo, régimen, risk_score, tendencia) + contexto macro que importa hoy (solo lo relevante) + posicionamiento técnico/institucional + decisión tomada arriba. Aplica las reglas A-D antes de redactar. Si hay contradicción motor vs indicador, decláralo aquí. PROHIBIDO listar datos. Solo argumento causal: "X está pasando, por eso Y, por tanto Z."]
+
+═══════ SEÑALES QUE SOSTIENEN LA DECISIÓN ═══════
+[Tabla de máximo 8 señales. FILTRO ESTRICTO: solo aparecen señales en ZONA RELEVANTE.
+- VIX <20 no aparece (neutral). VIX >20 aparece como ⚠️, VIX >30 como ❌.
+- RSI 40-70 no aparece (zona normal). RSI >70 o <30 aparece.
+- Fear&Greed 30-70 no aparece. Solo extremos (<20 o >80).
+- Indicadores en zona neutral DESAPARECEN. No los menciones.
+Formato exacto, una señal por línea (sin saltos extra entre líneas):
+✅ ALCISTA   [factor] — [dato concreto, máx 12 palabras]
+⚠️ VIGILAR  [factor] — [dato concreto, máx 12 palabras]
+❌ BAJISTA   [factor] — [dato concreto, máx 12 palabras]
+Incluye OBLIGATORIAMENTE (si están en zona relevante):
+- Estado del motor MANENGIS (semáforo + días consecutivos + tendencia risk_score)
+- Régimen + breadth (si refuerza o contradice)
+- Similitud histórica si fiable Y sesgada (ruido+leve >=70% es alcista; fuerte+crash >=25% es bajista)
+- COT sesgo si extremo
+- Macro de alerta si aplica (HY Spread, curva invertida, NFCI>0)
+- Skew o VIX term structure si en zona no-normal
+Máx 8 señales totales. Si hay menos de 3 en zona relevante, decláralo: "Pocas señales en zona relevante — mercado en equilibrio."]
+
+═══════ RIESGO PRINCIPAL ═══════
+[UNA SOLA FRASE específica. El escenario concreto que haría que la decisión de arriba fuera errónea. Ejemplos del nivel exigido: "Que el VIX rompa 20 con volumen — invalidaría el contango." / "Que la similitud histórica con crashes (8%) se materialice antes del rebalance." NO frases vagas tipo "siempre hay riesgo" o "vigilar el mercado". Específico o no vale.]
+
+═══════ NIVELES CLAVE d+1 ═══════
+[UNA SOLA LÍNEA con 3 números: Max Pain: [valor] · Resistencia: [strike calls o nivel técnico] · Soporte: [strike puts o nivel técnico]. Si no hay datos institucionales, usa EMA20 y máximos/mínimos recientes.]
+
+═══════ HORIZONTE 2-5 DÍAS ═══════
+[2-3 frases. ¿El sesgo a 2-5 días es COHERENTE o DIVERGENTE con d+1? Usa: VIX term structure, ETF flows, similitud histórica (que mira 20d hacia adelante), COT, momentum 5d. Si DIVERGENTE, explica cuál prevalece y por qué. Si COHERENTE, di qué refuerza la convicción.
+${(R.cot || R.oi || R.vts || R.etf) ? 'OBLIGATORIO: integrar Radar 2-5D.' : 'Usar similitud histórica como proxy.'}]`;
 
   try {
     const proxyBase = S.proxyUrl || localStorage.getItem('nqr_proxy') || '';
@@ -4746,32 +4802,34 @@ function procesarRespuestaIA(texto) {
     return m ? parseInt(m[1]) : S.posLiquidez;
   };
   const getAnalisis = () => {
-    // Try new unified format with sections
-    const macroMatch = texto.match(/═+\s*ANÁLISIS MACRO\s*═+\s*([\s\S]+?)(?:═+\s*CONTEXTO SEMANAL|═+\s*ANÁLISIS TÉCNICO|$)/i);
-    const semMatch   = texto.match(/═+\s*CONTEXTO SEMANAL\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS TÉCNICO|$)/i);
-    const tecMatch   = texto.match(/═+\s*ANÁLISIS TÉCNICO\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS GRÁFICO|═+\s*LECTURA|═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
-    const concMatch  = texto.match(/═+\s*CONCLUSIÓN CONJUNTA\s*═+\s*([\s\S]+)/i);
+    // Nuevo formato "Caso de inversión" (Paso 3) — 5 secciones jerárquicas:
+    // TESIS CENTRAL → SEÑALES → RIESGO PRINCIPAL → NIVELES CLAVE → HORIZONTE 2-5D
+    // El análisis gráfico de ProRealTime sigue siendo una sección anexa opcional.
+    const tesisMatch   = texto.match(/═+\s*TESIS CENTRAL\s*═+\s*([\s\S]+?)(?:═+\s*SEÑALES|═+\s*RIESGO|$)/i);
+    const senMatch     = texto.match(/═+\s*SEÑALES QUE SOSTIENEN LA DECISIÓN\s*═+\s*([\s\S]+?)(?:═+\s*RIESGO|$)/i);
+    const riesgoMatch  = texto.match(/═+\s*RIESGO PRINCIPAL\s*═+\s*([\s\S]+?)(?:═+\s*NIVELES|═+\s*HORIZONTE|$)/i);
+    const nivelesMatch = texto.match(/═+\s*NIVELES CLAVE d\+1\s*═+\s*([\s\S]+?)(?:═+\s*HORIZONTE|═+\s*ANÁLISIS|$)/i);
+    const horizMatch   = texto.match(/═+\s*HORIZONTE 2-5 DÍAS\s*═+\s*([\s\S]+?)(?:═+\s*ANÁLISIS|$)/i);
+    const prtMatch     = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+|$)/i);
 
-    const prtMatch  = texto.match(/═+\s*ANÁLISIS GRÁFICO PROREAL TIME\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*CONCLUSIÓN|$)/i);
-    const empMatch  = texto.match(/═+\s*ANÁLISIS EMPRESARIAL\s*═+\s*([\s\S]+?)(?:═+\s*LECTURA|═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
-    const instMatch = texto.match(/═+\s*LECTURA INSTITUCIONAL\s*═+\s*([\s\S]+?)(?:═+\s*DETECCIÓN|═+\s*CONCLUSIÓN|$)/i);
-    const giroMatch  = texto.match(/═+\s*DETECCIÓN DE GIRO\s*═+\s*([\s\S]+?)(?:═+\s*HORIZONTE|═+\s*CONCLUSIÓN|$)/i);
-    const horizMatch = texto.match(/═+\s*HORIZONTE 2-5 DÍAS\s*═+\s*([\s\S]+?)(?:═+\s*CONCLUSIÓN|$)/i);
-
-    if (macroMatch || semMatch || tecMatch || prtMatch || instMatch || giroMatch) {
+    if (tesisMatch || senMatch || riesgoMatch) {
       let html = '';
-      if (macroMatch) html += '<p><strong style="color:var(--ac)">📊 ANÁLISIS MACRO</strong></p>' + macroMatch[1].trim();
-      if (semMatch)   html += '\n\n<p><strong style="color:#8b5cf6">📅 CONTEXTO SEMANAL</strong></p>' + semMatch[1].trim();
-      if (tecMatch)   html += '\n\n<p><strong style="color:#06b6d4">📐 ANÁLISIS TÉCNICO</strong></p>' + tecMatch[1].trim();
-      if (prtMatch)   html += '\n\n<p><strong style="color:#f0a500">📸 ANÁLISIS GRÁFICO PROREAL TIME</strong></p>' + prtMatch[1].trim();
-      if (empMatch)   html += '\n\n<p><strong style="color:#f59e0b">📈 ANÁLISIS EMPRESARIAL</strong></p>' + empMatch[1].trim();
-      if (instMatch)  html += '\n\n<p><strong style="color:#8b5cf6">🏦 LECTURA INSTITUCIONAL</strong></p>' + instMatch[1].trim();
-      if (giroMatch)  html += '\n\n<p><strong style="color:#ff6b6b">🔄 DETECCIÓN DE GIRO</strong></p>' + giroMatch[1].trim();
-      if (horizMatch) html += '\n\n<p><strong style="color:#06b6d4">⏱️ HORIZONTE 2-5 DÍAS</strong></p>' + horizMatch[1].trim();
-      if (concMatch)  html += '\n\n<p><strong style="color:var(--gr)">🎯 CONCLUSIÓN CONJUNTA</strong></p>' + concMatch[1].trim();
+      if (tesisMatch)   html += '<p><strong style="color:var(--ac)">💡 TESIS CENTRAL</strong></p>' + tesisMatch[1].trim();
+      if (senMatch) {
+        // Reformatear la tabla de señales en cajas visuales por línea
+        let senalesHtml = senMatch[1].trim();
+        // Mantener líneas tal cual — la IA ya las da con ✅/⚠️/❌
+        html += '\n\n<p><strong style="color:#06b6d4">📊 SEÑALES QUE SOSTIENEN LA DECISIÓN</strong></p>' +
+                '<div style="font-family:\'JetBrains Mono\',monospace;font-size:12px;line-height:1.7;background:rgba(0,0,0,0.15);border:1px solid var(--b1);border-radius:8px;padding:10px 14px;margin:6px 0;white-space:pre-wrap;">' +
+                senalesHtml + '</div>';
+      }
+      if (riesgoMatch)  html += '\n\n<p><strong style="color:#ff6b6b">⚠️ RIESGO PRINCIPAL</strong></p>' + riesgoMatch[1].trim();
+      if (nivelesMatch) html += '\n\n<p><strong style="color:#f0a500">🎯 NIVELES CLAVE d+1</strong></p>' + nivelesMatch[1].trim();
+      if (horizMatch)   html += '\n\n<p><strong style="color:#8b5cf6">⏱️ HORIZONTE 2-5 DÍAS</strong></p>' + horizMatch[1].trim();
+      if (prtMatch)     html += '\n\n<p><strong style="color:#06b6d4">📸 ANÁLISIS GRÁFICO PROREAL TIME</strong></p>' + prtMatch[1].trim();
       return html;
     }
-    // Fallback: old format
+    // Fallback: formato anterior o sin secciones
     const m = texto.match(/ANÁLISIS:\s*([\s\S]+)/i);
     return m ? m[1].trim() : texto;
   };
