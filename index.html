@@ -3273,59 +3273,20 @@ async function fetchDatos() {
     const data = await resp.json();
     const L = data.live || {};
 
-    // Aplicar VIX
-    const vixEl = document.getElementById('fd-vix');
-    const vixCh = document.getElementById('fc-vix');
-    if (vixEl && L.vix != null) {
-      vixEl.textContent = L.vix;
-      if (vixCh && L.vix_cambio != null) {
-        const sgn = L.vix_cambio >= 0 ? '+' : '';
-        vixCh.textContent = sgn + L.vix_cambio + '%';
-        vixCh.className = 'fd-cambio ' + (L.vix_cambio >= 0 ? 'dn' : 'up');
+    // Aplicar datos del live — todos los accesos al DOM protegidos
+    const _set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+    const _chg = (id, val, invertir) => {
+      const el = document.getElementById(id);
+      if (el && val != null) {
+        el.textContent = (val >= 0 ? '+' : '') + val + '%';
+        el.className = 'fd-cambio ' + (invertir ? (val >= 0 ? 'dn' : 'up') : (val >= 0 ? 'up' : 'dn'));
       }
-    }
-
-    // Aplicar NQ (usando QQQ como referencia)
-    const nqEl = document.getElementById('fd-nq');
-    const nqCh = document.getElementById('fc-nq');
-    if (nqEl && L.precio_qqq != null) {
-      nqEl.textContent = L.precio_qqq;
-      if (nqCh && L.cambio_qqq != null) {
-        const sgn = L.cambio_qqq >= 0 ? '+' : '';
-        nqCh.textContent = sgn + L.cambio_qqq + '%';
-        nqCh.className = 'fd-cambio ' + (L.cambio_qqq >= 0 ? 'up' : 'dn');
-      }
-    }
-
-    // Aplicar RSI al panel técnico si existe
-    const rsiEl = document.getElementById('td-rsi');
-    if (rsiEl && L.rsi_qqq != null) {
-      rsiEl.textContent = L.rsi_qqq;
-    }
-
-    // Aplicar US10Y
-    const us10El = document.getElementById('fd-us10');
-    const us10Ch = document.getElementById('fc-us10');
-    if (us10El && L.us10y != null) {
-      us10El.textContent = L.us10y;
-      if (us10Ch && L.us10y_cambio != null) {
-        const sgn = L.us10y_cambio >= 0 ? '+' : '';
-        us10Ch.textContent = sgn + L.us10y_cambio + '%';
-        us10Ch.className = 'fd-cambio ' + (L.us10y_cambio >= 0 ? 'dn' : 'up');
-      }
-    }
-
-    // Aplicar DXY
-    const dxyEl = document.getElementById('fd-dxy');
-    const dxyCh = document.getElementById('fc-dxy');
-    if (dxyEl && L.dxy != null) {
-      dxyEl.textContent = L.dxy;
-      if (dxyCh && L.dxy_cambio != null) {
-        const sgn = L.dxy_cambio >= 0 ? '+' : '';
-        dxyCh.textContent = sgn + L.dxy_cambio + '%';
-        dxyCh.className = 'fd-cambio ' + (L.dxy_cambio >= 0 ? 'dn' : 'up');
-      }
-    }
+    };
+    _set('fd-vix',  L.vix);        _chg('fc-vix',  L.vix_cambio,  true);
+    _set('fd-nq',   L.precio_qqq); _chg('fc-nq',   L.cambio_qqq,  false);
+    _set('fd-us10', L.us10y);      _chg('fc-us10', L.us10y_cambio, false);
+    _set('fd-dxy',  L.dxy);        _chg('fc-dxy',  L.dxy_cambio,  false);
+    _set('td-rsi',  L.rsi_qqq);
 
     // Rellenar tarjetas individuales de indicadores (inputs manuales)
     if (L.vix != null)        { setInput('i-vix',  L.vix);        if(typeof evalInd==='function') evalInd('vix'); }
@@ -3345,8 +3306,17 @@ async function fetchDatos() {
     estado.textContent = 'Actualizado ✓';
     estado.className = 'fetch-estado ok';
   } catch (e) {
-    estado.textContent = 'Error red';
+    console.error('[fetchDatos] Error:', e.message, e);
+    // Distinguir error de red real vs error de JS en el procesamiento
+    const esErrorRed = e instanceof TypeError && 
+      (e.message.includes('fetch') || e.message.includes('network') || 
+       e.message.includes('Failed') || e.message.includes('Load'));
+    estado.textContent = esErrorRed ? 'Error red' : 'Error datos';
     estado.className = 'fetch-estado err';
+    // Si no fue error de red, intentar mostrar qué fue
+    if (!esErrorRed) {
+      console.warn('[fetchDatos] El fetch OK pero falló al procesar:', e.message);
+    }
   }
 
   btn.classList.remove('loading');
