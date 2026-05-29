@@ -3288,11 +3288,13 @@ async function fetchDatos() {
     _set('fd-dxy',  L.dxy);        _chg('fc-dxy',  L.dxy_cambio,  false);
     _set('td-rsi',  L.rsi_qqq);
 
-    // Rellenar tarjetas individuales de indicadores (inputs manuales)
-    if (L.vix != null)        { setInput('i-vix',  L.vix);        if(typeof evalInd==='function') evalInd('vix'); }
-    if (L.nqf_cambio != null) { setInput('i-nq',   L.nqf_cambio); if(typeof evalInd==='function') evalInd('nq'); }
-    if (L.us10y != null)      { setInput('i-us10', L.us10y);      if(typeof evalInd==='function') evalInd('us10'); }
-    if (L.dxy != null)        { setInput('i-dxy',  L.dxy);        if(typeof evalInd==='function') evalInd('dxy'); }
+    // Rellenar inputs de evaluación si setInput ya está disponible
+    if (typeof setInput === 'function') {
+      if (L.vix != null)        { setInput('i-vix',  L.vix);        if(typeof evalInd==='function') evalInd('vix'); }
+      if (L.nqf_cambio != null) { setInput('i-nq',   L.nqf_cambio); if(typeof evalInd==='function') evalInd('nq'); }
+      if (L.us10y != null)      { setInput('i-us10', L.us10y);      if(typeof evalInd==='function') evalInd('us10'); }
+      if (L.dxy != null)        { setInput('i-dxy',  L.dxy);        if(typeof evalInd==='function') evalInd('dxy'); }
+    }
 
     // Intentar también datos.js en paralelo (sin bloquear)
     const proxyUrl = S.proxyUrl;
